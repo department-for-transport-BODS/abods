@@ -7,10 +7,11 @@ import {
   ServerError,
 } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
+import { clearUserScopedStorage } from "@/utils/authReset";
 
 const signOutAndRedirect = () => {
   // Clear session so they can re authenticate
-  localStorage.removeItem("session");
+  clearUserScopedStorage();
   // Navigate to login
   const pathname = window.location.pathname || "/";
   const search = window.location.search || "";
@@ -37,6 +38,11 @@ export function createApolloClient() {
 
       if (error.statusCode === 401) {
         signOutAndRedirect();
+      } else if (error.statusCode >= 500) {
+        const pathname = window.location.pathname || "/";
+        if (!pathname.startsWith("/500")) {
+          window.location.href = "/500";
+        }
       }
     } else if (CombinedGraphQLErrors.is(error)) {
       error.errors.forEach(({ message, locations, path }) =>

@@ -26,6 +26,11 @@ const loadFromStorage = (): CorridorHideOutliers => {
   }
 };
 
+export const clearCorridorHideOutliersStorage = (): void => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STORAGE_KEY);
+};
+
 export const useCorridorHideOutliers = () => {
   const [state, setState] = useState<CorridorHideOutliers>(loadFromStorage);
 

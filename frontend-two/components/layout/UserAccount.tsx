@@ -2,14 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
-import { authService } from "@/services/auth.service";
 
 export const UserAccount = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
-  const { clearUser } = useAuth();
+  const { logout, clearUser } = useAuth();
   const { config } = useConfig();
 
   useEffect(() => {
@@ -41,14 +40,8 @@ export const UserAccount = () => {
       router.push("/500");
       return;
     }
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      clearUser();
-      router.push("/login");
-    }
+    await logout();
+    router.push("/login");
   };
 
   const handleInviteClick = () => {

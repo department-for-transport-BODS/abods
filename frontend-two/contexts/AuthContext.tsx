@@ -8,8 +8,10 @@ import {
   ReactNode,
 } from "react";
 import { LoginInfo } from "@/types";
-import { authService } from "@/services/auth.service";
+import { authService, LoginResult } from "@/services/auth.service";
 import { sessionStore, userStore } from "@/utils/storage";
+import { clearUserScopedStorage } from "@/utils/authReset";
+import { apolloClient } from "@/services/apolloClient";
 import { useConfig } from "@/contexts/ConfigContext";
 
 const IDLE_TIMEOUT = 1000 * 60 * 60 * 12; // 12 hours
@@ -18,7 +20,7 @@ interface AuthContextValue {
   user: LoginInfo | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   clearUser: () => void;
 }
@@ -42,8 +44,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const resetState = useCallback(() => {
-    sessionStore.clear();
-    userStore.clear();
+    clearUserScopedStorage();
+    apolloClient.clearStore().catch(() => undefined);
     setIsAuthenticated(false);
     setUserState(null);
   }, []);
@@ -105,11 +107,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = useCallback(
     async (username: string, password: string) => {
       const result = await authService.login(username, password);
-      if (!result.success || !result.expiresAt) throw new Error("Login failed");
-      sessionStore.set({ expiresAt: result.expiresAt });
-      userStore.set({ username });
-      await fetchUser();
-      setIsAuthenticated(true);
+      if (result.success && result.expiresAt) {
+        sessionStore.set({ expiresAt: result.expiresAt });
+        userStore.set({ username });
+        await fetchUser();
+        setIsAuthenticated(true);
+      }
+      return result;
     },
     [fetchUser],
   );

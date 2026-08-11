@@ -22,6 +22,7 @@ interface BaseLayoutProps {
 }
 const PUBLIC_ROUTES = [
   "/login",
+  "/500",
   "/accessibility",
   "/cookies",
   "/privacy-policy",

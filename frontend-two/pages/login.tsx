@@ -8,6 +8,22 @@ import { loginSchema, LoginSchema } from "@/schemas/login.schema";
 import { ErrorInfo } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useConfig } from "@/contexts/ConfigContext";
+import { LoginResult } from "@/services/auth.service";
+
+const getLoginErrorMessage = (result: LoginResult): string => {
+  if (result.locked && result.unlockAt) {
+    const diffMs = new Date(result.unlockAt).getTime() - Date.now();
+    const diffMins = Math.max(Math.ceil(diffMs / 60000), 0);
+    return `Your account is locked for ${diffMins} minutes due to multiple failed attempts. Please try again later or reset your password if required.`;
+  }
+
+  let errorMessage = "Invalid username or password.";
+  if (result.maxAttempts != null) {
+    const remaining = result.maxAttempts - (result.failedAttempts ?? 0);
+    errorMessage = `${errorMessage} You have ${remaining} more attempts remaining before your account is locked.`;
+  }
+  return errorMessage;
+};
 
 const LoginPage = () => {
   const router = useRouter();
@@ -60,7 +76,25 @@ const LoginPage = () => {
 
     try {
       setIsSubmitting(true);
-      await login(result.data.username, result.data.password);
+      const loginResult = await login(result.data.username, result.data.password);
+      if (!loginResult.success) {
+        setErrors([
+          {
+            id: "username",
+            errorMessage: getLoginErrorMessage(loginResult),
+          },
+        ]);
+        return;
+      }
+      if (!loginResult.expiresAt) {
+        setErrors([
+          {
+            id: "username",
+            errorMessage: "Login failed",
+          },
+        ]);
+        return;
+      }
       router.replace(returnUrl);
     } catch (error) {
       setErrors([
