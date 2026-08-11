@@ -16,17 +16,30 @@ jobs:
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
-      - name: Install
-        run: npm i
+      - name: Install root dependencies
+        run: npm install --ignore-scripts
+
+      - name: Install API dependencies
+        run: npm install --prefix abods-api
+
+      - name: Generate code
+        run: npm run codegen
 
       - name: Check for changes
-        run: git diff --name-only --exit-code HEAD || (echo "It looks like generated files haven't been updated. You can do that by running 'npm install' in the root directory"; false)
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if git diff --quiet "$BASE_REF"...HEAD -- frontend; then
+            git diff --name-only --exit-code HEAD -- . ':!frontend/package-lock.json' || (echo "It looks like generated files haven't been updated. You can do that by running 'npm install' in the root directory"; false)
+          else
+            git diff --name-only --exit-code HEAD || (echo "It looks like generated files haven't been updated. You can do that by running 'npm install' in the root directory"; false)
+          fi
 
       - name: Check types
         if: success() || failure()
-        run: npm run type-check
+        run: npm --prefix abods-api run type-check
 
       - name: Check formatting
         if: success() || failure()
@@ -34,11 +47,11 @@ jobs:
 
       - name: Run linters
         if: success() || failure()
-        run: npm run lint:check
+        run: npm --prefix abods-api run lint:check
 
       - name: Run tests
         if: success() || failure()
-        run: npm run test:ci
+        run: npm --prefix abods-api run test:ci
 
   build-backend:
     runs-on: ubuntu-latest
@@ -53,7 +66,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: setup sam
         uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
@@ -79,7 +92,24 @@ jobs:
         with:
           node-version-file: frontend/.nvmrc
 
-      - name: build frontend code
-        run: |
-          npm install
-          npm run build:production
+      - name: Install
+        run: npm install
+
+      - name: Check for changes
+        run: git diff --name-only --exit-code HEAD || (echo "It looks like the frontend lockfile hasn't been updated. Run 'npm install' in the frontend directory using the version in frontend/.nvmrc"; false)
+
+      - name: Check types
+        if: success() || failure()
+        run: npm run type-check
+
+      - name: Run linters
+        if: success() || failure()
+        run: npm run lint:check
+
+      - name: Run tests
+        if: success() || failure()
+        run: npm run test:ci
+
+      - name: Build frontend code
+        if: success() || failure()
+        run: npm run build:production

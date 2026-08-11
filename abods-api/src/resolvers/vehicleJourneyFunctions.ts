@@ -181,7 +181,7 @@ export const getJourney: QueryResolvers["journey"] = async (
     avlRangeBufferInHours,
     "hours",
   );
-  const maxRange = dayjs(stops.at(-1)!.scheduledDepartureUtc).add(
+  const maxRange = dayjs(stops[stops.length - 1].scheduledDepartureUtc).add(
     avlRangeBufferInHours,
     "hours",
   );
