@@ -11,6 +11,7 @@ import { SkipLinks } from "@/components/layout/SkipLinks";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorInfo } from "@/types";
 import { buildTitle } from "@/utils/errors";
+import { isPublicRoute } from "@/utils/routes";
 
 interface BaseLayoutProps {
   title: string;
@@ -20,12 +21,6 @@ interface BaseLayoutProps {
   mainClassName?: string;
   backLink?: ReactNode;
 }
-const PUBLIC_ROUTES = [
-  "/login",
-  "/accessibility",
-  "/cookies",
-  "/privacy-policy",
-];
 
 export const BaseLayout = ({
   title,
@@ -37,11 +32,8 @@ export const BaseLayout = ({
 }: BaseLayoutProps) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const normalizedPath = router.asPath.split("?")[0].replace(/\/+$/, "") || "/";
-  const isPublicRoute = PUBLIC_ROUTES.some(
-    (route) => normalizedPath === route || normalizedPath.endsWith(route),
-  );
-  const showAuthenticatedLayout = isAuthenticated && !isPublicRoute;
+  const showAuthenticatedLayout =
+    isAuthenticated && !isPublicRoute(router.asPath);
   const pageTitle = buildTitle(errors, title);
 
   return (

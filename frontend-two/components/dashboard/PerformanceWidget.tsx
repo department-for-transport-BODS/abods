@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
+import { Spinner } from "@/components/shared/Spinner";
 import { DateTime } from "luxon";
 import { useConfig } from "@/contexts/ConfigContext";
 import { dashboardService } from "@/services/dashboard/dashboard.service";
@@ -131,8 +132,8 @@ export const PerformanceWidget = ({
   return (
     <div className="performance app-performance">
       {!loaded ? (
-        <div className="performance__no-data">
-          <span className="govuk-body">Loading...</span>
+        <div className="performance__no-data performance__no-data--loading">
+          <Spinner size="default" message="Loading..." />
         </div>
       ) : !stats && !errored ? (
         <div className="performance__no-data">

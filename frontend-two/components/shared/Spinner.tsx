@@ -1,9 +1,15 @@
 interface SpinnerProps {
-  size?: "small" | "x-small";
+  size?: "default" | "small" | "x-small";
+  message?: string;
 }
 
-export const Spinner = ({ size = "x-small" }: SpinnerProps) => (
-  <div className={`spinner spinner--${size}`} aria-hidden="true">
+export const Spinner = ({ size = "x-small", message }: SpinnerProps) => (
+  <div
+    className={`spinner spinner--${size}`}
+    {...(message
+      ? { role: "alert", "aria-busy": true }
+      : { "aria-hidden": true })}
+  >
     <svg
       className="spinner__icon"
       viewBox="0 0 50 50"
@@ -32,5 +38,6 @@ export const Spinner = ({ size = "x-small" }: SpinnerProps) => (
         fill="currentColor"
       />
     </svg>
+    {message ? <span className="spinner__message">{message}</span> : null}
   </div>
 );
