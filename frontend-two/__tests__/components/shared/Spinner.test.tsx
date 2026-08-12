@@ -13,7 +13,9 @@ describe("Spinner", () => {
   });
 
   it("renders an accessible message with the default spinner size", () => {
-    const { getByRole } = render(<Spinner size="default" message="Loading..." />);
+    const { getByRole } = render(
+      <Spinner size="default" message="Loading..." />,
+    );
 
     expect(getByRole("alert")).toHaveClass("spinner", "spinner--default");
     expect(getByRole("alert")).toHaveTextContent("Loading...");

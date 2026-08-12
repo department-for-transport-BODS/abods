@@ -76,7 +76,10 @@ const LoginPage = () => {
 
     try {
       setIsSubmitting(true);
-      const loginResult = await login(result.data.username, result.data.password);
+      const loginResult = await login(
+        result.data.username,
+        result.data.password,
+      );
       if (!loginResult.success) {
         setErrors([
           {

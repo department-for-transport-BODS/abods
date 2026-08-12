@@ -32,7 +32,8 @@ export const BaseLayout = ({
 }: BaseLayoutProps) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const showAuthenticatedLayout = isAuthenticated && !isPublicRoute(router.asPath);
+  const showAuthenticatedLayout =
+    isAuthenticated && !isPublicRoute(router.asPath);
   const pageTitle = buildTitle(errors, title);
 
   return (

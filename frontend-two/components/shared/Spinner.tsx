@@ -6,7 +6,9 @@ interface SpinnerProps {
 export const Spinner = ({ size = "x-small", message }: SpinnerProps) => (
   <div
     className={`spinner spinner--${size}`}
-    {...(message ? { role: "alert", "aria-busy": true } : { "aria-hidden": true })}
+    {...(message
+      ? { role: "alert", "aria-busy": true }
+      : { "aria-hidden": true })}
   >
     <svg
       className="spinner__icon"
