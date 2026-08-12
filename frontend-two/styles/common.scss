@@ -455,6 +455,14 @@
   width: 100%;
 }
 
+.auth-gate-loading {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+}
+
 .vehicle-journeys-search__loading {
   margin-top: govuk-spacing(4);
 }
@@ -3784,6 +3792,10 @@ $day-width: 46px;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &--loading {
+      flex-direction: column;
+    }
   }
   &__chart {
     max-width: rem(800);
