@@ -30,7 +30,6 @@ export const createCorridor: MutationResolvers["createCorridor"] = async (
       // This won't be visible to any other orgs they are assigned to.
       // Visibility will be somewhat random, though consistent because we sort the org numbers
       organisation_id: orgIds[0],
-      user_id: user.id,
     },
     select: {
       corridor_id: true,

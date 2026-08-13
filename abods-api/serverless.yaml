@@ -2,7 +2,9 @@ useDotenv: true
 service: apollo-lambda
 provider:
   name: aws
-  runtime: nodejs24.x
+  # serverless-offline runs handlers with the local Node version; nodejs20.x is the
+  # highest runtime Serverless Framework v3's schema accepts (real deploys use SAM/template.yaml with nodejs24.x)
+  runtime: nodejs20.x
   timeout: 899
   httpApi:
     cors:

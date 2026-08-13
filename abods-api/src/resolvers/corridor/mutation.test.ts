@@ -71,7 +71,6 @@ describe("createCorridor", () => {
       data: {
         corridor_name: "Test Corridor",
         organisation_id: 10,
-        user_id: 1,
       },
       select: {
         corridor_id: true,
