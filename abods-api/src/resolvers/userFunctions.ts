@@ -19,7 +19,7 @@ import {
 import { requireUserSession, throwUnauthenticatedError } from "./helpers.js";
 import dayjs from "dayjs";
 
-const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 60 * 24 * 14;
+const SESSION_EXPIRY_TIME_IN_SECONDS = 60 * 5;
 export const accountTypes = {
   admin: 1,
   orgAdmin: 2,
