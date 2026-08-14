@@ -1,11 +1,16 @@
 interface SpinnerProps {
   size?: "default" | "small" | "x-small";
   message?: string;
+  vCentre?: boolean;
 }
 
-export const Spinner = ({ size = "x-small", message }: SpinnerProps) => (
+export const Spinner = ({
+  size = "x-small",
+  message,
+  vCentre = false,
+}: SpinnerProps) => (
   <div
-    className={`spinner spinner--${size}`}
+    className={`spinner spinner--${size}${vCentre ? " spinner--vcentre" : ""}`}
     {...(message
       ? { role: "alert", "aria-busy": true }
       : { "aria-hidden": true })}
