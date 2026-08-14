@@ -357,6 +357,78 @@ Resources:
                   - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
                   - Distribution: !Ref CloudFrontDistributionV2
 
+  CloudFrontRewriteFunctionV2:
+    Type: AWS::CloudFront::Function
+    Condition: IsNonProd
+    Properties:
+      Name: !Sub "${ProjectName}-${Environment}-rewrite-v2"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Rewrite extensionless frontend routes to static index documents
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+
+          if (!uri || uri.indexOf('/api/') === 0) {
+            return request;
+          }
+
+          // Next.js static export with trailingSlash:true emits one shell per
+          // dynamic route using literal bracket names, e.g.
+          //   corridors/[corridorId]/index.html
+          // A request for /corridors/12/ must be rewritten to that shell so
+          // S3 serves it directly — equivalent to Nginx try_files falling
+          // through to a location block for the route pattern.
+
+          // https://nextjs.org/docs/pages/guides/static-exports#deploying
+          var dynamic = mapDynamicRoute(uri);
+          if (dynamic) {
+            request.uri = dynamic;
+            return request;
+          }
+
+          if (uri.endsWith('/')) {
+            request.uri = uri + 'index.html';
+            return request;
+          }
+
+          if (uri.indexOf('.') === -1) {
+            request.uri = uri + '/index.html';
+          }
+
+          return request;
+        }
+
+        // Maps concrete dynamic paths to their exported bracket-named shells.
+        // Add an entry here whenever a new client-rendered dynamic route is
+        // added to pages/ without getStaticPaths.
+        function mapDynamicRoute(uri) {
+          var path = uri;
+          if (path.charAt(path.length - 1) === '/') path = path.slice(0, -1);
+          if (path.charAt(0) === '/') path = path.slice(1);
+          if (path === '' || path.indexOf('.') !== -1) return null;
+
+          var seg = path.split('/');
+          var B = '%5B', E = '%5D';
+
+          if (seg.length === 2 && seg[0] === 'corridors' && seg[1] !== 'create')
+            return '/corridors/' + B + 'corridorId' + E + '/index.html';
+          if (seg.length === 3 && seg[0] === 'corridors' && seg[1] === 'edit')
+            return '/corridors/edit/' + B + 'corridorId' + E + '/index.html';
+          if (seg.length === 2 && seg[0] === 'feed-monitoring')
+            return '/feed-monitoring/' + B + 'nocCode' + E + '/index.html';
+          if (seg.length === 3 && seg[0] === 'feed-monitoring' && seg[2] === 'feed-history')
+            return '/feed-monitoring/' + B + 'nocCode' + E + '/feed-history/index.html';
+          if (seg.length === 2 && seg[0] === 'on-time')
+            return '/on-time/' + B + 'nocCode' + E + '/index.html';
+          if (seg.length === 3 && seg[0] === 'on-time')
+            return '/on-time/' + B + 'nocCode' + E + '/' + B + 'lineId' + E + '/index.html';
+
+          return null;
+        }
+
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Condition: IsNotLocal
