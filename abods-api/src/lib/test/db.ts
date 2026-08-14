@@ -545,7 +545,6 @@ export async function createCorridorTable(db: Kysely<DB>) {
     .addColumn("corridor_id", "serial", (col) => col.primaryKey())
     .addColumn("corridor_name", "varchar", (col) => col.notNull())
     .addColumn("organisation_id", "integer", (col) => col.notNull())
-    .addColumn("user_id", "integer", (col) => col.notNull())
     .execute();
 }
 

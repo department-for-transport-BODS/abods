@@ -84,7 +84,6 @@ beforeEach(() => {
 });
 
 const mockCorridorResult: CorridorResultsType = {
-  user_id: 1,
   corridor_id: 1,
   corridor_name: "Test Corridor",
   organisation_id: 123,
@@ -843,14 +842,12 @@ describe("listCorridors", () => {
       corridor_id: 1,
       corridor_name: "Corridor 1",
       organisation_id: 123,
-      user_id: 1,
       corridor_stops: [],
     },
     {
       corridor_id: 2,
       corridor_name: "Corridor 2",
       organisation_id: 123,
-      user_id: 1,
       corridor_stops: [],
     },
   ] as never);

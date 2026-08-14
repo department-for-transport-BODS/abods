@@ -91,7 +91,6 @@ describe("Corridor mutation integration", () => {
         corridor_id: 3,
         corridor_name: "Corridor To Update",
         organisation_id: 1,
-        user_id: 1,
       })
       .execute();
     await kysely
@@ -146,7 +145,6 @@ describe("Corridor mutation integration", () => {
         corridor_id: 4,
         corridor_name: "Corridor To Delete",
         organisation_id: 1,
-        user_id: 1,
       })
       .execute();
     await kysely
