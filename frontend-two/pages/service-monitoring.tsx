@@ -1,29 +1,60 @@
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
-import { useAuth, useRequireAuth } from "@/hooks/useAuth";
+import { Spinner } from "@/components/shared/Spinner";
+import { useRequireAuth } from "@/hooks/useAuth";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
+import { serviceMonitoringService } from "@/services/service-monitoring/service-monitoring.service";
 import { ErrorInfo } from "@/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const ServiceMonitoringPage = () => {
   useRequireAuth();
-  const { user, isLoading } = useAuth();
   const { loadData } = useHelpdesk();
+  const [isLoading, setIsLoading] = useState(true);
+  const [errors, setErrors] = useState<ErrorInfo[]>([]);
+  const [embedUrl, setEmbedUrl] = useState<string | null>(null);
 
   useEffect(() => {
     loadData("serviceMonitoring", "Service monitoring");
   }, [loadData]);
 
-  const errors: ErrorInfo[] =
-    isLoading ||
-    (user?.canViewServiceMonitoring && user?.serviceMonitoringEmbedUrl)
-      ? []
-      : [
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const user =
+          await serviceMonitoringService.fetchServiceMonitoringUser();
+
+        if (
+          !user?.canViewServiceMonitoring ||
+          !user?.serviceMonitoringEmbedUrl
+        ) {
+          setEmbedUrl(null);
+          setErrors([
+            {
+              id: "enable-service-monitoring",
+              errorMessage: "Unable to load dashboard. Please contact admin",
+            },
+          ]);
+          return;
+        }
+
+        setEmbedUrl(user.serviceMonitoringEmbedUrl);
+        setErrors([]);
+      } catch {
+        setEmbedUrl(null);
+        setErrors([
           {
-            id: "service-monitoring-error",
-            errorMessage: "Unable to load dashboard. Please contact admin",
+            id: "dashboard-load-error",
+            errorMessage: "Failed to load dashboard. Please try again",
           },
-        ];
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    load();
+  }, []);
 
   return (
     <BaseLayout
@@ -31,7 +62,12 @@ const ServiceMonitoringPage = () => {
       errors={errors}
     >
       <div>
-        <h1 className="govuk-heading-xl">Service monitoring</h1>
+        <header className="govuk-!-margin-bottom-2 govuk-!-margin-top-2">
+          <h1 className="govuk-heading-xl govuk-!-margin-bottom-0">
+            Service monitoring
+          </h1>
+        </header>
+        <br />
 
         <div className="govuk-grid-row">
           <div className="govuk-grid-column-two-thirds-from-desktop">
@@ -40,12 +76,12 @@ const ServiceMonitoringPage = () => {
         </div>
 
         {isLoading ? (
-          <p className="govuk-body">Loading...</p>
+          <Spinner size="default" message="Loading..." vCentre />
         ) : (
-          user?.serviceMonitoringEmbedUrl && (
+          embedUrl && (
             <div className="service-monitoring__iframe-container">
               <iframe
-                src={user.serviceMonitoringEmbedUrl}
+                src={embedUrl}
                 width="100%"
                 height="100%"
                 style={{ border: "none" }}
