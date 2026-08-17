@@ -53,11 +53,11 @@
   display: inline-flex;
   align-items: center;
   margin-left: govuk-spacing(2);
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   text-decoration: underline;
 }
 .journey-nav__link:hover {
-  color: $govuk-link-hover-colour;
+  color: govuk-functional-colour(link-hover);
 }
 .journey-nav__icon {
   display: inline-flex;
@@ -66,7 +66,7 @@
   height: 13px;
 }
 .journey-nav__link--disabled {
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   opacity: 0.6;
   pointer-events: none;
   text-decoration: none;
@@ -91,7 +91,7 @@
 }
 .vehicle-journeys__otp-stat {
   min-width: 0;
-  border-top: 1px solid $govuk-border-colour;
+  border-top: 1px solid govuk-functional-colour(border);
   padding-top: govuk-spacing(3);
   white-space: nowrap;
 }
@@ -118,8 +118,8 @@
 }
 .stop-list-item--timing-point {
   @include govuk-font(19, $weight: bold);
-  border-top: 1px solid govuk-colour("mid-grey");
-  border-bottom: 1px solid govuk-colour("mid-grey");
+  border-top: 1px solid govuk-colour("black", $variant: "tint-80");
+  border-bottom: 1px solid govuk-colour("black", $variant: "tint-80");
   padding-top: govuk-spacing(2);
   padding-bottom: govuk-spacing(2);
 }
@@ -132,14 +132,14 @@
 }
 .stop-list-item__skeleton-block {
   height: 1rem;
-  background: govuk-colour("light-grey");
+  background: govuk-colour("black", $variant: "tint-95");
 }
 .stop-list-item__skeleton-block--wide {
   width: 80%;
 }
 .stop-list-header {
   @include govuk-font(16, $weight: bold);
-  border-bottom: 1px solid $govuk-border-colour;
+  border-bottom: 1px solid govuk-functional-colour(border);
   min-height: govuk-spacing(8);
 }
 .stop-list-item__value-container {
@@ -185,13 +185,13 @@
   color: govuk-colour("purple");
 }
 .stop-list-item__icon--early {
-  color: govuk-colour("pink");
+  color: govuk-colour("magenta");
 }
 .stop-list-item__icon--late {
   color: raas-colour("late");
 }
 .stop-list-item__icon--no-data {
-  color: govuk-colour("mid-grey");
+  color: govuk-colour("black", $variant: "tint-80");
 }
 .stop-list-item__icon--stop {
   width: 1.25rem;

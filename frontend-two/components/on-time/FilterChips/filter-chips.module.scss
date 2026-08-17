@@ -47,12 +47,12 @@
   border-bottom-left-radius: 4px;
 
   &:hover {
-    color: $govuk-link-hover-colour;
+    color: govuk-functional-colour(link-hover);
   }
 
   &:focus-visible {
     @include govuk-focused-text;
-    outline: 3px solid $govuk-focus-colour;
+    outline: 3px solid govuk-functional-colour(focus);
   }
 }
 

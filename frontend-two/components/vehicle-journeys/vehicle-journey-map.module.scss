@@ -11,7 +11,7 @@
 .vehicle-journeys__map {
   width: 100%;
   min-height: 80vh;
-  border: 1px solid $govuk-border-colour;
+  border: 1px solid govuk-functional-colour(border);
 }
 .vehicle-journeys__map-loading {
   position: absolute;
@@ -36,7 +36,7 @@
   font-size: 19px;
   cursor: pointer;
   &:hover {
-    background: govuk-colour("light-grey");
+    background: govuk-colour("black", $variant: "tint-95");
   }
 }
 .vehicle-journeys__map-recentre-icon {
@@ -76,7 +76,7 @@
   background-color: govuk-colour("purple");
 }
 .otp-legend__icon--early {
-  background-color: govuk-colour("pink");
+  background-color: govuk-colour("magenta");
 }
 .otp-legend__icon--late {
   background-color: raas-colour("late");
@@ -84,12 +84,12 @@
 .otp-legend__icon--scheduled-route {
   width: 24px;
   height: 0;
-  border-top: 2px dotted govuk-colour("mid-grey");
+  border-top: 2px dotted govuk-colour("black", $variant: "tint-80");
 }
 .otp-legend__value {
   margin-top: 2px;
 }
 .otp-legend__value--muted {
   margin-left: govuk-spacing(1);
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
 }

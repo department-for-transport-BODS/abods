@@ -6,10 +6,10 @@
 
   &:global(.govuk-link),
   &:global(.button-link) {
-    color: $govuk-link-colour;
+    color: govuk-functional-colour(link);
 
     &:hover:not(:focus) {
-      color: $govuk-link-hover-colour;
+      color: govuk-functional-colour(link-hover);
     }
   }
 }

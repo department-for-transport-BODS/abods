@@ -1,15 +1,15 @@
 @import "../../styles/govuk-module";
 .feed-status-summary-stat {
-  background: $govuk-body-background-colour;
+  background: govuk-functional-colour(body-background);
   display: flex;
   flex-direction: column;
-  border-top: 2px solid $govuk-border-colour;
+  border-top: 2px solid govuk-functional-colour(border);
 }
 .feed-status-summary-stat__title {
   @include govuk-font(19);
   margin-top: 1rem;
   margin-bottom: govuk-spacing(4);
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
 }
 .feed-status-summary-stat__row {
   display: flex;
@@ -25,7 +25,7 @@
   color: govuk-colour("green");
 }
 .feed-status-summary-stat__value--inactive {
-  color: $govuk-error-colour;
+  color: govuk-functional-colour(error);
 }
 .feed-status-summary-stat__check {
   width: 36px;

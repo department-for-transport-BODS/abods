@@ -6,7 +6,7 @@
 }
 
 .label {
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
   @include govuk-font(19);
 }
 

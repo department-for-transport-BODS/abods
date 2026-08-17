@@ -30,7 +30,7 @@ export const MultiselectCheckbox = ({
   selectedValues,
   onChange,
   onShowAll,
-  showAll = true,
+  showAll,
   showAllLabel,
   placeholder,
   disabled = false,
@@ -136,7 +136,7 @@ export const MultiselectCheckbox = ({
 
   const showSelectionSummary = isOpen && hasSelection;
   const inputValue = isOpen ? searchText : displayText;
-  const allSectionLabel = showAllLabel ?? `All ${label}`;
+  const showAllHeader = showAll ?? Boolean(showAllLabel);
 
   return (
     <div
@@ -175,7 +175,9 @@ export const MultiselectCheckbox = ({
           ref={inputRef}
           id={id}
           type="text"
-          className={`govuk-input ${styles.trigger}`}
+          className={`govuk-input ${styles.trigger}${
+            !hasSelection && !isOpen ? ` ${styles.triggerPlaceholder}` : ""
+          }`}
           style={
             showSelectionSummary && summaryRef.current
               ? {
@@ -232,11 +234,13 @@ export const MultiselectCheckbox = ({
           onMouseDown={(event) => event.preventDefault()}
         >
 
-          {showAll ? (
+          {showAllHeader ? (
             <div className={styles.header}>
-              <strong className={styles.headerLabel}>
-                {allSectionLabel}
-              </strong>
+              {showAllLabel ? (
+                <strong className={styles.headerLabel}>
+                  {showAllLabel}
+                </strong>
+              ) : null}
 
               <button
                 type="button"

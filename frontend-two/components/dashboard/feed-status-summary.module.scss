@@ -10,7 +10,7 @@
   }
   th {
     @include govuk-font(16);
-    color: $govuk-secondary-text-colour;
+    color: govuk-functional-colour(secondary-text);
   }
   td {
     @include govuk-font(19);
@@ -31,6 +31,6 @@
   margin-top: govuk-spacing(4);
 }
 .feed-status-summary__operator--muted {
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
   @include govuk-font(16);
 }

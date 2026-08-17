@@ -43,9 +43,9 @@
   width: 7.2rem;
 }
 .ranking-table__operator {
-  color: $govuk-text-colour;
+  color: govuk-functional-colour(text);
   :global(.unbuttoned) {
-    color: $govuk-text-colour;
+    color: govuk-functional-colour(text);
   }
 }
 .ranking-table__operator-text {
@@ -99,7 +99,7 @@
 }
 .tabs__list-item {
   @include govuk-font(19);
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   cursor: pointer;
   &:not(:last-child) {
     margin-right: govuk-spacing(7);
@@ -109,13 +109,13 @@
   }
   &:focus-visible {
     outline: 3px solid transparent;
-    color: $govuk-focus-text-colour;
-    background-color: $govuk-focus-colour;
-    border-bottom: 4px solid $govuk-focus-text-colour;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
+    border-bottom: 4px solid govuk-functional-colour(focus-text);
     text-decoration: none;
   }
 }
 .tabs__list-item--selected {
   font-weight: $govuk-font-weight-bold;
-  border-bottom: $govuk-link-colour 4px solid;
+  border-bottom: govuk-functional-colour(link) 4px solid;
 }

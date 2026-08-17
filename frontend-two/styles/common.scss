@@ -4,6 +4,11 @@
   min-width: fit-content;
 }
 
+// GDS v6 uses default blue links in the footer; keep the v5 text-coloured links.
+.govuk-footer__link {
+  @include govuk-link-style-text;
+}
+
 .govuk-table__header {
   font-size: 17px;
   font-weight: $govuk-font-weight-bold;

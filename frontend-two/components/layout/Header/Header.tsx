@@ -1,19 +1,12 @@
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
+import Link from "next/link";
 import styles from "./header.module.scss";
 import navStyles from "../Nav/nav.module.scss";
 import { useAuth } from "@/hooks/useAuth";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useNav } from "@/contexts/NavContext";
 import { clsx } from "clsx";
-
-const KainosGovukHeader = dynamic(
-  () =>
-    import("kainossoftwareltd-govuk-react-kainos").then(
-      (module) => module.Header,
-    ),
-  { ssr: false },
-);
+import GovukLogotype from "@/assets/icons/govuk-logotype.svg";
 
 export const Header = ({ serviceName }: { serviceName: string }) => {
   const router = useRouter();
@@ -24,13 +17,28 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
 
   return (
     <div className={styles.headerShell}>
-      <KainosGovukHeader
-        className={styles.header}
-        serviceName={serviceName}
-        serviceUrl="/"
-        showNavigation={false}
-        rebrand
-      />
+      <header className={clsx("govuk-header", styles.header)} role="banner">
+        <div className="govuk-header__container govuk-width-container">
+          <div className="govuk-header__logo">
+            <Link href="/" className="govuk-header__homepage-link">
+              <GovukLogotype
+                className="govuk-header__logotype"
+                role="img"
+                aria-label="GOV.UK"
+                focusable="false"
+              />
+            </Link>
+          </div>
+          <div className="govuk-header__content">
+            <Link
+              href="/"
+              className="govuk-header__link govuk-header__service-name"
+            >
+              {serviceName}
+            </Link>
+          </div>
+        </div>
+      </header>
       {showAuthControls ? (
         <div className={styles.helpOverlay}>
           <button
@@ -67,7 +75,12 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
             aria-controls="navigation"
             aria-expanded={isNavOpen}
             onClick={toggleNav}
-            className={clsx(navStyles.navToggle, navStyles.navToggleLight, isNavOpen && navStyles.navToggleActive, "button-link")}
+            className={clsx(
+              navStyles.navToggle,
+              navStyles.navToggleLight,
+              isNavOpen && navStyles.navToggleActive,
+              "button-link",
+            )}
           >
             Menu
           </button>

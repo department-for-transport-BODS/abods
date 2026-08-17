@@ -37,8 +37,8 @@ $_thumb-height: 40px;
 
       &:focus {
         box-shadow:
-          0 0 0 1.5px $govuk-input-border-colour,
-          0 0 0 4px $govuk-focus-colour;
+          0 0 0 1.5px govuk-functional-colour(input-border),
+          0 0 0 4px govuk-functional-colour(focus);
         outline: none;
       }
 

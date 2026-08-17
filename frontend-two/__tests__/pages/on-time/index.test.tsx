@@ -65,50 +65,6 @@ vi.mock("next/router", () => ({
   }),
 }));
 
-vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
-  Select: ({
-    items,
-    onChange,
-    name,
-  }: {
-    items: any[];
-    onChange: (e: any) => void;
-    name: string;
-  }) => (
-    <select name={name} onChange={onChange} data-testid={`select-${name}`}>
-      {items.map((item) => (
-        <option key={item.value} value={item.value} selected={item.selected}>
-          {item.text}
-        </option>
-      ))}
-    </select>
-  ),
-  // TODO: This will need to change once we implement the table properly
-  Table: ({ head, rows }: any) => (
-    <table>
-      <thead>
-        <tr>
-          {head.map((h: any, i: number) => (
-            <th key={i}>{h.content}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row: any[], i: number) => (
-          <tr key={i}>
-            {row.map((cell: any, j: number) => (
-              <td key={j}>{cell?.content || cell}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ),
-  Button: ({ children, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
-}));
-
 // Mock data
 const mockOperatorData = [
   {

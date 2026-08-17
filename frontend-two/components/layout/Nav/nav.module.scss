@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-right: 1px solid $govuk-border-colour;
+  border-right: 1px solid govuk-functional-colour(border);
   width: 200px;
   flex-shrink: 0;
   box-sizing: content-box;
@@ -30,7 +30,7 @@
 .link {
   display: block;
   @include govuk-font(19);
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   text-decoration: none;
   padding-top: govuk-spacing(1);
   padding-bottom: govuk-spacing(1);
@@ -42,9 +42,9 @@
 
   &:focus {
     outline: 0;
-    color: $govuk-focus-text-colour;
-    background-color: $govuk-focus-colour;
-    box-shadow: 0 4px $govuk-focus-text-colour;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
+    box-shadow: 0 4px govuk-functional-colour(focus-text);
   }
 }
 
@@ -59,7 +59,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: $govuk-link-colour;
+    background: govuk-functional-colour(link);
   }
 }
 
@@ -79,7 +79,7 @@
 
   svg {
     display: inline-flex;
-    color: $govuk-link-colour;
+    color: govuk-functional-colour(link);
     width: 20px;
     height: 20px;
     margin-right: govuk-spacing(2);
@@ -87,7 +87,7 @@
 
   &:focus {
     svg {
-      color: $govuk-focus-text-colour;
+      color: govuk-functional-colour(focus-text);
     }
   }
 }

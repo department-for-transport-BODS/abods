@@ -5,7 +5,7 @@
 .button-link {
   font-family: $font-family-default;
   line-height: inherit;
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   background-color: transparent;
   margin: 0;
   padding: govuk-spacing(1);
@@ -25,24 +25,24 @@
 
   &:focus {
     outline: $govuk-focus-width solid transparent;
-    color: $govuk-focus-text-colour;
-    background-color: $govuk-focus-colour;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
     box-shadow:
-      0 -2px $govuk-focus-colour,
-      0 4px $govuk-focus-text-colour;
+      0 -2px govuk-functional-colour(focus),
+      0 4px govuk-functional-colour(focus-text);
     text-decoration: none;
   }
 
   &--disabled {
-    color: $govuk-secondary-text-colour;
+    color: govuk-functional-colour(secondary-text);
     text-decoration: none;
     &:hover:not(:focus) {
-      color: $govuk-secondary-text-colour;
+      color: govuk-functional-colour(secondary-text);
       text-decoration: none;
       cursor: auto;
     }
     &:focus {
-      color: $govuk-secondary-text-colour;
+      color: govuk-functional-colour(secondary-text);
       text-decoration: none;
     }
   }

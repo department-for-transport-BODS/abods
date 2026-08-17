@@ -16,7 +16,7 @@
 .corridor__map-style-btn {
   @include govuk-font(16);
   padding: govuk-spacing(1) govuk-spacing(2);
-  border: 2px solid $govuk-border-colour;
+  border: 2px solid govuk-functional-colour(border);
   background: govuk-colour("white");
   cursor: pointer;
 }
@@ -24,10 +24,10 @@
   border-left: 0;
 }
 .corridor__map-style-btn--active {
-  background: govuk-colour("dark-grey");
+  background: govuk-colour("black", $variant: "tint-25");
   color: govuk-colour("white");
   font-weight: $govuk-font-weight-bold;
-  border-color: govuk-colour("dark-grey");
+  border-color: govuk-colour("black", $variant: "tint-25");
 }
 .corridor__map-recentre {
   display: inline-flex;
@@ -44,7 +44,7 @@
   font-size: 19px;
   cursor: pointer;
   &:hover {
-    background: govuk-colour("light-grey");
+    background: govuk-colour("black", $variant: "tint-95");
   }
 }
 .corridor__map-recentre-icon {

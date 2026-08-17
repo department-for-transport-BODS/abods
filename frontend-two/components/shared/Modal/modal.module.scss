@@ -67,7 +67,7 @@
   color: govuk-colour("white");
 
   &:focus {
-    background: $govuk-focus-colour;
+    background: govuk-functional-colour(focus);
 
     .closeIcon {
       color: govuk-colour("black");

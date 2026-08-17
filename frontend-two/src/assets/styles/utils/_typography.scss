@@ -3,5 +3,5 @@
 
 // used in the top-bar to recreate govuk menu button styling
 .text-secondary {
-  color: $govuk-secondary-text-colour !important;
+  color: govuk-functional-colour(secondary-text) !important;
 }

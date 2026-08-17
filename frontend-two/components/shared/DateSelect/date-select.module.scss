@@ -72,7 +72,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  color: $govuk-brand-colour;
+  color: govuk-functional-colour(brand);
   font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
@@ -88,5 +88,5 @@
 
 .monthStepDisabled {
   pointer-events: none;
-  color: govuk-colour("mid-grey");
+  color: govuk-colour("black", $variant: "tint-80");
 }

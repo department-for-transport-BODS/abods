@@ -75,7 +75,7 @@
 .stop-analysis-filters__refine-panel {
   margin-top: govuk-spacing(3);
   padding: govuk-spacing(4);
-  background: govuk-colour("light-grey");
+  background: govuk-colour("black", $variant: "tint-95");
 }
 .stop-analysis-filters__chips {
   display: flex;
@@ -84,8 +84,8 @@
   margin-top: govuk-spacing(2);
 }
 .stop-analysis-filters__chip {
-  @include govuk-font(14);
-  background: govuk-colour("light-grey");
+  @include govuk-font(16);
+  background: govuk-colour("black", $variant: "tint-95");
   padding: govuk-spacing(1) govuk-spacing(2);
   border-radius: 3px;
 }

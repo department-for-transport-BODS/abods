@@ -33,7 +33,7 @@
   cursor: pointer;
   padding: govuk-spacing(1);
   &:focus-visible {
-    outline: 3px solid $govuk-focus-colour;
+    outline: 3px solid govuk-functional-colour(focus);
     outline-offset: 0;
   }
 }
@@ -54,7 +54,7 @@
   margin-right: -(govuk-spacing(3));
 }
 .corridor__summary-stat {
-  border-top: 1px solid $govuk-border-colour;
+  border-top: 1px solid govuk-functional-colour(border);
   padding-top: govuk-spacing(3);
   flex: 1;
   margin-left: govuk-spacing(3);

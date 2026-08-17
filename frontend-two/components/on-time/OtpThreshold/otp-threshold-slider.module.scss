@@ -18,7 +18,7 @@
   @include govuk-font(16);
 }
 .otp-threshold-slider__scheduled-value {
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
   font-feature-settings: normal;
   font-variant-numeric: tabular-nums;
   text-rendering: optimizeLegibility;
@@ -38,7 +38,7 @@
 }
 .otp-threshold-slider__early {
   left: 0;
-  background-color: govuk-colour("pink");
+  background-color: govuk-colour("magenta");
 }
 .otp-threshold-slider__late {
   right: 0;

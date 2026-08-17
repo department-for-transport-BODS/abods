@@ -36,7 +36,7 @@
 
 .vehicle-journeys-search__error-icon {
   flex-shrink: 0;
-  color: $govuk-error-colour;
+  color: govuk-functional-colour(error);
 }
 
 .journey-search-nav {
@@ -60,16 +60,16 @@
     display: inline-flex;
     align-items: center;
     gap: govuk-spacing(2);
-    color: $govuk-link-colour;
+    color: govuk-functional-colour(link);
     font-weight: normal;
     text-decoration: underline;
 
     &:hover {
-      color: $govuk-link-hover-colour;
+      color: govuk-functional-colour(link-hover);
     }
 
     &:focus {
-      color: $govuk-text-colour;
+      color: govuk-functional-colour(text);
     }
   }
 
@@ -108,7 +108,7 @@
 
 .journey-search-grid__skeleton-item {
   height: 1.5rem;
-  background: govuk-colour("light-grey");
+  background: govuk-colour("black", $variant: "tint-95");
 }
 
 @media (max-width: 900px) {

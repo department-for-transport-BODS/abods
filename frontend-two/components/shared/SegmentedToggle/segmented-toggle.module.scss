@@ -29,7 +29,7 @@
 .label {
   @include govuk-font(19);
   padding: govuk-spacing(1) govuk-spacing(2);
-  background-color: govuk-colour("light-grey");
+  background-color: govuk-colour("black", $variant: "tint-95");
   cursor: pointer;
   width: 100%;
 }

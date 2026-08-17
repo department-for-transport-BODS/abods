@@ -35,14 +35,14 @@
     left: 50%;
     width: 12px;
     height: 6.5px;
-    border: solid $govuk-input-border-colour;
+    border: solid govuk-functional-colour(input-border);
     border-width: 0 0 3px 3px;
     transform: translateX(-50%) rotate(-45deg);
     box-sizing: border-box;
   }
 
   &:focus-visible + .label::before {
-    outline: 3px solid $govuk-focus-colour;
+    outline: 3px solid govuk-functional-colour(focus);
     outline-offset: 2px;
   }
 }
@@ -65,7 +65,7 @@
     left: 50%;
     width: 24px;
     height: 24px;
-    border: 2px solid $govuk-input-border-colour;
+    border: 2px solid govuk-functional-colour(input-border);
     background: govuk-colour("white");
     transform: translateX(-50%);
     box-sizing: border-box;

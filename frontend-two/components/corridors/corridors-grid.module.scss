@@ -11,7 +11,7 @@
   height: 1rem;
   transform: translateY(-50%);
   pointer-events: none;
-  color: govuk-colour("dark-grey");
+  color: govuk-colour("black", $variant: "tint-25");
 }
 .corridors-grid-search__input {
   padding-left: govuk-spacing(5);

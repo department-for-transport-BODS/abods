@@ -30,7 +30,7 @@
   bottom: 0;
   width: calc(100vw / 2);
   padding: govuk-spacing(4);
-  border-left: 1px solid $govuk-border-colour;
+  border-left: 1px solid govuk-functional-colour(border);
   background-color: govuk-colour("white");
   box-sizing: border-box;
   overflow-y: auto;
@@ -83,11 +83,11 @@
 }
 
 .sections {
-  border-top: 1px solid $govuk-border-colour;
+  border-top: 1px solid govuk-functional-colour(border);
 }
 
 .section {
-  border-bottom: 1px solid $govuk-border-colour;
+  border-bottom: 1px solid govuk-functional-colour(border);
   padding: govuk-spacing(3) 0;
 }
 

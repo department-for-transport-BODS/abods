@@ -33,7 +33,7 @@
   transform: translate(-50%, -50%);
   background: govuk-colour("white");
   padding: govuk-spacing(2) govuk-spacing(3);
-  border: 1px solid $govuk-border-colour;
+  border: 1px solid govuk-functional-colour(border);
   border-radius: 4px;
   z-index: 3;
 }
@@ -62,7 +62,7 @@
   margin: govuk-spacing(1);
 
   &High {
-    background-color: govuk-colour("turquoise");
+    background-color: govuk-colour("teal");
   }
 
   &Med {
@@ -74,6 +74,6 @@
   }
 
   &NoData {
-    background-color: govuk-colour("mid-grey");
+    background-color: govuk-colour("black", $variant: "tint-80");
   }
 }

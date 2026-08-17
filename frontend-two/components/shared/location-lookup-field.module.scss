@@ -32,8 +32,8 @@
   right: govuk-spacing(2);
   width: 0.55rem;
   height: 0.55rem;
-  border-right: 3px solid govuk-colour("mid-grey");
-  border-bottom: 3px solid govuk-colour("mid-grey");
+  border-right: 3px solid govuk-colour("black", $variant: "tint-80");
+  border-bottom: 3px solid govuk-colour("black", $variant: "tint-80");
   transform: translateY(-60%) rotate(45deg);
   pointer-events: none;
 }
@@ -45,7 +45,7 @@
 .hint {
   padding: govuk-spacing(2);
   @include govuk-font(16);
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
 }
 
 .loading {
@@ -57,21 +57,21 @@
   width: 100%;
   text-align: left;
   border: 0;
-  border-top: 1px solid govuk-colour("light-grey");
+  border-top: 1px solid govuk-colour("black", $variant: "tint-95");
   background: govuk-colour("white");
   padding: govuk-spacing(2);
   cursor: pointer;
   @include govuk-font(16);
   &:hover {
-    background: govuk-colour("light-grey");
+    background: govuk-colour("black", $variant: "tint-95");
   }
 }
 
 .optionContext {
   display: inline;
   margin-left: govuk-spacing(1);
-  @include govuk-font(14);
-  color: $govuk-secondary-text-colour;
+  @include govuk-font(16);
+  color: govuk-functional-colour(secondary-text);
 }
 
 .selected {
@@ -83,7 +83,7 @@
   padding-right: govuk-spacing(9);
   position: relative;
   &:focus-within {
-    outline: 3px solid $govuk-focus-colour;
+    outline: 3px solid govuk-functional-colour(focus);
     outline-offset: 0;
   }
   &:hover {
@@ -97,7 +97,7 @@
   border: 0;
   background: transparent;
   color: transparent;
-  caret-color: $govuk-text-colour;
+  caret-color: govuk-functional-colour(text);
   outline: 0;
   padding: inherit;
   font-size: inherit;
@@ -122,9 +122,9 @@
   cursor: pointer;
   @include govuk-font(16);
   font-weight: $govuk-font-weight-bold;
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
   line-height: 1;
   &:hover {
-    color: $govuk-text-colour;
+    color: govuk-functional-colour(text);
   }
 }

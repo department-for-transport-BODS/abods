@@ -16,13 +16,13 @@
   width: 430px;
   height: 40px;
   padding: 0.5em 0.75em;
-  background: $govuk-body-background-colour;
-  border: 2px solid $govuk-input-border-colour;
+  background: govuk-functional-colour(body-background);
+  border: 2px solid govuk-functional-colour(input-border);
   cursor: pointer;
   text-align: left;
 
   &:hover {
-    background: govuk-colour("light-grey");
+    background: govuk-colour("black", $variant: "tint-95");
   }
 }
 
@@ -33,7 +33,7 @@
 }
 
 .date-range-select__button-text {
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
   font-size: 19px;
   white-space: nowrap;
   overflow: hidden;
@@ -50,8 +50,8 @@
 .date-range-select__panel {
   position: absolute;
   z-index: 200;
-  background: $govuk-body-background-colour;
-  border: 2px solid $govuk-input-border-colour;
+  background: govuk-functional-colour(body-background);
+  border: 2px solid govuk-functional-colour(input-border);
   padding: 1rem;
   box-sizing: border-box;
   width: calc((46px * 7) + 2rem + 4px);
@@ -146,7 +146,7 @@ $day-width: 46px;
   cursor: pointer;
   font-size: 1.4rem;
   line-height: 1;
-  color: $govuk-brand-colour;
+  color: govuk-functional-colour(brand);
   padding: 0;
   width: 24px;
   height: 24px;
@@ -164,6 +164,6 @@ $day-width: 46px;
 
   &--disabled {
     pointer-events: none;
-    color: govuk-colour("mid-grey");
+    color: govuk-colour("black", $variant: "tint-80");
   }
 }

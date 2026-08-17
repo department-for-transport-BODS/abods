@@ -12,11 +12,11 @@ $spinner-duration: 2s;
     height: 50px;
   }
   &__background {
-    stroke: $govuk-border-colour;
+    stroke: govuk-functional-colour(border);
   }
   &__message {
     margin-top: govuk-spacing(2);
-    color: $govuk-secondary-text-colour;
+    color: govuk-functional-colour(secondary-text);
   }
   &__dot1,
   &__dot2,

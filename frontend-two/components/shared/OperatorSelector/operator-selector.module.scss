@@ -23,16 +23,16 @@
   .container {
     outline: inherit;
     outline-offset: inherit;
-    color: $govuk-focus-text-colour;
-    background-color: $govuk-focus-colour;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
     box-shadow:
-      0 -2px $govuk-focus-colour,
-      0 0 2px $govuk-focus-colour,
-      0 4px $govuk-focus-text-colour !important;
+      0 -2px govuk-functional-colour(focus),
+      0 0 2px govuk-functional-colour(focus),
+      0 4px govuk-functional-colour(focus-text) !important;
   }
 
   .input input {
-    color: $govuk-focus-text-colour;
+    color: govuk-functional-colour(focus-text);
   }
 }
 
@@ -43,7 +43,7 @@
   border-radius: 0;
   @include govuk-font(24);
   font-weight: $font-weight-bold;
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   padding: 0;
   max-width: inherit;
   min-height: inherit;
@@ -89,8 +89,8 @@
     background: transparent;
     @include govuk-font(24);
     font-weight: $font-weight-bold;
-    color: $govuk-link-colour;
-    caret-color: $govuk-link-colour;
+    color: govuk-functional-colour(link);
+    caret-color: govuk-functional-colour(link);
   }
 }
 
@@ -146,7 +146,7 @@
 .gdsSelect--open.gdsSelect--filtering {
   .input input {
     opacity: 1;
-    caret-color: $govuk-link-colour;
+    caret-color: govuk-functional-colour(link);
     width: 100%;
     min-width: 120px;
   }
@@ -167,11 +167,13 @@
   left: 0;
   z-index: 20;
   background: govuk-colour("white");
-  border: 2px solid govuk-colour("black");
+  border: 1px solid govuk-colour("black");
+  border-radius: 0;
   box-sizing: border-box;
   width: 100%;
   min-width: 400px;
   margin-top: 2px;
+  padding: govuk-spacing(1);
 }
 
 .dropdownItems {
@@ -179,7 +181,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: govuk-colour("mid-grey") transparent;
+  scrollbar-color: govuk-colour("black", $variant: "tint-80") transparent;
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -187,7 +189,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: govuk-colour("mid-grey");
+    background-color: govuk-colour("black", $variant: "tint-80");
     border: none;
   }
 
@@ -198,21 +200,22 @@
 
 .option {
   white-space: normal;
-  padding: 5px;
+  padding: govuk-spacing(1);
+  @include govuk-font($size: 24, $line-height: 1.25);
 }
 
 .optionLabel {
-  color: $govuk-text-colour;
-  @include govuk-font(19);
+  color: govuk-functional-colour(text);
+  @include govuk-font($size: 24, $line-height: 1.25);
   font-weight: $font-weight-normal;
 }
 
 .option--selected {
   background-color: transparent !important;
-  color: $govuk-text-colour !important;
+  color: govuk-functional-colour(text) !important;
 
   .optionLabel {
-    color: $govuk-text-colour !important;
+    color: govuk-functional-colour(text) !important;
     font-weight: $font-weight-normal;
   }
 }
@@ -223,15 +226,15 @@
 
   .optionLabel {
     color: govuk-colour("white") !important;
-    font-weight: $govuk-font-weight-bold;
+    font-weight: $font-weight-normal;
   }
 }
 
 .option:not(.option--active):not(.option--selected):hover {
-  background-color: govuk-colour("light-grey") !important;
+  background-color: govuk-colour("black", $variant: "tint-95") !important;
 
   .optionLabel {
-    color: $govuk-text-colour !important;
+    color: govuk-functional-colour(text) !important;
     font-weight: $font-weight-normal;
   }
 }

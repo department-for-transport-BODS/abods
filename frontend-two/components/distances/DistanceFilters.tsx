@@ -69,7 +69,7 @@ export const DistanceFilters = ({
           <MultiselectCheckbox
             id="distance-admin-area"
             label="Admin Area"
-            showAllLabel="All areas"
+            showAllLabel="Admin area"
             options={toOptions(adminAreaOptions)}
             selectedValues={selectedAdminAreas}
             onChange={onAdminAreasChange}

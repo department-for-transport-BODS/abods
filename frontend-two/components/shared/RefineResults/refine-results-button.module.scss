@@ -11,7 +11,7 @@
   @include govuk-font(19);
   white-space: nowrap;
   flex-shrink: 0;
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   margin-bottom: govuk-spacing(4);
   text-decoration: underline;
 
@@ -33,5 +33,5 @@
 .icon {
   width: 24px;
   height: 24px;
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
 }

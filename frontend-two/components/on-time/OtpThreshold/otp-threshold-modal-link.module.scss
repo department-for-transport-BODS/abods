@@ -9,11 +9,11 @@
 
   &:global(.govuk-link),
   &:global(.button-link) {
-    color: $govuk-link-colour;
+    color: govuk-functional-colour(link);
     text-decoration: underline;
 
     &:hover:not(:focus) {
-      color: $govuk-link-hover-colour;
+      color: govuk-functional-colour(link-hover);
       text-decoration: underline;
     }
   }

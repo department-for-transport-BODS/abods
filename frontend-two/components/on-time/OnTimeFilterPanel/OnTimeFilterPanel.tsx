@@ -1,6 +1,5 @@
 import styles from "./on-time-filter-panel.module.scss";
 
-import dynamic from "next/dynamic";
 import { DateTime } from "luxon";
 import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
@@ -64,12 +63,6 @@ export const calculateDateRange = (
   }
 };
 
-const Select = dynamic(
-  () =>
-    import("kainossoftwareltd-govuk-react-kainos").then((mod) => mod.Select),
-  { ssr: false },
-);
-
 interface ToggleOption {
   value: string;
   label: string;
@@ -132,16 +125,24 @@ export const OnTimeFilterPanel = ({
             value={dateRange || undefined}
             onChange={onDateRangeChange}
           />
-          <Select
-            name="date-preset"
-            label="Date preset"
-            items={datePresetItems.map((preset) => ({
-              value: preset,
-              text: preset,
-              selected: selectedDatePreset === preset,
-            }))}
-            onChange={(event) => onDatePresetChange(event.target.value)}
-          />
+          <div className="govuk-form-group">
+            <label className="govuk-label" htmlFor="date-preset">
+              Date preset
+            </label>
+            <select
+              id="date-preset"
+              name="date-preset"
+              className="govuk-select"
+              value={selectedDatePreset}
+              onChange={(event) => onDatePresetChange(event.target.value)}
+            >
+              {datePresetItems.map((preset) => (
+                <option key={preset} value={preset}>
+                  {preset}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className={styles.refineResultsButtonContainer}>
           <RefineResultsButton

@@ -27,24 +27,24 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   border-radius: 50%;
   width: $segment-stop-size;
   height: $segment-stop-size;
-  border: 5px solid $govuk-border-colour;
+  border: 5px solid govuk-functional-colour(border);
   flex-shrink: 0;
   &:hover {
     border-color: govuk-colour("black");
   }
 }
 .segment-selector__segment {
-  background-color: govuk-colour("light-grey");
+  background-color: govuk-colour("black", $variant: "tint-95");
   width: 100%;
   min-width: $segment-min-width;
   height: $segment-half-height;
   cursor: pointer;
   &:hover {
-    background-color: govuk-colour("light-blue");
+    background-color: govuk-colour("blue", $variant: "tint-25");
   }
   &:focus-visible {
-    background-color: govuk-colour("light-blue");
-    outline: 3px solid $govuk-focus-colour;
+    background-color: govuk-colour("blue", $variant: "tint-25");
+    outline: 3px solid govuk-functional-colour(focus);
   }
 }
 .segment-selector__segment--active, .segment-selector__segment:active {
@@ -60,16 +60,16 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
 .segment-selector__segment__invalid-service-link {
   background: repeating-linear-gradient(
         to right,
-        govuk-colour("light-grey"),
-        govuk-colour("light-grey") 10px,
+        govuk-colour("black", $variant: "tint-95"),
+        govuk-colour("black", $variant: "tint-95") 10px,
         govuk-colour("white") 4px,
         govuk-colour("white") 14px
       );
   &:hover {
     background: repeating-linear-gradient(
           to right,
-          govuk-colour("light-blue"),
-          govuk-colour("light-blue") 10px,
+          govuk-colour("blue", $variant: "tint-25"),
+          govuk-colour("blue", $variant: "tint-25") 10px,
           govuk-colour("white") 4px,
           govuk-colour("white") 14px
         );
@@ -99,7 +99,7 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   width: 100%;
   text-align: center;
   @include govuk-font(16);
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
 }
 .segment-selector__distance ~ .segment-selector__distance {
   margin-left: ($segment-stop-size + $segment-stop-surround * 2);
@@ -108,5 +108,5 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   margin-top: 15px;
 }
 .segment-selector-hint__text {
-  color: govuk-colour("dark-grey");
+  color: govuk-colour("black", $variant: "tint-25");
 }

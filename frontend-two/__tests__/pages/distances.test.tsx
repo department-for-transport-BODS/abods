@@ -53,32 +53,6 @@ vi.mock("next/router", () => ({
   }),
 }));
 
-vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
-  Button: ({ children, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
-  SortableTable: ({ head, rows }: any) => (
-    <table>
-      <thead>
-        <tr>
-          {head.map((h: any) => (
-            <th key={h.key}>{h.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r: any) => (
-          <tr key={r.key}>
-            {head.map((h: any) => (
-              <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ),
-}));
-
 // Mock data
 const mockDistanceData = [
   {

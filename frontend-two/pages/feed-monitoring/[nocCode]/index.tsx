@@ -106,10 +106,10 @@ const LiveStatusPage = () => {
           </div>
         </div>
       )}
-      <span className="govuk-caption-xl">NOC feed monitoring</span>
-      <h1 className="app-page-header font-bold" style={{ fontSize: "48px" }}>
-        Live status
-      </h1>
+      <header className="govuk-!-margin-bottom-2">
+        <span className="govuk-caption-xl">NOC feed monitoring</span>
+        <h1 className="govuk-heading-xl app-page-header">Live status</h1>
+      </header>
       <div className="flex items-baseline gap-4">
         <span
           className="govuk-body"

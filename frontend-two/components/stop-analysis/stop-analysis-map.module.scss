@@ -56,7 +56,7 @@
   background: govuk-colour("white");
   padding: govuk-spacing(3);
   border-radius: 4px;
-  @include govuk-font(14);
+  @include govuk-font(16);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
   pointer-events: none;
@@ -69,7 +69,7 @@
   flex: 0 0 auto;
 }
 .stop-analysis-map__dot--high {
-  background-color: govuk-colour("turquoise");
+  background-color: govuk-colour("teal");
 }
 .stop-analysis-map__dot--med {
   background-color: govuk-colour("yellow");
@@ -78,5 +78,5 @@
   background-color: govuk-colour("red");
 }
 .stop-analysis-map__dot--no-data {
-  background-color: govuk-colour("mid-grey");
+  background-color: govuk-colour("black", $variant: "tint-80");
 }

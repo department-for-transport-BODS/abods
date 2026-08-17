@@ -144,7 +144,7 @@ export const SummaryStatsGrid = ({
           {breakdownItems.map((item) => (
             <li key={item.key}>
               {" "}
-              • <b>{item.count}</b> {item.label}
+              <b>{item.count}</b> {item.label}
             </li>
           ))}
         </ul>

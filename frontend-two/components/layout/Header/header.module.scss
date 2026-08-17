@@ -1,10 +1,68 @@
 @import "../../../styles/govuk-module";
 
 .header {
-  // Keep legacy ABODS look even if library-internal CSS does not load.
-  background-color: $govuk-brand-colour;
+  background-color: govuk-functional-colour(brand);
   color: govuk-colour("white");
-  border-bottom: 10px solid $govuk-brand-colour;
+  border-bottom: 10px solid govuk-functional-colour(brand);
+
+  :global(.govuk-header__container) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  :global(.govuk-header__logo) {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  :global(.govuk-header__content) {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  :global(.govuk-header__service-name) {
+    @include govuk-font(24, $weight: bold);
+    display: inline-block;
+    margin-bottom: govuk-spacing(2);
+    color: govuk-colour("white");
+    text-decoration: none;
+
+    &:link,
+    &:visited {
+      color: govuk-colour("white");
+    }
+
+    &:hover {
+      text-decoration: underline;
+      color: govuk-colour("white");
+    }
+
+    &:focus {
+      color: govuk-functional-colour(focus-text);
+    }
+  }
+}
+
+@include bp($tablet) {
+  .header {
+    :global(.govuk-header__content) {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    :global(.govuk-header__service-name) {
+      margin-bottom: 0;
+      pointer-events: auto;
+    }
+  }
 }
 
 .headerShell {

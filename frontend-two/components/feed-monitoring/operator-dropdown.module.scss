@@ -16,7 +16,7 @@
 }
 
 .operator-dropdown__label {
-  color: $govuk-brand-colour;
+  color: govuk-functional-colour(brand);
   font-weight: bold;
   font-size: 24px;
   margin: 0;
@@ -34,8 +34,8 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  background-color: $govuk-body-background-colour;
-  border: 1px solid govuk-colour("mid-grey");
+  background-color: govuk-functional-colour(body-background);
+  border: 1px solid govuk-colour("black", $variant: "tint-80");
   list-style: none;
   margin: 0;
   padding: 0;
@@ -49,11 +49,11 @@
 .operator-dropdown__item {
   padding: 8px 12px;
   cursor: pointer;
-  background-color: $govuk-body-background-colour;
-  color: $govuk-text-colour;
+  background-color: govuk-functional-colour(body-background);
+  color: govuk-functional-colour(text);
 
   &--hovered {
-    background-color: $govuk-brand-colour;
+    background-color: govuk-functional-colour(brand);
     color: govuk-colour("white");
   }
 }

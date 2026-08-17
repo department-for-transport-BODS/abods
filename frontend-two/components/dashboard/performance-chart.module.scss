@@ -14,7 +14,7 @@
   gap: govuk-spacing(4);
   height: rem(240);
   width: 60%;
-  border-bottom: 1px solid $govuk-border-colour;
+  border-bottom: 1px solid govuk-functional-colour(border);
 }
 .performance-chart__fallback-bar {
   display: flex;

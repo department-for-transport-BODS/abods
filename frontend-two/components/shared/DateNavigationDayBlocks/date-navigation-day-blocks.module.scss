@@ -16,7 +16,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    border: 1px solid $govuk-border-colour;
+    border: 1px solid govuk-functional-colour(border);
     z-index: -1;
   }
 }
@@ -31,7 +31,7 @@
   display: block;
   height: 32px;
   width: 100%;
-  background-color: govuk-colour("light-grey");
+  background-color: govuk-colour("black", $variant: "tint-95");
   border: none;
   cursor: pointer;
   padding: 0;
@@ -45,7 +45,7 @@
 
   &:focus:not(.itemActive) {
     outline: none;
-    box-shadow: 0 0 0 3px $govuk-focus-colour;
+    box-shadow: 0 0 0 3px govuk-functional-colour(focus);
   }
 }
 
@@ -54,8 +54,8 @@
   position: relative;
   border-radius: 1px;
   box-shadow:
-    0 0 0 1.5px $govuk-input-border-colour,
-    0 0 0 4px $govuk-focus-colour;
+    0 0 0 1.5px govuk-functional-colour(input-border),
+    0 0 0 4px govuk-functional-colour(focus);
   z-index: 1;
 }
 
@@ -65,7 +65,7 @@
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background-color: $govuk-focus-text-colour;
+  background-color: govuk-functional-colour(focus-text);
   color: govuk-colour("white");
   font-size: 14px;
   font-family: "GDS Transport", arial, sans-serif;
@@ -82,7 +82,7 @@
     left: 50%;
     transform: translateX(-50%);
     border: 5px solid transparent;
-    border-top-color: $govuk-input-border-colour;
+    border-top-color: govuk-functional-colour(input-border);
   }
 }
 
@@ -92,7 +92,7 @@
 }
 
 .monthLabel {
-  color: $govuk-secondary-text-colour;
+  color: govuk-functional-colour(secondary-text);
   font-size: 13px;
   line-height: 1.538;
   transform: translateX(-50%);

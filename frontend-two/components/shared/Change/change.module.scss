@@ -23,7 +23,7 @@
   }
 
   &::after {
-    border-bottom: 11px solid govuk-colour("dark-grey");
+    border-bottom: 11px solid govuk-colour("black", $variant: "tint-25");
   }
 }
 
@@ -35,7 +35,7 @@
   }
 
   &::after {
-    border-top: 11px solid govuk-colour("dark-grey");
+    border-top: 11px solid govuk-colour("black", $variant: "tint-25");
   }
 }
 

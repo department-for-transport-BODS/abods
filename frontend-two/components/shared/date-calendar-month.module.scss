@@ -38,7 +38,7 @@ $day-width: 46px;
   position: relative;
 
   &--included {
-    background-color: govuk-colour("light-grey");
+    background-color: govuk-colour("black", $variant: "tint-95");
 
     &::before {
       content: "";
@@ -47,20 +47,20 @@ $day-width: 46px;
       bottom: 0;
       left: 0;
       right: 0;
-      background-color: govuk-colour("light-grey");
+      background-color: govuk-colour("black", $variant: "tint-95");
       z-index: 0;
       pointer-events: none;
     }
   }
 
   &--start {
-    background-color: govuk-colour("light-grey");
+    background-color: govuk-colour("black", $variant: "tint-95");
     border-top-left-radius: 999em;
     border-bottom-left-radius: 999em;
   }
 
   &--end {
-    background-color: govuk-colour("light-grey");
+    background-color: govuk-colour("black", $variant: "tint-95");
     border-top-right-radius: 999em;
     border-bottom-right-radius: 999em;
   }
@@ -71,7 +71,7 @@ $day-width: 46px;
   border: none;
   cursor: pointer;
   z-index: 1;
-  color: $govuk-text-colour;
+  color: govuk-functional-colour(text);
 
   &:hover::after {
     content: "";
@@ -87,7 +87,7 @@ $day-width: 46px;
   }
 
   &--disabled {
-    color: govuk-colour("mid-grey");
+    color: govuk-colour("black", $variant: "tint-80");
     pointer-events: none;
   }
 
@@ -95,14 +95,14 @@ $day-width: 46px;
   &--end {
     color: govuk-colour("white");
     border-radius: 100%;
-    background-color: $govuk-brand-colour;
+    background-color: govuk-functional-colour(brand);
   }
 
   &--included:not(
       .date-range-controls__day--start,
       .date-range-controls__day--end
     ) {
-    background-color: govuk-colour("light-grey");
+    background-color: govuk-colour("black", $variant: "tint-95");
 
     &:hover::after {
       background-color: rgba(0, 0, 0, 0.06);
@@ -116,7 +116,7 @@ $day-width: 46px;
   &--saturday::before {
     content: "";
     position: absolute;
-    border-left: 1px solid govuk-colour("mid-grey");
+    border-left: 1px solid govuk-colour("black", $variant: "tint-80");
     top: 0;
     bottom: 0;
     left: -1px;

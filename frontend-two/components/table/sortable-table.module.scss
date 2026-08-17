@@ -31,7 +31,7 @@
   font-weight: $govuk-font-weight-bold;
   text-decoration: none;
   cursor: pointer;
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   text-align: left;
   align-items: flex-start;
   box-sizing: border-box;
@@ -56,7 +56,7 @@
   word-break: normal;
 }
 .sortable-table .sortable-header:hover {
-  color: $govuk-link-hover-colour;
+  color: govuk-functional-colour(link-hover);
 }
 .sortable-table__footer-row {
   display: flex;
@@ -118,7 +118,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   line-height: 1;
   vertical-align: middle;
   min-height: 16px;
@@ -132,7 +132,7 @@
   font-size: 14px;
 }
 .sortable-table-sort-icon--none {
-  color: govuk-colour("mid-grey");
+  color: govuk-colour("black", $variant: "tint-80");
   font-size: 8px;
   &::before {
     content: "\25b2\a\25bc";

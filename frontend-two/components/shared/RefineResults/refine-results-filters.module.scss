@@ -20,7 +20,7 @@
   &::-webkit-scrollbar-thumb {
     border: 6px solid transparent;
     border-radius: 999em;
-    background-color: govuk-colour("mid-grey");
+    background-color: govuk-colour("black", $variant: "tint-80");
     background-clip: padding-box;
   }
 

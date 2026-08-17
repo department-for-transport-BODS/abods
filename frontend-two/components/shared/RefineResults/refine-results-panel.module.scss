@@ -8,7 +8,7 @@
   display: block;
   width: 380px;
   padding: govuk-spacing(4);
-  border-left: 1px solid $govuk-border-colour;
+  border-left: 1px solid govuk-functional-colour(border);
   background-color: govuk-colour("white");
   box-sizing: border-box;
   overflow: hidden;

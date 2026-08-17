@@ -111,8 +111,8 @@
 }
 .stop-analysis-table__table--with-totals {
   table tbody tr:first-child > * {
-    border-top: 0.125rem solid $govuk-border-colour;
-    border-bottom: 0.125rem solid $govuk-border-colour;
+    border-top: 0.125rem solid govuk-functional-colour(border);
+    border-bottom: 0.125rem solid govuk-functional-colour(border);
   }
 }
 .stop-analysis-table__summary-row > * {
@@ -135,6 +135,6 @@
   justify-content: center;
   width: 1.25rem;
   height: 1.25rem;
-  color: $govuk-text-colour;
+  color: govuk-functional-colour(text);
   vertical-align: middle;
 }

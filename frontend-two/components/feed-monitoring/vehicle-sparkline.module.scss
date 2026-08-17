@@ -1,6 +1,6 @@
 @import "../../styles/govuk-module";
 .sparkline-wrapper {
-  background-color: $govuk-template-background-colour;
+  background-color: govuk-functional-colour(template-background);
   border-radius: 8px;
   overflow: hidden;
   padding: 4px 0;
