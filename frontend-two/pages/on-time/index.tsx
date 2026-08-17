@@ -319,6 +319,7 @@ const OnTimeIndexPage = () => {
             <MultiselectCheckbox
               id="on-time-summary-area"
               label={"Area"}
+              showAllLabel="Area"
               labelClassName="govuk-visually-hidden"
               options={adminAreaOptions.map((area) => ({
                 label: area,
@@ -341,7 +342,7 @@ const OnTimeIndexPage = () => {
             minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
           >
             <div className={styles.content}>
-              <div className="summary-stat-container">
+              <div className={styles.summaryStat}>
                 <p className="govuk-body-l">
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
@@ -355,6 +356,7 @@ const OnTimeIndexPage = () => {
                 </div>
 
                 <SummaryStatsGrid
+                  compact
                   onTimeCount={summaryStats?.onTime ?? null}
                   lateCount={summaryStats?.late ?? null}
                   earlyCount={summaryStats?.early ?? null}
@@ -367,11 +369,10 @@ const OnTimeIndexPage = () => {
                   }
                   incompleteBreakdown={summaryStats?.incomplete ?? null}
                   averageDelay={summaryStats?.averageDelay ?? null}
-                  className={styles.summaryGrid}
                 />
               </div>
 
-              <div className="summary-map-container">
+              <div className={styles.summaryMap}>
                 {config?.mapboxToken && config?.mapboxStyle ? (
                   <OnTimeBoundariesMap
                     mapboxToken={config.mapboxToken}
@@ -388,7 +389,7 @@ const OnTimeIndexPage = () => {
         )}
       </div>
 
-      <div className="operator-container">
+      <div className={styles.operator}>
         <h2 className="govuk-heading-m">Operators</h2>
 
         {isLoading ? (

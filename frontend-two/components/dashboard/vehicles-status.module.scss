@@ -1,0 +1,15 @@
+@import "../../styles/govuk-module";
+.vehicles-status__stats {
+  display: flex;
+  gap: govuk-spacing(6);
+  > * {
+    flex: 1 1 0;
+    margin-bottom: 0;
+  }
+}
+.vehicles-status__footer {
+  display: flex;
+  justify-content: flex-end;
+  @include govuk-font(19);
+  margin-top: govuk-spacing(4);
+}

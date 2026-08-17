@@ -1,0 +1,70 @@
+@import "../../../styles/govuk-module";
+.corridor-stop-list {
+  background-color: govuk-colour("light-grey");
+  width: 50ex;
+  max-width: 100%;
+  padding: govuk-spacing(2) govuk-spacing(2) 0;
+  margin-bottom: govuk-spacing(4);
+}
+.corridor-stop-list__stop {
+  display: flex;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+  position: relative;
+  padding: govuk-spacing(3) govuk-spacing(1) govuk-spacing(3) govuk-spacing(2);
+}
+.corridor-stop-list__stop--added {
+  background-color: govuk-colour("light-grey");
+}
+.corridor-stop-list__stop--matching {
+  box-shadow: inset 0px -2px 0px $govuk-border-colour;
+  padding-top: govuk-spacing(3);
+  padding-left: govuk-spacing(1);
+  background-color: govuk-colour("white");
+  width: 100%;
+  box-sizing: border-box;
+}
+.corridor-stop-list__stop--connected::before {
+  content: "";
+  position: absolute;
+  display: block;
+  border-left: 5px solid govuk-colour("blue");
+  left: govuk-spacing(4);
+  top: 32px;
+  height: 100%;
+  z-index: 1;
+}
+.corridor-stop-list__stop:hover, .corridor-stop-list__stop--added {
+  .corridor-stop-list__stop-details:before {
+    border-color: govuk-colour("black");
+  }
+}
+.corridor-stop-list__stop-details {
+  @include govuk-font(19);
+  position: relative;
+  padding: 0 govuk-spacing(4) 0 govuk-spacing(8);
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 25px;
+    height: 25px;
+    border: 4px solid govuk-colour("mid-grey");
+    background-color: govuk-colour("white");
+    border-radius: 50%;
+    box-sizing: border-box;
+    z-index: 2;
+  }
+}
+.corridor-stop-list__stop-details--no-graphic {
+  padding-left: 0;
+  &:before {
+    content: none;
+  }
+}
+.corridor-stop-list__stop-label {
+  @include govuk-responsive-margin(1, "bottom");
+}
+.corridor-stop-list__naptan {
+  color: $govuk-secondary-text-colour;
+}

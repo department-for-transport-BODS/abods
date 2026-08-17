@@ -1,6 +1,7 @@
 import styles from "./on-time-display-controls.module.scss";
 
 import type { ReactNode } from "react";
+import { clsx } from "clsx";
 import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { RadioOptions } from "@/components/shared/RadioOptions";
 import {
@@ -32,13 +33,19 @@ export const OnTimeDisplayControls = ({
   onOpenDisplayOptions,
   beforeDirections,
   groupInputs = false,
-  className = `${styles.container} govuk-!-margin-top-6`,
+  className,
 }: OnTimeDisplayControlsProps) => {
   const directionsControl = (
-    <div className={styles.directionsContainer}>
+    <div
+      className={clsx(
+        styles.directionsContainer,
+        !groupInputs && styles.directionsContainerCompact,
+      )}
+    >
       <MultiselectCheckbox
         id="on-time-directions"
         label="Directions"
+        showAllLabel="All Directions"
         options={[
           { label: "Inbound", value: "Inbound" },
           { label: "Outbound", value: "Outbound" },
@@ -51,7 +58,9 @@ export const OnTimeDisplayControls = ({
   );
 
   return (
-    <div className={className}>
+    <div
+      className={clsx(styles.container, "govuk-!-margin-top-6", className)}
+    >
       {groupInputs ? (
         <div className={styles.inputsContainer}>
           {beforeDirections}

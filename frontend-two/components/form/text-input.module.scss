@@ -1,0 +1,7 @@
+@import "../../styles/govuk-module";
+
+.labelRequired {
+  &:after {
+    content: " *";
+  }
+}

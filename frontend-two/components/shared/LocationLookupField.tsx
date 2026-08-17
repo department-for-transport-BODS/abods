@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { clsx } from "clsx";
+import styles from "./location-lookup-field.module.scss";
 import {
   buildLocationContext,
   buildLocationSearchTypes,
@@ -122,14 +124,14 @@ export const LocationLookupField = ({
       <label className="govuk-label" htmlFor={id}>
         {label}
       </label>
-      <div className="stop-analysis-filters__location-search">
-        <div className="stop-analysis-filters__location-input-wrap">
+      <div className={styles.search}>
+        <div className={styles.inputWrap}>
           {selectedOption ? (
-            <div className="govuk-input stop-analysis-filters__location-input stop-analysis-filters__location-selected">
-              <span className="stop-analysis-filters__location-selected-text">
+            <div className={clsx("govuk-input", styles.input, styles.selected)}>
+              <span className={styles.selectedText}>
                 <span>{selectedOption.label}</span>
                 {selectedOption.context && (
-                  <span className="stop-analysis-filters__location-option-context">
+                  <span className={styles.optionContext}>
                     {selectedOption.context}
                   </span>
                 )}
@@ -137,7 +139,7 @@ export const LocationLookupField = ({
               <input
                 ref={overlayRef}
                 id={id}
-                className="stop-analysis-filters__location-overlay-input"
+                className={styles.overlayInput}
                 type="text"
                 value=""
                 aria-label={selectedOption.label}
@@ -157,7 +159,7 @@ export const LocationLookupField = ({
             <input
               ref={inputRef}
               id={id}
-              className="govuk-input stop-analysis-filters__location-input"
+              className={clsx("govuk-input", styles.input)}
               type="text"
               value={value}
               onChange={(event) => {
@@ -176,7 +178,7 @@ export const LocationLookupField = ({
           {(selectedOption || value) && (
             <button
               type="button"
-              className="stop-analysis-filters__location-clear"
+              className={styles.clear}
               aria-label="Clear location"
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -190,7 +192,7 @@ export const LocationLookupField = ({
             </button>
           )}
           <span
-            className={`stop-analysis-filters__location-chevron${open ? " stop-analysis-filters__location-chevron--open" : ""}`}
+            className={clsx(styles.chevron, open && styles.chevronOpen)}
             aria-hidden="true"
           />
         </div>
@@ -199,16 +201,16 @@ export const LocationLookupField = ({
           !disabled &&
           (selectedOption || value.trim().length === 0 || hasResults) && (
             <div
-              className="stop-analysis-filters__location-results"
+              className={styles.results}
               role="listbox"
             >
               {value.trim().length === 0 && (
-                <div className="stop-analysis-filters__location-hint">
+                <div className={styles.hint}>
                   Type to search
                 </div>
               )}
               {value.trim().length > 0 && loading && (
-                <div className="stop-analysis-filters__location-loading">
+                <div className={styles.loading}>
                   Searching...
                 </div>
               )}
@@ -218,7 +220,7 @@ export const LocationLookupField = ({
                   <button
                     key={option.id}
                     type="button"
-                    className="stop-analysis-filters__location-option"
+                    className={styles.option}
                     onClick={() => {
                       setSelectedOption(option);
                       onValueChange(option.label);
@@ -228,7 +230,7 @@ export const LocationLookupField = ({
                   >
                     {option.label}
                     {option.context && (
-                      <span className="stop-analysis-filters__location-option-context">
+                      <span className={styles.optionContext}>
                         {option.context}
                       </span>
                     )}

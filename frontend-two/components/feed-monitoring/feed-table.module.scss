@@ -1,0 +1,15 @@
+@import "../../styles/govuk-module";
+.feed-table__check {
+  width: 30px;
+  min-width: 24px;
+  height: 30px;
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
+}
+.feed-table__cross {
+  width: 30px;
+  min-width: 24px;
+  height: 30px;
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
+}

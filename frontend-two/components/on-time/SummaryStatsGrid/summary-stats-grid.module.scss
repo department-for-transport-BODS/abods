@@ -23,8 +23,16 @@
   }
 }
 
+.gridCompact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (min-width: 64em) {
   .grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .gridCompact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

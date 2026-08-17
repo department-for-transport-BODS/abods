@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Stat } from "@/components/shared/SummaryStat/Stat";
+import styles from "@/components/shared/SummaryStat/stat.module.scss";
 
 describe("Stat", () => {
   it("renders tooltip-backed values with the default dotted underline affordance", () => {
@@ -14,8 +15,8 @@ describe("Stat", () => {
     );
 
     expect(screen.getByRole("button", { name: "123" })).toBeInTheDocument();
-    expect(screen.getByText("123")).toHaveClass("stat__value");
-    expect(screen.getByText("123")).toHaveClass("stat__value--tooltip");
+    expect(screen.getByText("123")).toHaveClass(styles.value);
+    expect(screen.getByText("123")).toHaveClass(styles.valueTooltip);
   });
 
   it("renders loading values without the dotted border class", () => {
@@ -28,7 +29,7 @@ describe("Stat", () => {
       />,
     );
 
-    expect(screen.getByText("Loading...")).toHaveClass("stat__value--loading");
+    expect(screen.getByText("Loading...")).toHaveClass(styles.valueLoading);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });

@@ -1,0 +1,26 @@
+@import "../../styles/govuk-module";
+
+.distance-grid__filters {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 8fr) minmax(0, 9fr);
+  gap: govuk-spacing(1);
+  align-items: end;
+  margin-bottom: govuk-spacing(2);
+}
+
+.distance-grid__filtersLast {
+  margin-bottom: govuk-spacing(4);
+}
+
+.distance-grid__filter {
+  min-width: 0;
+
+  :global(.govuk-form-group) {
+    margin-bottom: 0;
+    width: 100%;
+  }
+
+  :global(.govuk-input) {
+    height: 40px;
+  }
+}

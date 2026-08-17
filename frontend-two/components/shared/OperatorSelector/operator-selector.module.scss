@@ -1,0 +1,237 @@
+@import "../../../styles/govuk-module";
+
+.operatorSelector {
+  display: flex;
+  align-items: center;
+}
+
+.label {
+  display: inline-block;
+  padding-right: 5px;
+}
+
+.selector {
+  min-width: 0;
+  max-width: 420px;
+}
+
+.gdsSelect {
+  position: relative;
+}
+
+.gdsSelect--focused {
+  .container {
+    outline: inherit;
+    outline-offset: inherit;
+    color: $govuk-focus-text-colour;
+    background-color: $govuk-focus-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 0 2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour !important;
+  }
+
+  .input input {
+    color: $govuk-focus-text-colour;
+  }
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  border: none;
+  border-radius: 0;
+  @include govuk-font(24);
+  font-weight: $font-weight-bold;
+  color: $govuk-link-colour;
+  padding: 0;
+  max-width: inherit;
+  min-height: inherit;
+
+  &:hover {
+    box-shadow: none;
+  }
+}
+
+.valueContainer {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.value {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  margin-right: govuk-spacing(2);
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input {
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 2px;
+  padding-left: 5px;
+  overflow: hidden;
+
+  input {
+    width: 2px;
+    min-width: 2px;
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    background: transparent;
+    @include govuk-font(24);
+    font-weight: $font-weight-bold;
+    color: $govuk-link-colour;
+    caret-color: $govuk-link-colour;
+  }
+}
+
+.arrowWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  min-width: 20px;
+  cursor: pointer;
+}
+
+.arrow {
+  display: inline-block;
+  position: relative;
+  top: -3px;
+  border: solid govuk-colour("blue");
+  border-width: 0 2px 2px 0;
+  padding: 3px;
+  transform: rotate(45deg);
+}
+
+.gdsSelect:not(.gdsSelect--open) {
+  .input input {
+    opacity: 0;
+    caret-color: transparent;
+  }
+}
+
+.gdsSelect--open {
+  .arrow {
+    top: 1px;
+    transform: rotate(-135deg);
+  }
+}
+
+.gdsSelect--open:not(.gdsSelect--filtering) {
+  .value {
+    margin-right: govuk-spacing(2);
+    max-width: none;
+    overflow: visible;
+    visibility: visible;
+  }
+
+  .input input {
+    width: 2px;
+    min-width: 2px;
+    opacity: 0;
+    caret-color: transparent;
+  }
+}
+
+.gdsSelect--open.gdsSelect--filtering {
+  .input input {
+    opacity: 1;
+    caret-color: $govuk-link-colour;
+    width: 100%;
+    min-width: 120px;
+  }
+}
+
+.gdsSelect--filtering {
+  .value {
+    margin-right: 0;
+    max-width: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  background: govuk-colour("white");
+  border: 2px solid govuk-colour("black");
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 400px;
+  margin-top: 2px;
+}
+
+.dropdownItems {
+  max-height: 230px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: govuk-colour("mid-grey") transparent;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: govuk-colour("mid-grey");
+    border: none;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.option {
+  white-space: normal;
+  padding: 5px;
+}
+
+.optionLabel {
+  color: $govuk-text-colour;
+  @include govuk-font(19);
+  font-weight: $font-weight-normal;
+}
+
+.option--selected {
+  background-color: transparent !important;
+  color: $govuk-text-colour !important;
+
+  .optionLabel {
+    color: $govuk-text-colour !important;
+    font-weight: $font-weight-normal;
+  }
+}
+
+.option--active,
+.option--selected.option--active {
+  background-color: govuk-colour("blue") !important;
+
+  .optionLabel {
+    color: govuk-colour("white") !important;
+    font-weight: $govuk-font-weight-bold;
+  }
+}
+
+.option:not(.option--active):not(.option--selected):hover {
+  background-color: govuk-colour("light-grey") !important;
+
+  .optionLabel {
+    color: $govuk-text-colour !important;
+    font-weight: $font-weight-normal;
+  }
+}

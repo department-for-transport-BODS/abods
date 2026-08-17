@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./otp-threshold-modal-link.module.scss";
 import { useState } from "react";
 import { OtpThresholdModal } from "@/components/on-time/OtpThreshold/OtpThresholdModal";
 import { Tooltip } from "@/components/shared/Tooltip";
@@ -27,7 +29,7 @@ export const OtpThresholdModalLink = ({
     <>
       <Tooltip
         message="Compare on-time performance thresholds"
-        className="govuk-body govuk-link button-link otp-threshold-modal-button"
+        className={clsx("govuk-body", "govuk-link", "button-link", styles["otp-threshold-modal-button"])}
         onClick={() => setOpen(true)}
       >
         Compare thresholds

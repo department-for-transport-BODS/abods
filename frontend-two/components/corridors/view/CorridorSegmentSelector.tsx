@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./corridor-segment-selector.module.scss";
 import { CorridorStop } from "@/types/corridors";
 import { ServiceLinkType } from "../../../src/generated/graphql";
 import { isInvalidRouteLink } from "@/services/corridors/corridors-speed-utils";
@@ -57,16 +59,18 @@ export const CorridorSegmentSelector = ({
 
   return (
     <>
-      <div className="segment-selector-wrapper govuk-!-margin-bottom-6">
-        <div className="segment-selector">
+      <div className={clsx(styles["segment-selector-wrapper"], "govuk-!-margin-bottom-6")}>
+        <div className={styles["segment-selector"]}>
           {/* All segments button — top half of the rail */}
           <button
             type="button"
-            className={`unbuttoned segment-selector__segment segment-selector__segment--all${
-              selectedSegmentIndex === null
-                ? " segment-selector__segment--active"
-                : ""
-            }`}
+            className={clsx(
+              "unbuttoned",
+              styles["segment-selector__segment"],
+              styles["segment-selector__segment--all"],
+              selectedSegmentIndex === null &&
+                styles["segment-selector__segment--active"],
+            )}
             onClick={() => onChangeSegmentIndex(null)}
             disabled={isDisabled}
           >
@@ -74,20 +78,25 @@ export const CorridorSegmentSelector = ({
           </button>
 
           {/* Individual segments — bottom half of the rail */}
-          <div className="segment-selector__segments-wrapper">
+          <div className={styles["segment-selector__segments-wrapper"]}>
             {segments.map((seg) => (
               <button
                 key={seg.index}
                 type="button"
-                className={`unbuttoned segment-selector__segment${
+                className={clsx(
+                  "unbuttoned",
+                  styles["segment-selector__segment"],
                   isInvalidServiceLink(seg.from.naptan, seg.to.naptan)
-                    ? selectedSegmentIndex === seg.index
-                      ? " segment-selector__segment__invalid-service-link segment-selector__segment__invalid-service-link--active"
-                      : " segment-selector__segment__invalid-service-link"
-                    : selectedSegmentIndex === seg.index
-                      ? " segment-selector__segment--active"
-                      : ""
-                }`}
+                    ? clsx(
+                        styles["segment-selector__segment__invalid-service-link"],
+                        selectedSegmentIndex === seg.index &&
+                          styles[
+                            "segment-selector__segment__invalid-service-link--active"
+                          ],
+                      )
+                    : selectedSegmentIndex === seg.index &&
+                      styles["segment-selector__segment--active"],
+                )}
                 onClick={() => onChangeSegmentIndex(seg.index)}
                 disabled={isDisabled}
               >
@@ -99,7 +108,7 @@ export const CorridorSegmentSelector = ({
           </div>
 
           {/* Distance labels */}
-          <div className="segment-selector__distances-wrapper">
+          <div className={styles["segment-selector__distances-wrapper"]}>
             {segments.map((seg) => {
               const distance = getSegmentDistance(
                 seg.from.naptan,
@@ -110,7 +119,7 @@ export const CorridorSegmentSelector = ({
                 seg.to.naptan,
               );
               return (
-                <div key={seg.index} className="segment-selector__distance">
+                <div key={seg.index} className={styles["segment-selector__distance"]}>
                   {distance && <span>{distance}</span>}
                   {invalid && <span>*</span>}
                 </div>
@@ -120,14 +129,14 @@ export const CorridorSegmentSelector = ({
 
           {/* Stop circles — rendered last so they layer on top via z-index */}
           <div
-            className="segment-selector__stops-wrapper"
+            className={styles["segment-selector__stops-wrapper"]}
             role="list"
             aria-label="Corridor stops"
           >
             {stops.map((stop) => (
               <div
                 key={stop.naptan}
-                className="segment-selector__stop"
+                className={styles["segment-selector__stop"]}
                 role="listitem"
                 aria-label={`Stop - ${stop.stopName} (NaPTAN code: ${stop.naptan})`}
                 title={stop.stopName}
@@ -138,8 +147,8 @@ export const CorridorSegmentSelector = ({
       </div>
 
       {containsInvalidServiceLink && (
-        <div className="segment-selector-hint">
-          <span className="segment-selector-hint__text">
+        <div className={styles["segment-selector-hint"]}>
+          <span className={styles["segment-selector-hint__text"]}>
             * Dashed line indicates speed and distance are based on
             straight-line measurement
           </span>

@@ -1,17 +1,9 @@
 @import "../../styles/govuk-module";
 
-.onTimeDisplayControlsContainer {
-  display: flex;
-  grid-template-columns: minmax(0, 60%) auto;
-  justify-content: space-between;
-  align-items: end;
-  gap: govuk-spacing(3);
-  flex-wrap: wrap;
-}
-
 .searchContainer {
-  width: 100%;
+  flex: 0 1 30%;
   min-width: 200px;
+  width: 30%;
 }
 
 .searchContainerInput {

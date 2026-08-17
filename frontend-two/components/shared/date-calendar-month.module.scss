@@ -1,0 +1,124 @@
+@import "../../styles/govuk-module";
+
+$day-width: 46px;
+
+.date-range-controls__calendar-day-names {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.date-range-controls__day-name,
+.date-range-controls__day {
+  width: $day-width;
+  height: $day-width;
+  display: inline-flex;
+  flex: 0 0 $day-width;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-family: "GDS Transport", arial, sans-serif;
+  user-select: none;
+  padding: 3px 4px;
+  box-sizing: border-box;
+}
+
+.date-range-controls__table {
+  width: 100%;
+  table-layout: fixed;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.date-range-controls__table-cell {
+  width: $day-width;
+  height: $day-width;
+  padding: 0;
+  position: relative;
+
+  &--included {
+    background-color: govuk-colour("light-grey");
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -$day-width;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: govuk-colour("light-grey");
+      z-index: 0;
+      pointer-events: none;
+    }
+  }
+
+  &--start {
+    background-color: govuk-colour("light-grey");
+    border-top-left-radius: 999em;
+    border-bottom-left-radius: 999em;
+  }
+
+  &--end {
+    background-color: govuk-colour("light-grey");
+    border-top-right-radius: 999em;
+    border-bottom-right-radius: 999em;
+  }
+}
+
+.date-range-controls__day {
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1;
+  color: $govuk-text-colour;
+
+  &:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(24, 24, 24, 0.06);
+    border-radius: 100%;
+    pointer-events: none;
+  }
+
+  &--today {
+    font-weight: 700;
+  }
+
+  &--disabled {
+    color: govuk-colour("mid-grey");
+    pointer-events: none;
+  }
+
+  &--start,
+  &--end {
+    color: govuk-colour("white");
+    border-radius: 100%;
+    background-color: $govuk-brand-colour;
+  }
+
+  &--included:not(
+      .date-range-controls__day--start,
+      .date-range-controls__day--end
+    ) {
+    background-color: govuk-colour("light-grey");
+
+    &:hover::after {
+      background-color: rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &--invisible {
+    visibility: hidden;
+  }
+
+  &--saturday::before {
+    content: "";
+    position: absolute;
+    border-left: 1px solid govuk-colour("mid-grey");
+    top: 0;
+    bottom: 0;
+    left: -1px;
+  }
+}

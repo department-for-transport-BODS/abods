@@ -1,0 +1,14 @@
+@import "../../../styles/govuk-module";
+.corridor__chart-wrapper {
+  background: govuk-colour("light-grey");
+  padding-bottom: govuk-spacing(3);
+}
+.corridor__hide-outliers {
+  display: flex;
+  flex-direction: row-reverse;
+  padding-right: govuk-spacing(3);
+  margin-top: govuk-spacing(2);
+  :global(.govuk-form-group) {
+    margin-bottom: 0;
+  }
+}

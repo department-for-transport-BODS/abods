@@ -1,0 +1,58 @@
+@import "../styles/govuk-module";
+.dashboard__controls {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  > *:last-child {
+    margin-bottom: govuk-spacing(3);
+  }
+}
+.dashboard__layout {
+  display: flex;
+  flex-direction: column;
+}
+.dashboard__performance {
+  margin-bottom: govuk-spacing(6);
+  min-width: 0;
+}
+.dashboard__vehicles-status {
+  margin-bottom: govuk-spacing(6);
+}
+.dashboard__feed-status-link {
+  @include govuk-font(19);
+  text-align: right;
+}
+@include bp($tablet) {
+  .dashboard__feeds {
+    display: flex;
+  }
+  .dashboard__vehicles-status, .dashboard__feed-alerts {
+    flex-basis: 50%;
+  }
+  .dashboard__vehicles-status {
+    margin-right: govuk-spacing(6);
+    margin-bottom: 0;
+  }
+}
+@include bp($xlg-desktop) {
+  .dashboard__layout {
+    flex-direction: row;
+  }
+  .dashboard__performance {
+    flex: 1;
+    margin-right: govuk-spacing(6);
+    margin-bottom: 0;
+  }
+  .dashboard__feeds {
+    flex-direction: column;
+    flex-basis: 383px;
+  }
+  .dashboard__vehicles-status {
+    margin-bottom: govuk-spacing(6);
+  }
+  .dashboard__vehicles-status, .dashboard__feed-alerts {
+    flex-basis: auto;
+    margin-right: 0;
+  }
+}

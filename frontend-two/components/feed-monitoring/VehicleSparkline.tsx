@@ -1,3 +1,4 @@
+import styles from "./vehicle-sparkline.module.scss";
 import { useEffect, useRef } from "react";
 import { DateTime } from "luxon";
 import { VehicleStatFragment } from "../../src/generated/graphql";
@@ -94,6 +95,7 @@ export const VehicleSparkline = ({ data }: VehicleSparklineProps) => {
     <div
       id={idRef.current}
       ref={chartRef}
+      className={styles["sparkline-wrapper"]}
       style={{ minWidth: 200, height: 40 }}
       title="Last 24 hours vehicle counts"
     />

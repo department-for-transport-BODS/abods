@@ -62,18 +62,18 @@
   margin: govuk-spacing(1);
 
   &High {
-    background-color: #28a197;
+    background-color: govuk-colour("turquoise");
   }
 
   &Med {
-    background-color: #ffdd00;
+    background-color: govuk-colour("yellow");
   }
 
   &Low {
-    background-color: #d4351c;
+    background-color: govuk-colour("red");
   }
 
   &NoData {
-    background-color: #b1b4b6;
+    background-color: govuk-colour("mid-grey");
   }
 }

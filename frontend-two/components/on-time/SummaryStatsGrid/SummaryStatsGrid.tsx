@@ -1,7 +1,9 @@
 import styles from "./summary-stats-grid.module.scss";
+import tooltipListStyles from "@/components/shared/SummaryStat/summary-stat-with-tooltip.module.scss";
 
 import { Duration } from "luxon";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
+import { clsx } from "clsx";
 
 interface SummaryStatsGridProps {
   onTimeCount: number | null;
@@ -13,6 +15,7 @@ interface SummaryStatsGridProps {
   incompleteBreakdown: string | null;
   averageDelay: number | null;
   className?: string;
+  compact?: boolean;
 }
 
 const formatDelay = (delay: number | null): string => {
@@ -80,6 +83,7 @@ export const SummaryStatsGrid = ({
   incompleteBreakdown,
   averageDelay,
   className,
+  compact = false,
 }: SummaryStatsGridProps) => {
   const summaryTotal =
     (onTimeCount ?? 0) + (lateCount ?? 0) + (earlyCount ?? 0);
@@ -136,7 +140,7 @@ export const SummaryStatsGrid = ({
       <>
         <p>{baseText}</p>
         <p>Of these, there are:</p>
-        <ul className="summary-stat__tooltip-list">
+        <ul className={tooltipListStyles.tooltipList}>
           {breakdownItems.map((item) => (
             <li key={item.key}>
               {" "}
@@ -152,9 +156,7 @@ export const SummaryStatsGrid = ({
 
   return (
     <div
-      className={["summary-stats-grid", styles.grid, className]
-        .filter(Boolean)
-        .join(" ")}
+      className={clsx(styles.grid, compact && styles.gridCompact, className)}
       role="list"
       aria-label="Summary stats"
     >

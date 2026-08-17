@@ -1,0 +1,27 @@
+@import "../styles/govuk-module";
+.stop-analysis-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.stop-analysis-page__extra-filter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: govuk-spacing(4);
+  padding: govuk-spacing(2) 0;
+}
+.stop-analysis-page__loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: govuk-spacing(2);
+  min-height: 108px;
+}
+.refineButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}

@@ -145,7 +145,7 @@ const LoginPage = () => {
               <PasswordInput<LoginSchema>
                 display="Password"
                 inputName="password"
-                widthClass="password-input__width--20"
+                widthClass="width20"
                 value={formData.password}
                 initialErrors={errors}
                 stateUpdater={updateField}

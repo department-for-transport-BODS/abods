@@ -1,6 +1,7 @@
 import styles from "./date-navigation-day-blocks.module.scss";
 
 import { DateTime } from "luxon";
+import { clsx } from "clsx";
 
 interface DateNavigationDayBlocksProps {
   dateArray: { date: DateTime }[];
@@ -14,20 +15,15 @@ export const DateNavigationDayBlocks = ({
   onDateSelected,
 }: DateNavigationDayBlocksProps) => {
   return (
-    <div className={`${styles.container} datenav__day-blocks--with-labels`}>
+    <div className={styles.container}>
       {dateArray.map((item) => {
         const isActive = selectedDate.hasSame(item.date, "day");
         const isFirstOfMonth = item.date.day === 1;
 
         return (
-          <div key={item.date.toISODate()} className="datenav__item-wrapper">
+          <div key={item.date.toISODate()} className={styles.itemWrapper}>
             <button
-              className={[
-                "datenav__item",
-                isActive ? "datenav__item--active" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className={clsx(styles.item, isActive && styles.itemActive)}
               onClick={() => onDateSelected(item.date)}
               aria-label={item.date.toFormat("d MMMM")}
             >
@@ -35,11 +31,11 @@ export const DateNavigationDayBlocks = ({
                 {item.date.toFormat("d MMMM")}
               </span>
             </button>
-            <span className="datenav__tooltip" aria-hidden="true">
+            <span className={styles.tooltip} aria-hidden="true">
               {item.date.toFormat("d MMMM")}
             </span>
             {isFirstOfMonth && (
-              <span className="datenav__month-label">
+              <span className={styles.monthLabel}>
                 {item.date.toFormat("MMM")}
               </span>
             )}

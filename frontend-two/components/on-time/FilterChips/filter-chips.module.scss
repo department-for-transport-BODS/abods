@@ -22,6 +22,8 @@
   padding: govuk-spacing(1) govuk-spacing(2);
   background: govuk-colour("white");
   border: 1px solid govuk-colour("black");
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .label {
@@ -41,6 +43,8 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 
   &:hover {
     color: $govuk-link-hover-colour;

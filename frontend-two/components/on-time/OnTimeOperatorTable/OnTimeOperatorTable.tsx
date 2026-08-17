@@ -22,23 +22,48 @@ const OperatorSparkline = dynamic(
 );
 
 const columns = [
-  { key: "nocCode", label: "NOC", sortable: false },
+  {
+    key: "nocCode",
+    label: "NOC",
+    sortable: false,
+    cellClassName: styles.nocCell,
+  },
   {
     key: "name",
     label: "Operator",
     sortable: false,
-    cellClassName: "on-time-operator-table__name-cell",
-    headerClassName: "on-time-operator-table__name-header",
+    cellClassName: styles.nameCell,
+    headerClassName: styles.nameHeader,
   },
-  { key: "averageDelay", label: "Av. delay", sortable: true },
-  { key: "onTimeRatio", label: "On-time", sortable: true },
-  { key: "lateRatio", label: "Late", sortable: true },
-  { key: "earlyRatio", label: "Early", sortable: true },
+  {
+    key: "averageDelay",
+    label: "Av. delay",
+    sortable: true,
+    alignment: "right" as const,
+  },
+  {
+    key: "onTimeRatio",
+    label: "On-time",
+    sortable: true,
+    alignment: "right" as const,
+  },
+  {
+    key: "lateRatio",
+    label: "Late",
+    sortable: true,
+    alignment: "right" as const,
+  },
+  {
+    key: "earlyRatio",
+    label: "Early",
+    sortable: true,
+    alignment: "right" as const,
+  },
   {
     key: "sparkline",
     label: "",
     sortable: false,
-    cellClassName: "on-time-operator-table__sparkline-cell",
+    cellClassName: styles.sparklineCell,
   },
 ];
 
@@ -283,24 +308,25 @@ export const OnTimeOperatorTable = ({
     );
 
   return (
-    <SortedPaginatedTable
-      columns={columns}
-      data={sortedData}
-      getRowValue={getRowValue}
-      renderRow={renderOperatorRow}
-      colWidths={{
-        nocCode: "10%",
-        name: "20%",
-        averageDelay: "12%",
-        onTimeRatio: "12%",
-        lateRatio: "12%",
-        earlyRatio: "12%",
-        sparkline: "22%",
-      }}
-      initialSortKey="name"
-      initialSortOrder="asc"
-      paginationNoun="operator"
-      onPageDataChange={setPageRows}
-    />
+    <div className={styles.container}>
+      <SortedPaginatedTable
+        columns={columns}
+        data={sortedData}
+        getRowValue={getRowValue}
+        renderRow={renderOperatorRow}
+        colWidths={{
+          nocCode: "7%",
+          averageDelay: "10%",
+          onTimeRatio: "10%",
+          lateRatio: "10%",
+          earlyRatio: "10%",
+          sparkline: "28%",
+        }}
+        initialSortKey="name"
+        initialSortOrder="asc"
+        paginationNoun="operator"
+        onPageDataChange={setPageRows}
+      />
+    </div>
   );
 };

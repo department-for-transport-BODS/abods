@@ -1,6 +1,6 @@
 @import "../../../styles/govuk-module";
 
-.button{
+.button {
   display: inline-flex;
   align-items: center;
   gap: govuk-spacing(1);
@@ -13,11 +13,19 @@
   flex-shrink: 0;
   color: $govuk-link-colour;
   margin-bottom: govuk-spacing(4);
+  text-decoration: underline;
 
-  // Win over later .button-link { text-decoration: none }
-  &.button-link,
-  &.button-link:hover,
-  &.button-link:hover:not(:focus) {
+  &:global(.button-link),
+  &:global(.govuk-link) {
+    text-decoration: underline;
+
+    &:hover,
+    &:hover:not(:focus) {
+      text-decoration: underline;
+    }
+  }
+
+  :global(.govuk-link--no-visited-state) {
     text-decoration: underline;
   }
 }

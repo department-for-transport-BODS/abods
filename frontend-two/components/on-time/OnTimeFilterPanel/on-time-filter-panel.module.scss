@@ -1,79 +1,75 @@
 @import "../../../styles/govuk-module";
 
 .filterRow {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: end;
+  column-gap: govuk-spacing(2);
+  row-gap: govuk-spacing(1);
+  margin-bottom: govuk-spacing(4);
 }
 
 .datePicker {
+  grid-column: 1;
+  grid-row: 2;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: govuk-spacing(2);
-  margin-right: govuk-spacing(2);
-  margin-bottom: govuk-spacing(2) * -1;
+  min-width: 0;
+
+  :global(.govuk-form-group) {
+    margin-bottom: 0;
+  }
+
+  :global(.govuk-label) {
+    @include govuk-visually-hidden;
+  }
+
+  :global(.govuk-select) {
+    height: 40px;
+  }
 }
 
 .refineResultsButtonContainer {
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 2;
-  margin-bottom: govuk-spacing(4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
+  min-height: 40px;
+
+  :global(button) {
+    margin-bottom: 0;
+  }
 }
 
 .toggleContainer {
+  grid-column: 3;
+  grid-row: 1 / span 2;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: govuk-spacing(1);
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  justify-self: end;
-  margin-bottom: govuk-spacing(4);
   min-width: 0;
-  overflow: hidden;
 }
 
 @media (max-width: 47.99em) {
-  .datePicker {
-    width: 100%;
+  .filterRow {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .filterRow {
+  .datePicker {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .toggleContainer {
-    overflow: hidden;
-  }
-
-  .toggleContainer .segmented-toggle,
-  .toggleContainer .segmented-toggle__controls {
     width: 100%;
-    max-width: 100%;
-  }
-
-  .toggleContainer .segmented-toggle__controls {
-    display: flex;
-  }
-
-  .toggleContainer .segmented-toggle-item {
-    flex: 1 1 0;
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .toggleContainer .segmented-toggle-item__label {
-    display: block;
-    @include govuk-font(16);
-    padding-left: govuk-spacing(1);
-    padding-right: govuk-spacing(1);
-    box-sizing: border-box;
     overflow: hidden;
-    white-space: nowrap;
   }
 }
 

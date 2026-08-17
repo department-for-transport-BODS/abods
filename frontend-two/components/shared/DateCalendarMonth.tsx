@@ -1,4 +1,6 @@
 import { DateTime } from "luxon";
+import styles from "./date-calendar-month.module.scss";
+import { clsx } from "clsx";
 
 const DAY_NAMES = ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -77,22 +79,17 @@ export const DateCalendarMonth = ({
 
   return (
     <div>
-      <div className="date-range-controls__calendar-day-names">
+      <div className={styles["date-range-controls__calendar-day-names"]}>
         {DAY_NAMES.map((name, index) => (
           <span
             key={`${name}-${index}`}
-            className={[
-              "date-range-controls__day-name",
-              index === 5 ? "date-range-controls__day--saturday" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
+            className={clsx(styles["date-range-controls__day-name"], index === 5 && styles["date-range-controls__day--saturday"])}
           >
             {name}
           </span>
         ))}
       </div>
-      <table className="date-range-controls__table">
+      <table className={styles["date-range-controls__table"]}>
         <tbody>
           {table.map((row, rowIndex) => (
             <tr key={rowIndex}>
@@ -105,35 +102,12 @@ export const DateCalendarMonth = ({
                 return (
                   <td
                     key={cellIndex}
-                    className={[
-                      "date-range-controls__table-cell",
-                      included
-                        ? "date-range-controls__table-cell--included"
-                        : "",
-                      start ? "date-range-controls__table-cell--start" : "",
-                      end ? "date-range-controls__table-cell--end" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
+                    className={clsx(styles["date-range-controls__table-cell"], included && styles["date-range-controls__table-cell--included"], start && styles["date-range-controls__table-cell--start"], end && styles["date-range-controls__table-cell--end"])}
                   >
                     {dayIsValid ? (
                       <button
                         type="button"
-                        className={[
-                          "date-range-controls__day",
-                          day.isToday ? "date-range-controls__day--today" : "",
-                          !day.isSelectable
-                            ? "date-range-controls__day--disabled"
-                            : "",
-                          included ? "date-range-controls__day--included" : "",
-                          start ? "date-range-controls__day--start" : "",
-                          end ? "date-range-controls__day--end" : "",
-                          day.isSaturday
-                            ? "date-range-controls__day--saturday"
-                            : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
+                        className={clsx(styles["date-range-controls__day"], day.isToday && styles["date-range-controls__day--today"], !day.isSelectable && styles["date-range-controls__day--disabled"], included && styles["date-range-controls__day--included"], start && styles["date-range-controls__day--start"], end && styles["date-range-controls__day--end"], day.isSaturday && styles["date-range-controls__day--saturday"])}
                         onClick={() => {
                           if (day.isSelectable) {
                             onDateChange(day.date);

@@ -1,0 +1,27 @@
+@use "sass:math";
+@import "../../../styles/govuk-module";
+
+.stat {
+  margin-bottom: govuk-spacing(4);
+}
+
+.label {
+  color: $govuk-secondary-text-colour;
+  @include govuk-font(19);
+}
+
+.value {
+  padding-top: govuk-spacing(1);
+  display: block;
+  font-size: rem(32);
+  line-height: math.div(35, 32);
+  font-weight: $govuk-font-weight-bold;
+}
+
+.valueTooltip {
+  border-bottom: 4px dotted;
+}
+
+.valueLoading {
+  border-bottom: 0;
+}

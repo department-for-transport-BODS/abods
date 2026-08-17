@@ -1,0 +1,121 @@
+@import "../../styles/govuk-module";
+.ranking-table__content {
+  position: relative;
+  width: 100%;
+  min-height: 108px;
+}
+.ranking-table__content--loading {
+  .ranking-table__data {
+    visibility: hidden;
+  }
+}
+.ranking-table__data {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  @include govuk-font(19);
+  padding: 0;
+  td {
+    padding: 0 govuk-spacing(4) govuk-spacing(2) 0;
+    vertical-align: top;
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+.ranking-table__service {
+  :global(.govuk-link) {
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+.ranking-table__col-service {
+  width: auto;
+}
+.ranking-table__col-operator {
+  width: 12.5rem;
+}
+.ranking-table__col-stat {
+  width: 6.3rem;
+}
+.ranking-table__col-trend {
+  width: 7.2rem;
+}
+.ranking-table__operator {
+  color: $govuk-text-colour;
+  :global(.unbuttoned) {
+    color: $govuk-text-colour;
+  }
+}
+.ranking-table__operator-text {
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.ranking-table__stat, .ranking-table__trend {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ranking-table__link {
+  text-decoration: none;
+}
+.ranking-table__trend {
+  text-align: right;
+}
+.ranking-table__no-data, .ranking-table__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: inherit;
+  width: 100%;
+  min-height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app-performance-ranking {
+  width: 100%;
+}
+@include bp($to-tablet) {
+  .ranking-table__data {
+    table-layout: auto;
+    td {
+      padding-right: govuk-spacing(2);
+    }
+  }
+  .ranking-table__col-service, .ranking-table__col-operator, .ranking-table__col-stat, .ranking-table__col-trend {
+    width: auto;
+  }
+  .ranking-table__service, .ranking-table__operator {
+    min-width: 0;
+  }
+}
+.tabs__list {
+  list-style: none;
+  margin: 0 0 govuk-spacing(3);
+  padding: 0;
+  display: flex;
+}
+.tabs__list-item {
+  @include govuk-font(19);
+  color: $govuk-link-colour;
+  cursor: pointer;
+  &:not(:last-child) {
+    margin-right: govuk-spacing(7);
+  }
+  &:focus {
+    outline: none;
+  }
+  &:focus-visible {
+    outline: 3px solid transparent;
+    color: $govuk-focus-text-colour;
+    background-color: $govuk-focus-colour;
+    border-bottom: 4px solid $govuk-focus-text-colour;
+    text-decoration: none;
+  }
+}
+.tabs__list-item--selected {
+  font-weight: $govuk-font-weight-bold;
+  border-bottom: $govuk-link-colour 4px solid;
+}

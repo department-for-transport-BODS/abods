@@ -29,8 +29,8 @@ describe("Modal", () => {
     expect(
       screen.getByRole("dialog", { name: "Display options" }),
     ).toBeInTheDocument();
-    expect(document.body.querySelector(".shared-modal__header")).not.toBeNull();
-    expect(document.body.querySelector(".shared-modal__logo")).not.toBeNull();
+    expect(screen.getByText("Display options")).toBeInTheDocument();
+    expect(screen.getByText("Modal content")).toBeInTheDocument();
   });
 
   it("renders dialog content and closes when dismissed", async () => {

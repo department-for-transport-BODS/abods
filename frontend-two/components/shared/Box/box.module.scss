@@ -1,0 +1,7 @@
+@import "../../../styles/govuk-module";
+
+.box {
+  background: govuk-colour("light-grey");
+  @include govuk-responsive-padding(5);
+  position: relative;
+}

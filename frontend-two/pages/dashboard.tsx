@@ -1,3 +1,4 @@
+import styles from "./dashboard.module.scss";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
@@ -140,7 +141,7 @@ const DashboardPage = () => {
         <div className="govuk-!-margin-bottom-2 govuk-!-margin-top-2">
           <h1 className="govuk-heading-xl app-page-header">Dashboard</h1>
         </div>
-        <div className="dashboard__controls">
+        <div className={styles.dashboard__controls}>
           <OperatorSelector
             operators={operators}
             selectedOperatorId={nocCode}
@@ -151,8 +152,8 @@ const DashboardPage = () => {
         {isLoading ? (
           <p className="govuk-body">Loading dashboard data...</p>
         ) : (
-          <div className="dashboard__layout">
-            <div className="dashboard__performance">
+          <div className={styles.dashboard__layout}>
+            <div className={styles.dashboard__performance}>
               <Box>
                 <h2 className="govuk-heading-m">On-time performance</h2>
                 <PerformanceWidget
@@ -162,15 +163,15 @@ const DashboardPage = () => {
                 />
               </Box>
             </div>
-            <div className="dashboard__feeds">
-              <div className="dashboard__vehicles-status">
+            <div className={styles.dashboard__feeds}>
+              <div className={styles["dashboard__vehicles-status"]}>
                 <VehiclesStatus
                   actual={currentVehicles}
                   expected={expectedVehicles}
                   nocCode={nocCode}
                 />
               </div>
-              <div className="dashboard__feed-alerts">
+              <div className={styles["dashboard__feed-alerts"]}>
                 <FeedStatusSummary operators={feedStatusOperators} />
               </div>
             </div>

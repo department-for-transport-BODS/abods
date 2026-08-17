@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./stop-analysis-filters.module.scss";
 import { useMemo, useState } from "react";
 import { DateTime } from "luxon";
 import { Period } from "@/utils/date-range";
@@ -161,18 +163,19 @@ export const StopAnalysisFilters = ({
   };
 
   return (
-    <div className="stop-analysis-filters">
-      <div className="filters stop-analysis-filters__grid govuk-!-margin-bottom-2">
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--date">
+    <div className={styles["stop-analysis-filters"]}>
+      <div className={clsx(styles["stop-analysis-filters__grid"], "govuk-!-margin-bottom-2")}>
+        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--date"])}>
           <label className="govuk-label">Date Range</label>
-          <div className="stop-analysis-filters__date-range">
+          <div className={styles["stop-analysis-filters__date-range"]}>
             <DateRangeSelect
               value={{ from: fromTimestamp, to: toTimestamp }}
               onChange={({ from, to }) => onDateRangeChange(from, to)}
               hideLabel
+              fullWidth
             />
             <select
-              className="govuk-select stop-analysis-filters__preset-select"
+              className={clsx("govuk-select", styles["stop-analysis-filters__preset-select"])}
               value={activePreset}
               onChange={(event) =>
                 handlePresetChange(event.target.value as Period)
@@ -191,10 +194,11 @@ export const StopAnalysisFilters = ({
           </div>
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--admin">
+        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--admin"])}>
           <MultiselectCheckbox
             id="stop-analysis-admin-areas"
             label="Admin Areas"
+            showAllLabel="All Areas"
             options={adminAreaOptions}
             selectedValues={adminAreaIds}
             onChange={onAdminAreasChange}
@@ -202,12 +206,12 @@ export const StopAnalysisFilters = ({
           />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--toggles stop-analysis-filters__toggles">
+        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--toggles"], styles["stop-analysis-filters__toggles"])}>
           <MatchTypeToggle matchType={matchType} onChange={onMatchTypeChange} />
           <StopTypeToggle stopType={stopType} onChange={onStopTypeChange} />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--location">
+        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--location"])}>
           <LocationLookupField
             id="sa-location-search"
             label="Location name or postcode"
@@ -224,10 +228,11 @@ export const StopAnalysisFilters = ({
           />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--operators">
+        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--operators"])}>
           <MultiselectCheckbox
             id="stop-analysis-operators"
             label="Operators"
+            showAllLabel="All Operators"
             options={operatorOptions}
             selectedValues={operatorIds}
             onChange={onOperatorsChange}
@@ -235,10 +240,11 @@ export const StopAnalysisFilters = ({
           />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--services">
+        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--services"])}>
           <MultiselectCheckbox
             id="stop-analysis-services"
             label="Services"
+            showAllLabel="All Services"
             options={lineOptions}
             selectedValues={lineIds}
             onChange={onLinesChange}

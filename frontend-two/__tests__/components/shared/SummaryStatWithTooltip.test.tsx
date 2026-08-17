@@ -9,4 +9,18 @@ describe("SummaryStatWithTooltip", () => {
     expect(screen.getByText("Unavailable")).toBeInTheDocument();
     expect(screen.queryByText("-")).not.toBeInTheDocument();
   });
+
+  it("renders tooltip-backed values as a button trigger", () => {
+    render(
+      <SummaryStatWithTooltip
+        title="On-time"
+        value="92.00%"
+        tooltip="On-time stop departures"
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "92.00%" }),
+    ).toBeInTheDocument();
+  });
 });

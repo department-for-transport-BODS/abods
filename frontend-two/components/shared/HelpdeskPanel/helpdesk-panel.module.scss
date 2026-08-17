@@ -1,0 +1,105 @@
+@import "../../../styles/govuk-module";
+
+.overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: calc(#{$z-modal} - 1);
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  visibility: hidden;
+  transition: background-color 0.15s;
+}
+
+.overlayOpen {
+  visibility: visible;
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  visibility: hidden;
+  height: 100%;
+  border: none;
+  padding: govuk-spacing(4);
+  background: govuk-colour("white");
+  z-index: $z-modal;
+  transform: translateX(100%);
+  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: scroll;
+}
+
+.panelOpen {
+  width: 100%;
+  visibility: visible;
+  transform: translateX(0%);
+}
+
+.heading {
+  display: flex;
+  justify-content: space-between;
+}
+
+.closeButton {
+  height: govuk-spacing(7);
+}
+
+@include bp($tablet) {
+  .panel {
+    padding: govuk-spacing(6);
+    width: 750px;
+  }
+}
+
+:global(body.helpdesk-open) {
+  overflow: hidden;
+}
+
+:global(.govuk-accordion__section-content) {
+  p {
+    margin-top: 0;
+    margin-bottom: govuk-spacing(4);
+  }
+
+  ul,
+  ol {
+    margin-top: 0;
+    margin-bottom: govuk-spacing(4);
+    margin-left: govuk-spacing(4);
+    padding-left: govuk-spacing(4);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  li {
+    margin-bottom: govuk-spacing(1);
+
+    > ul,
+    > ol {
+      margin-top: govuk-spacing(1);
+    }
+  }
+
+  img {
+    margin-bottom: govuk-spacing(2);
+  }
+
+  a {
+    @include govuk-link-common;
+    @include govuk-link-style-default;
+  }
+}

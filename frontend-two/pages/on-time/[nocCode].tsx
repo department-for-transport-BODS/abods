@@ -629,7 +629,7 @@ const OnTimeOperatorPage = () => {
                   />
                 </div>
                 <OnTimeDisplayControls
-                  className={`${styles.onTimeDisplayControlsContainer} govuk-body govuk-!-margin-top-6`}
+                  className="govuk-body"
                   groupInputs
                   beforeDirections={
                     <div className={styles.searchContainer}>

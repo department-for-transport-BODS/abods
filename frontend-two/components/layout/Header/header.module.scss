@@ -1,0 +1,103 @@
+@import "../../../styles/govuk-module";
+
+.header {
+  // Keep legacy ABODS look even if library-internal CSS does not load.
+  background-color: $govuk-brand-colour;
+  color: govuk-colour("white");
+  border-bottom: 10px solid $govuk-brand-colour;
+}
+
+.headerShell {
+  position: relative;
+}
+
+.logo {
+  width: auto;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  @include govuk-clearfix();
+
+  &:after {
+    display: none;
+  }
+}
+
+.helpIcon {
+  color: govuk-colour("white");
+  width: 24px;
+  height: 24px;
+  margin-right: govuk-spacing(1);
+  vertical-align: text-bottom;
+}
+
+.helpLink {
+  @include govuk-font(19);
+  color: govuk-colour("white") !important;
+  margin-bottom: govuk-spacing(2);
+  display: inline-flex;
+  align-items: center;
+
+  @include bp($to-desktop) {
+    display: none;
+  }
+
+  &:link,
+  &:visited,
+  &:hover {
+    color: govuk-colour("white") !important;
+  }
+
+  &:focus {
+    .helpIcon {
+      color: govuk-colour("black");
+    }
+  }
+}
+
+.helpOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+  max-width: $max-width;
+  margin-right: $window-padding-small-screen;
+  margin-left: $window-padding-small-screen;
+
+  .helpLink {
+    pointer-events: auto;
+  }
+}
+
+@include bp($tablet) {
+  .helpOverlay {
+    margin-right: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+    );
+    margin-left: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+    );
+  }
+}
+
+@include bp($desktop) {
+  .helpOverlay {
+    margin-right: $window-padding-large-screen;
+    margin-left: $window-padding-large-screen;
+  }
+}
+
+@include bp($max-desktop) {
+  .helpOverlay {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}

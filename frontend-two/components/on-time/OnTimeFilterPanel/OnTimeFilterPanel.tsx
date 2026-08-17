@@ -134,7 +134,7 @@ export const OnTimeFilterPanel = ({
           />
           <Select
             name="date-preset"
-            label=""
+            label="Date preset"
             items={datePresetItems.map((preset) => ({
               value: preset,
               text: preset,
@@ -155,18 +155,22 @@ export const OnTimeFilterPanel = ({
         </div>
         <div className={styles.toggleContainer}>
           <SegmentedToggle
-            legend=""
+            legend="Match type"
+            hideLegend
             name="match-type-toggle"
             value={selectedMatchType}
             onChange={onMatchTypeChange}
             options={matchTypeOptions}
+            className="fullWidth"
           />
           <SegmentedToggle
-            legend=""
+            legend="Stop type"
+            hideLegend
             name="stop-type-toggle"
             value={selectedStopType}
             onChange={onStopTypeChange}
             options={stopTypeOptions}
+            className="fullWidth"
           />
         </div>
       </div>

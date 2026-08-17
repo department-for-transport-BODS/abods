@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./otp-threshold-modal.module.scss";
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/shared/Modal";
 import {
@@ -168,7 +170,7 @@ export const OtpThresholdModal = ({
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button
           type="button"
-          className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0 otp-threshold-modal__close-button"
+          className={clsx("govuk-button", "govuk-button--secondary", "govuk-!-margin-bottom-0", styles["otp-threshold-modal__close-button"])}
           onClick={onClose}
         >
           Close

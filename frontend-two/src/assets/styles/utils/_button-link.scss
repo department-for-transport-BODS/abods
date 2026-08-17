@@ -12,15 +12,27 @@
   border: 0;
   position: relative;
   box-sizing: border-box;
-  &:focus {
-    outline: 0;
-    color: govuk-colour("black");
-    background-color: govuk-colour("yellow");
-    box-shadow: 0 4px govuk-colour("black");
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
+
   &:hover:not(:focus) {
     text-decoration: underline;
   }
+
+  &:focus {
+    outline: $govuk-focus-width solid transparent;
+    color: $govuk-focus-text-colour;
+    background-color: $govuk-focus-colour;
+    box-shadow:
+      0 -2px $govuk-focus-colour,
+      0 4px $govuk-focus-text-colour;
+    text-decoration: none;
+  }
+
   &--disabled {
     color: $govuk-secondary-text-colour;
     text-decoration: none;

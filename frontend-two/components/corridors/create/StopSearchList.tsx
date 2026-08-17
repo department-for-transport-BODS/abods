@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./corridor-stop-list.module.scss";
 import { useMemo, useState } from "react";
 import { CorridorStop } from "@/types/corridors";
 
@@ -30,15 +32,19 @@ export const StopSearchList = ({
       {stops.map((stop, index) => (
         <div
           key={`${stop.stopId}-${index}`}
-          className="corridor-stop-list__stop corridor-stop-list__stop--matching"
+          className={clsx(styles["corridor-stop-list__stop"], styles["corridor-stop-list__stop--matching"])}
         >
           <div
-            className={`${!showGraphic ? "corridor-stop-list__stop-details--no-graphic" : "corridor-stop-list__stop-details "}`}
+            className={
+              showGraphic
+                ? styles["corridor-stop-list__stop-details"]
+                : styles["corridor-stop-list__stop-details--no-graphic"]
+            }
           >
-            <div className="corridor-stop-list__stop-label">
+            <div className={styles["corridor-stop-list__stop-label"]}>
               {stop.stopName}
             </div>
-            <div className="corridor-stop-list__naptan">
+            <div className={styles["corridor-stop-list__naptan"]}>
               {stop.localityName ? `${stop.localityName} ` : ""}
               {stop.naptan}
             </div>

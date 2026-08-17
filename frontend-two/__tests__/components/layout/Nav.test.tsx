@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Nav } from "@/components/layout/Nav";
+import styles from "@/components/layout/Nav/nav.module.scss";
 
 let mockAsPath = "/corridors";
 
@@ -44,7 +45,7 @@ describe("Nav", () => {
     render(<Nav />);
 
     expect(screen.getByRole("link", { name: "Corridors" })).toHaveClass(
-      "nav__link--current",
+      styles.linkCurrent,
     );
   });
 
@@ -54,7 +55,7 @@ describe("Nav", () => {
     render(<Nav />);
 
     expect(screen.getByRole("link", { name: "Corridors" })).toHaveClass(
-      "nav__link--current",
+      styles.linkCurrent,
     );
   });
 });

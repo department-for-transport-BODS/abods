@@ -1,0 +1,76 @@
+@import "../../../styles/govuk-module";
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.body {
+  display: flex;
+  flex-grow: 1;
+  align-items: stretch;
+  position: relative;
+  max-width: $max-width;
+  margin-right: $window-padding-small-screen;
+  margin-left: $window-padding-small-screen;
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: govuk-colour("white");
+  // Window margins already inset the page on small screens; avoid stacking
+  // another 40px of side padding (Angular uses govuk-main-wrapper instead).
+  padding-right: 0;
+  padding-bottom: govuk-spacing(7);
+  padding-left: 0;
+}
+
+.contentNarrow {
+  max-width: 960px;
+  margin: 0 auto;
+  padding-right: govuk-spacing(7);
+  padding-left: govuk-spacing(7);
+}
+
+.contentPage {
+  padding: 0;
+}
+
+@include bp($tablet) {
+  .body {
+    margin-right: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-right))
+    );
+    margin-left: max(
+      #{$window-padding-large-screen},
+      calc(#{$window-padding-small-screen} + env(safe-area-inset-left))
+    );
+  }
+
+  .content {
+    padding-left: govuk-spacing(0);
+    padding-right: govuk-spacing(0);
+  }
+
+  .contentPage {
+    padding: 0;
+  }
+}
+
+@include bp($desktop) {
+  .body {
+    margin-right: $window-padding-large-screen;
+    margin-left: $window-padding-large-screen;
+  }
+}
+
+@include bp($max-desktop) {
+  .body {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}

@@ -2,11 +2,10 @@
 
 .container {
   display: flex;
-  grid-template-columns: minmax(0, 60%) auto;
-  justify-content: space-between;
-  align-items: end;
+  align-items: flex-end;
   gap: govuk-spacing(3);
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .displayOptionsContainer {
@@ -15,8 +14,9 @@
   align-items: center;
   gap: govuk-spacing(3);
   flex-wrap: wrap;
-  align-self: start;
-  margin-top: 31px;
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-left: auto;
 }
 
 .displayOptionsButton {
@@ -32,7 +32,20 @@
 }
 
 .directionsContainer {
-  max-width: 80%;
+  flex: 1 1 auto;
+  min-width: 200px;
+  width: auto;
+  max-width: none;
+
+  :global(.govuk-form-group) {
+    width: 100%;
+    margin-bottom: 0;
+  }
+}
+
+.directionsContainerCompact {
+  flex: 0 1 37.5%;
+  max-width: 37.5%;
 }
 
 .radiosContainer {
@@ -45,28 +58,19 @@
 }
 
 .inputsContainer {
-  display: grid;
-  grid-template-columns: minmax(200px, 1fr) minmax(200px, 2fr);
-  align-items: baseline;
-  gap: govuk-spacing(2);
+  display: flex;
+  flex: 1 1 auto;
   min-width: 0;
-}
+  align-items: flex-end;
+  gap: govuk-spacing(4);
 
-.govuk-form-group,
-.directionsContainer{
-  width: 100%;
+  :global(.govuk-form-group) {
+    margin-bottom: 0;
+  }
 }
 
 @media (max-width: 900px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-
   .inputsContainer {
-    grid-template-columns: 1fr;
-  }
-
-  .displayOptionsContainer {
-    margin-top: 0;
+    flex: 1 1 100%;
   }
 }

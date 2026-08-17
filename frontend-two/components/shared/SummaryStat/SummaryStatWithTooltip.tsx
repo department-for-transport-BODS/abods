@@ -1,4 +1,6 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
+import { Tooltip } from "@/components/shared/Tooltip";
+import styles from "./summary-stat-with-tooltip.module.scss";
 
 interface SummaryStatWithTooltipProps {
   title: string;
@@ -11,7 +13,6 @@ export const SummaryStatWithTooltip = ({
   value,
   tooltip,
 }: SummaryStatWithTooltipProps) => {
-  const [visible, setVisible] = useState(false);
   const displayValue = value === "-" ? "Unavailable" : value;
 
   return (
@@ -24,24 +25,9 @@ export const SummaryStatWithTooltip = ({
       </span>
       {tooltip ? (
         <div className="font-bold govuk-!-font-size-36">
-          <div
-            className="summary-stat"
-            style={{ position: "relative", display: "inline-block" }}
-            onMouseEnter={() => setVisible(true)}
-            onMouseLeave={() => setVisible(false)}
-          >
-            <span
-              style={{ borderBottom: "4px dotted #000000", cursor: "help" }}
-            >
-              {displayValue}
-            </span>
-            {visible && (
-              <div className="govuk-body tooltip">
-                {tooltip}
-                <span className="triangle" />
-              </div>
-            )}
-          </div>
+          <Tooltip message={tooltip}>
+            <span className={styles.value}>{displayValue}</span>
+          </Tooltip>
         </div>
       ) : (
         <div className="font-bold govuk-!-font-size-36">{displayValue}</div>

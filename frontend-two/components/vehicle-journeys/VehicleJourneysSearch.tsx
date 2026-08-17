@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./vehicle-journeys-search.module.scss";
 import Link from "next/link";
 import { NextRouter } from "next/router";
 import { Interval } from "luxon";
@@ -103,7 +105,7 @@ export const VehicleJourneysSearch = ({
   return (
     <>
       <h1 className="govuk-heading-xl">Vehicle journeys</h1>
-      <div className="vehicle-journeys-search__controls">
+      <div className={styles["vehicle-journeys-search__controls"]}>
         <DateSelect
           label="Date"
           inputId="vehicle-journeys-date"
@@ -118,7 +120,7 @@ export const VehicleJourneysSearch = ({
           }}
         />
 
-        <div className="vehicle-journeys-search__operator">
+        <div className={styles["vehicle-journeys-search__operator"]}>
           <MultiselectCheckbox
             id="vehicle-journeys-operator"
             label="Operator"
@@ -136,7 +138,7 @@ export const VehicleJourneysSearch = ({
           />
         </div>
 
-        <div className="vehicle-journeys-search__service">
+        <div className={styles["vehicle-journeys-search__service"]}>
           <MultiselectCheckbox
             id="vehicle-journeys-service"
             label="Service name"
@@ -154,7 +156,7 @@ export const VehicleJourneysSearch = ({
 
       {selectedServiceId && !dateError ? (
         <nav
-          className="govuk-pagination journey-search-nav"
+          className={clsx("govuk-pagination", styles["journey-search-nav"])}
           role="navigation"
           aria-label="results"
         >
@@ -170,7 +172,7 @@ export const VehicleJourneysSearch = ({
               </button>
             ) : null}
           </div>
-          <span className="journey-search-nav__date">
+          <span className={styles["journey-search-nav__date"]}>
             {formatDate(selectedDate)}
           </span>
           <div className="govuk-pagination__next">
@@ -189,15 +191,21 @@ export const VehicleJourneysSearch = ({
       ) : null}
 
       {journeysLoading && !dateError ? (
-        <div className="vehicle-journeys-search__loading" aria-live="polite">
+        <div
+          className={styles["vehicle-journeys-search__loading"]}
+          aria-live="polite"
+        >
           <Spinner size="small" />
           <span className="govuk-visually-hidden">Loading journeys</span>
           <div
-            className="journey-search-grid journey-search-grid--skeleton"
+            className={clsx(styles["journey-search-grid"], styles["journey-search-grid--skeleton"])}
             aria-hidden="true"
           >
             {Array.from({ length: 12 }).map((_, index) => (
-              <div key={index} className="journey-search-grid__skeleton-item" />
+              <div
+                key={index}
+                className={styles["journey-search-grid__skeleton-item"]}
+              />
             ))}
           </div>
         </div>
@@ -209,13 +217,13 @@ export const VehicleJourneysSearch = ({
               <h2 className="govuk-heading-m govuk-!-margin-top-6">
                 {pattern[0].serviceNumber}: {pattern[0].serviceName}
               </h2>
-              <div className="journey-search-grid">
+              <div className={styles["journey-search-grid"]}>
                 {pattern.map((journey) => (
                   <div
                     key={`${journey.groupId}-${journey.directionRef ?? ""}-${journey.startTime}`}
                   >
                     <Link
-                      className="govuk-link govuk-body journey-search-grid__time"
+                      className={clsx("govuk-link", "govuk-body", styles["journey-search-grid__time"])}
                       href={{
                         pathname: "/vehicle-journeys/[journeyId]",
                         query: {
@@ -247,11 +255,11 @@ export const VehicleJourneysSearch = ({
 
       {journeysErrored ? (
         <div
-          className="govuk-body govuk-!-margin-top-8 vehicle-journeys-search__error"
+          className={clsx("govuk-body", "govuk-!-margin-top-8", styles["vehicle-journeys-search__error"])}
           role="alert"
         >
           <ExclamationInCircleIcon
-            className="vehicle-journeys-search__error-icon"
+            className={styles["vehicle-journeys-search__error-icon"]}
             aria-hidden="true"
             focusable="false"
           />

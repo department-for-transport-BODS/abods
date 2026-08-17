@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./vehicle-journey-map.module.scss";
 import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { DateTime } from "luxon";
@@ -479,34 +481,34 @@ const addJourneyLayers = (
 };
 
 const OtpLegend = () => (
-  <div className="otp-legend govuk-!-margin-top-4">
-    <div className="otp-legend__item">
-      <span className="otp-legend__icon otp-legend__icon--on-time" />
-      <span className="otp-legend__value">
+  <div className={clsx(styles["otp-legend"], "govuk-!-margin-top-4")}>
+    <div className={styles["otp-legend__item"]}>
+      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--on-time"])} />
+      <span className={styles["otp-legend__value"]}>
         <strong>On-time</strong>
       </span>
     </div>
-    <div className="otp-legend__item">
-      <span className="otp-legend__icon otp-legend__icon--late" />
-      <span className="otp-legend__value">
+    <div className={styles["otp-legend__item"]}>
+      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--late"])} />
+      <span className={styles["otp-legend__value"]}>
         <strong>Late</strong>
       </span>
-      <span className="otp-legend__value otp-legend__value--muted">
+      <span className={clsx(styles["otp-legend__value"], styles["otp-legend__value--muted"])}>
         (&gt; 5:59 minutes)
       </span>
     </div>
-    <div className="otp-legend__item">
-      <span className="otp-legend__icon otp-legend__icon--early" />
-      <span className="otp-legend__value">
+    <div className={styles["otp-legend__item"]}>
+      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--early"])} />
+      <span className={styles["otp-legend__value"]}>
         <strong>Early</strong>
       </span>
-      <span className="otp-legend__value otp-legend__value--muted">
+      <span className={clsx(styles["otp-legend__value"], styles["otp-legend__value--muted"])}>
         (&gt; 1 minute)
       </span>
     </div>
-    <div className="otp-legend__item">
-      <span className="otp-legend__icon otp-legend__icon--scheduled-route" />
-      <span className="otp-legend__value">
+    <div className={styles["otp-legend__item"]}>
+      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--scheduled-route"])} />
+      <span className={styles["otp-legend__value"]}>
         <strong>Scheduled Route</strong>
       </span>
     </div>
@@ -773,13 +775,13 @@ export const VehicleJourneyMap = ({
     stops.length > 0 || avls.length > 0 || (scheduledRoute?.length ?? 0) > 0;
 
   return (
-    <div className="vehicle-journeys__map-wrapper">
+    <div className={styles["vehicle-journeys__map-wrapper"]}>
       {loading ? (
-        <div className="vehicle-journeys__map-loading">
+        <div className={styles["vehicle-journeys__map-loading"]}>
           <Spinner size="small" />
         </div>
       ) : null}
-      <div className="vehicle-journeys__map-controls">
+      <div className={styles["vehicle-journeys__map-controls"]}>
         <MapDisplayOptions
           activeStyle={activeStyle}
           mapboxSatelliteStyle={config?.mapboxSatelliteStyle}
@@ -790,7 +792,7 @@ export const VehicleJourneyMap = ({
       </div>
       <div
         ref={mapContainerRef}
-        className="vehicle-journeys__map"
+        className={styles["vehicle-journeys__map"]}
         aria-label="Journey map"
       />
       {recentrePortal &&
@@ -798,16 +800,16 @@ export const VehicleJourneyMap = ({
         createPortal(
           <button
             type="button"
-            className="vehicle-journeys__map-recentre"
+            className={styles["vehicle-journeys__map-recentre"]}
             onClick={recentre}
           >
-            <ReCentreIcon className="vehicle-journeys__map-recentre-icon" />
+            <ReCentreIcon className={styles["vehicle-journeys__map-recentre-icon"]} />
             Re-centre
           </button>,
           recentrePortal,
         )}
       {!hasMapData && !loading ? (
-        <p className="govuk-body vehicle-journeys__map-empty">
+        <p className={clsx("govuk-body", styles["vehicle-journeys__map-empty"])}>
           No map data available
         </p>
       ) : null}

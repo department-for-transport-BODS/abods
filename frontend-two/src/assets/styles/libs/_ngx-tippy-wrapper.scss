@@ -29,6 +29,8 @@ $tooltip-arrow-offset: $tooltip-arrow-size;
   .tippy-content {
     max-width: rem(260);
     padding: govuk-spacing(2);
+    text-align: left;
+    white-space: normal;
 
     p {
       margin: 0 0 govuk-spacing(2);

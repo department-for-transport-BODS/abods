@@ -1,0 +1,144 @@
+@import "../../styles/govuk-module";
+.sortable-table :global(.govuk-table__header) {
+  font-weight: $govuk-font-weight-bold;
+  min-width: 0;
+  overflow: hidden;
+}
+.sortable-table--fixed {
+  table-layout: fixed;
+  width: 100%;
+
+  :global(.govuk-table__cell),
+  :global(.govuk-table__header) {
+    overflow: hidden;
+    vertical-align: middle;
+    box-sizing: border-box;
+  }
+}
+.sortable-table__clip {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.sortable-table .sortable-header {
+  display: flex;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding-right: govuk-spacing(4);
+  font-size: 17px;
+  font-weight: $govuk-font-weight-bold;
+  text-decoration: none;
+  cursor: pointer;
+  color: $govuk-link-colour;
+  text-align: left;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+.sortable-table .sortable-header__label {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  column-gap: 0.25em;
+  min-width: 0;
+  max-width: 100%;
+  font-weight: $govuk-font-weight-bold;
+}
+.sortable-table .sortable-header__label-word {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.sortable-table .sortable-header:hover {
+  color: $govuk-link-hover-colour;
+}
+.sortable-table__footer-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: govuk-spacing(3);
+  margin-top: govuk-spacing(3);
+  margin-bottom: govuk-spacing(3);
+}
+.sortable-table__footer-row > :last-child {
+  margin-left: auto;
+}
+.sortable-table__footer-row--empty {
+  justify-content: flex-start;
+}
+.sortable-table__footer-row--empty > :last-child {
+  margin-left: 0;
+}
+@media (max-width: 640px) {
+  .sortable-table__footer-row {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+  .sortable-table__footer-row > :last-child {
+    margin-left: 0;
+  }
+  .paging-panel, .paging-panel > nav {
+    flex-wrap: wrap;
+  }
+  .paging-panel {
+    justify-content: flex-start;
+  }
+}
+.sortable-table__align--right {
+  justify-content: flex-end;
+  width: 100%;
+  text-align: right;
+
+  .sortable-header__label {
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+.sortable-table__align--center {
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+.sortable-table .sortable-header.sortable-table__align--left {
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+}
+.sortable-table-sort-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: $govuk-link-colour;
+  line-height: 1;
+  vertical-align: middle;
+  min-height: 16px;
+}
+.sortable-table-sort-icon--asc::before {
+  content: "\25b2";
+  font-size: 14px;
+}
+.sortable-table-sort-icon--desc::before {
+  content: "\25bc";
+  font-size: 14px;
+}
+.sortable-table-sort-icon--none {
+  color: govuk-colour("mid-grey");
+  font-size: 8px;
+  &::before {
+    content: "\25b2\a\25bc";
+    white-space: pre;
+    display: block;
+    text-align: center;
+    line-height: 1;
+  }
+}

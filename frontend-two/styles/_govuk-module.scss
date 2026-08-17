@@ -2,3 +2,17 @@
 @import "govuk-frontend/dist/govuk/helpers/index";
 @import "govuk-frontend/dist/govuk/helpers/_colour.scss";
 @import "govuk-frontend/dist/govuk/settings/index";
+
+$rem-base: 16;
+
+@import "src/assets/styles/settings/layout";
+@import "src/assets/styles/settings/breakpoints";
+@import "src/assets/styles/settings/colours";
+@import "src/assets/styles/settings/spacing";
+@import "src/assets/styles/settings/typography";
+@import "src/assets/styles/settings/z-index";
+@import "src/assets/styles/settings/animations";
+@import "src/assets/styles/helpers/bp";
+@import "src/assets/styles/helpers/raas-colour";
+@import "src/assets/styles/helpers/strip-unit";
+@import "src/assets/styles/helpers/rem";

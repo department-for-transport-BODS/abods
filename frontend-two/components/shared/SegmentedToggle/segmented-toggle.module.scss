@@ -1,0 +1,79 @@
+@import "../../../styles/govuk-module";
+
+.segmentedToggle {
+  padding: 0;
+  margin: 0;
+  border: 0 none;
+}
+
+.controls {
+  border: 2px solid govuk-colour("black");
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-width: 140px;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.label {
+  @include govuk-font(19);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  background-color: govuk-colour("light-grey");
+  cursor: pointer;
+  width: 100%;
+}
+
+.item {
+  .input:checked + .label {
+    color: govuk-colour("white");
+    background-color: govuk-colour("blue");
+    font-weight: $govuk-font-weight-bold;
+    pointer-events: none;
+  }
+
+  .input:focus-visible + .label {
+    outline: 0;
+    background-color: govuk-colour("yellow");
+    color: govuk-colour("black");
+  }
+}
+
+@media (max-width: 47.99em) {
+  .fullWidth {
+    width: 100%;
+    max-width: 100%;
+
+    .controls {
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+    }
+
+    .item {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .label {
+      display: block;
+      @include govuk-font(16);
+      padding-left: govuk-spacing(1);
+      padding-right: govuk-spacing(1);
+      box-sizing: border-box;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  }
+}

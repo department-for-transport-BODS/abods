@@ -1,21 +1,35 @@
 @import "../../../styles/govuk-module";
 
-// TODO: check where this is used
+.container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  .sortable-table {
+    width: 100%;
+  }
+}
+
+.nocCell {
+  white-space: nowrap;
+}
+
 .nameCell {
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   word-break: break-word;
 
   .govuk-link {
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     word-break: break-word;
   }
 }
 
 .nameHeader .sortable-header__label {
   white-space: normal;
-  overflow-wrap: anywhere;
 }
 
 .sparklineCell {

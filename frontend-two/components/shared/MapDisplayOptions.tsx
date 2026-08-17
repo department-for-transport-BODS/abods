@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
+import { clsx } from "clsx";
+import styles from "./map-display-options.module.scss";
 
 type MapStyle = "default" | "satellite";
 
@@ -60,10 +62,10 @@ export const MapDisplayOptions = ({
   }
 
   return (
-    <div ref={optionsRef} className="map-display-options">
+    <div ref={optionsRef} className={styles.root}>
       <button
         type="button"
-        className={`govuk-button govuk-button--secondary govuk-!-margin-bottom-0 map-display-options__summary${showDisplayOptions ? " map-display-options__summary--open" : ""}`}
+        className={clsx("govuk-button", "govuk-button--secondary", "govuk-!-margin-bottom-0", styles.summary, showDisplayOptions && styles.summaryOpen)}
         aria-haspopup="true"
         aria-expanded={showDisplayOptions}
         aria-controls={panelId}
@@ -73,7 +75,7 @@ export const MapDisplayOptions = ({
       </button>
       <div
         id={panelId}
-        className={`map-display-options__panel${showDisplayOptions ? " map-display-options__panel--open" : ""}`}
+        className={clsx(styles.panel, showDisplayOptions && styles.panelOpen)}
         role="group"
         aria-label="Map view"
         aria-hidden={!showDisplayOptions}

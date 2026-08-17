@@ -1,0 +1,48 @@
+@import "../../../styles/govuk-module";
+
+.change {
+  @include govuk-font(19);
+  display: inline-flex;
+  align-items: center;
+
+  &::after {
+    content: "";
+    margin-left: govuk-spacing(1);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+  }
+}
+
+.increase {
+  color: govuk-colour("green");
+
+  .value {
+    background-color: raas-colour("change", "up");
+  }
+
+  &::after {
+    border-bottom: 11px solid govuk-colour("dark-grey");
+  }
+}
+
+.decrease {
+  color: govuk-colour("red");
+
+  .value {
+    background-color: raas-colour("change", "down");
+  }
+
+  &::after {
+    border-top: 11px solid govuk-colour("dark-grey");
+  }
+}
+
+.small {
+  @include govuk-font(16);
+}
+
+.value {
+  display: inline;
+}

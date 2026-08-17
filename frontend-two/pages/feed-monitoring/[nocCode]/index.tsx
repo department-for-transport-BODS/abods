@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "@/components/feed-monitoring/live-vehicle-stats.module.scss";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -67,7 +69,7 @@ const LiveStatusPage = () => {
     return (
       <BaseLayout
         title="Live status - Analyse Bus Open Data"
-        mainClassName="app__content--page"
+        mainClassName="contentPage"
       >
         <p className="govuk-body">Loading...</p>
       </BaseLayout>
@@ -77,7 +79,7 @@ const LiveStatusPage = () => {
   return (
     <BaseLayout
       title="Live status - Analyse Bus Open Data"
-      mainClassName="app__content--page"
+      mainClassName="contentPage"
       backLink={
         <Link
           href="/feed-monitoring"
@@ -189,8 +191,8 @@ const LiveStatusPage = () => {
       )}
       <div className="mt-8">
         <Box>
-          <div className="live-vehicle-stats__container">
-            <div className="live-vehicle-stats__item">
+          <div className={styles["live-vehicle-stats__container"]}>
+            <div className={styles["live-vehicle-stats__item"]}>
               <LiveVehicleStats
                 data={operator?.feedMonitoring?.liveStats?.last24Hours ?? []}
                 granularity="hour"
@@ -202,7 +204,7 @@ const LiveStatusPage = () => {
                 xAxisMax={new Date()}
               />
             </div>
-            <div className="live-vehicle-stats__item mt-8">
+            <div className={clsx(styles["live-vehicle-stats__item"], "mt-8")}>
               <LiveVehicleStats
                 data={operator?.feedMonitoring?.liveStats?.last20Minutes ?? []}
                 granularity="minute"

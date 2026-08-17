@@ -31,7 +31,7 @@ export const MultiselectCheckbox = ({
   onChange,
   onShowAll,
   showAll = true,
-  showAllLabel = "All",
+  showAllLabel,
   placeholder,
   disabled = false,
   allowMultiselect = true,
@@ -136,6 +136,7 @@ export const MultiselectCheckbox = ({
 
   const showSelectionSummary = isOpen && hasSelection;
   const inputValue = isOpen ? searchText : displayText;
+  const allSectionLabel = showAllLabel ?? `All ${label}`;
 
   return (
     <div
@@ -234,7 +235,7 @@ export const MultiselectCheckbox = ({
           {showAll ? (
             <div className={styles.header}>
               <strong className={styles.headerLabel}>
-                {showAllLabel}
+                {allSectionLabel}
               </strong>
 
               <button

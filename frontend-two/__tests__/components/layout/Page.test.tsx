@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import Link from "next/link";
 import { Page } from "@/components/layout/Page";
+import styles from "@/components/layout/Page/page.module.scss";
 
 describe("Page", () => {
   it("renders the back link before the padded page content", () => {
@@ -13,9 +14,9 @@ describe("Page", () => {
     const backLink = screen.getByRole("link", { name: "All operators" });
     const pageContent = screen.getByRole("main");
 
-    expect(pageContent.parentElement).toHaveClass("page");
-    expect(backLink.parentElement).toHaveClass("page__back-link");
-    expect(pageContent).toHaveClass("govuk-main-wrapper", "page__main-wrapper");
+    expect(pageContent.parentElement).toHaveClass(styles.page);
+    expect(backLink.parentElement).toHaveClass(styles.backLink);
+    expect(pageContent).toHaveClass("govuk-main-wrapper", styles.mainWrapper);
     expect(pageContent).toHaveAttribute("id", "content");
     expect(backLink.parentElement?.compareDocumentPosition(pageContent)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
@@ -31,11 +32,11 @@ describe("Page", () => {
       </Page>,
     );
 
-    expect(document.querySelector(".page__back-link")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
     const pageContent = screen.getByRole("main");
 
-    expect(pageContent.parentElement).toHaveClass("page");
-    expect(pageContent).toHaveClass("govuk-main-wrapper", "page__main-wrapper");
+    expect(pageContent.parentElement).toHaveClass(styles.page);
+    expect(pageContent).toHaveClass("govuk-main-wrapper", styles.mainWrapper);
     expect(pageContent).toHaveAttribute("id", "content");
   });
 });

@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./otp-threshold-form.module.scss";
 import { FormEvent, useState } from "react";
 import { useOtpThresholdDefaults } from "@/components/on-time/OtpThreshold/useOtpThresholdDefaults";
 import {
@@ -60,8 +62,8 @@ export const OtpThresholdForm = ({ onCompare }: OtpThresholdFormProps) => {
             </p>
           ) : null}
 
-          <div className="otp-threshold-form__inputs">
-            <div className="govuk-form-group otp-threshold-form__control">
+          <div className={styles["otp-threshold-form__inputs"]}>
+            <div className={clsx("govuk-form-group", styles["otp-threshold-form__control"])}>
               <label className="govuk-label" htmlFor="otp-threshold-early">
                 Early
               </label>
@@ -87,7 +89,7 @@ export const OtpThresholdForm = ({ onCompare }: OtpThresholdFormProps) => {
               </div>
             </div>
 
-            <div className="govuk-form-group otp-threshold-form__control">
+            <div className={clsx("govuk-form-group", styles["otp-threshold-form__control"])}>
               <label className="govuk-label" htmlFor="otp-threshold-late">
                 Late
               </label>

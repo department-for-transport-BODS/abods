@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./stop-analysis.module.scss";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import useSWR from "swr";
@@ -40,6 +42,7 @@ import {
 import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
 import { Period } from "@/utils/date-range";
 import { formatDateToISODateString } from "@/utils/date-formatter";
+import { LoadingDots } from "@/components/shared/LoadingDots";
 import { operatorsService } from "@/services/operator.service";
 
 const MAX_BOUND_SPAN = 0.5;
@@ -92,21 +95,6 @@ const refineValuesToStopFiltersQuery = (
   startTime: values.startTime === "00:00" ? undefined : values.startTime,
   endTime: values.endTime === "23:59" ? undefined : values.endTime,
 });
-
-const LoadingDots = () => (
-  <div
-    className="stop-analysis-page__loading-state govuk-!-margin-top-4"
-    role="status"
-    aria-live="polite"
-  >
-    <span className="ranking-table__loading-dots" aria-hidden="true">
-      <span className="ranking-table__loading-dot" />
-      <span className="ranking-table__loading-dot" />
-      <span className="ranking-table__loading-dot" />
-    </span>
-    <span className="govuk-body-s govuk-!-margin-bottom-0">Loading...</span>
-  </div>
-);
 
 function parseArrayParam(param: string | string[] | undefined): string[] {
   if (!param) return [];
@@ -702,14 +690,14 @@ const StopAnalysisPage = () => {
 
   return (
     <BaseLayout title="Stop analysis - Analyse Bus Open Data">
-      <div className="stop-analysis-page">
-        <div className="stop-analysis-page__header">
+      <div className={styles["stop-analysis-page"]}>
+        <div className={styles["stop-analysis-page__header"]}>
           <h1 className="govuk-heading-xl">Stop Analysis</h1>
-          <div className="stop-analysis-page__extra-filter">
+          <div className={styles["stop-analysis-page__extra-filter"]}>
             <RefineResultsButton
               isLoading={stopsLoading}
               showPerformanceFilters={false}
-              buttonClassName="govuk-link button-link stop-analysis-filters__refine-button"
+              buttonClassName={clsx("govuk-link", "button-link", styles.refineButton)}
               initialValues={refineResultsInitialValues}
               onApply={(values) =>
                 updateQuery(refineValuesToStopFiltersQuery(values))
@@ -807,7 +795,9 @@ const StopAnalysisPage = () => {
           />
         )}
         {stopsLoading ? (
-          <LoadingDots />
+          <div className={clsx(styles["stop-analysis-page__loading-state"], "govuk-!-margin-top-4")}>
+            <LoadingDots />
+          </div>
         ) : (
           <StopAnalysisTable
             data={tableRows}

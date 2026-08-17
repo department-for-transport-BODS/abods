@@ -1,0 +1,41 @@
+@import "../../styles/govuk-module";
+.feed-status-summary-stat {
+  background: $govuk-body-background-colour;
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid $govuk-border-colour;
+}
+.feed-status-summary-stat__title {
+  @include govuk-font(19);
+  margin-top: 1rem;
+  margin-bottom: govuk-spacing(4);
+  color: $govuk-secondary-text-colour;
+}
+.feed-status-summary-stat__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.feed-status-summary-stat__value {
+  font-weight: bold;
+  font-size: 36px;
+}
+.feed-status-summary-stat__value--active {
+  color: govuk-colour("green");
+}
+.feed-status-summary-stat__value--inactive {
+  color: $govuk-error-colour;
+}
+.feed-status-summary-stat__check {
+  width: 36px;
+  height: 36px;
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
+}
+.feed-status-summary-stat__cross {
+  width: 36px;
+  height: 36px;
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
+}

@@ -80,6 +80,7 @@ $_thumb-height: 40px;
   border: 2px solid govuk-colour("black");
   border-radius: 0;
   box-sizing: border-box;
+  overflow: hidden;
   transform: translateY(-50%);
 }
 

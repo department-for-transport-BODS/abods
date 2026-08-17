@@ -5,7 +5,7 @@
   width: 100%;
 }
 
-.container > .app-box {
+.container > :global(.app-box) {
   width: 100%;
 }
 

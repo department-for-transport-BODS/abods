@@ -57,19 +57,14 @@ describe("ServiceMonitoringPage", () => {
     const { container } = render(<ServiceMonitoringPage />);
 
     expect(screen.getByText("Service monitoring")).toBeInTheDocument();
-
     await waitFor(() => {
-      expect(
-        container.querySelector(".service-monitoring__iframe-container iframe"),
-      ).toBeInTheDocument();
+      const iframe = container.querySelector("iframe");
+      expect(iframe).toBeInTheDocument();
+      expect(iframe).toHaveAttribute(
+        "src",
+        "https://dashboard.example.com/embed?token=abc&nonce=def&ts=123",
+      );
     });
-
-    expect(
-      container.querySelector(".service-monitoring__iframe-container iframe"),
-    ).toHaveAttribute(
-      "src",
-      "https://dashboard.example.com/embed?token=abc&nonce=def&ts=123",
-    );
   });
 
   it("fetches a fresh embed url on page view", async () => {

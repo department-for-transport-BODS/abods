@@ -1,3 +1,4 @@
+import styles from "./create-corridor-form.module.scss";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import useSWR, { useSWRConfig } from "swr";
@@ -10,9 +11,34 @@ import { CorridorStopList } from "@/components/corridors/create/CorridorStopList
 import { StopSearchList } from "@/components/corridors/create/StopSearchList";
 import { DeleteCorridorModal } from "@/components/corridors/create/DeleteCorridorModal";
 import { LocationLookupField } from "@/components/shared/LocationLookupField";
-import type { LngLatBounds } from "mapbox-gl";
+import { LngLatBounds } from "mapbox-gl";
+import type { LocationLookupSelection } from "@/components/shared/LocationLookupField";
 
 type SearchMode = "location" | "stop";
+
+const validLocationSearchBounds = (bounds: LngLatBounds | null) =>
+  bounds ? bounds.getEast() - bounds.getWest() < 0.9 : false;
+
+const locationBounds = (selection: LocationLookupSelection) => {
+  if (selection.bbox) {
+    const [minLongitude, minLatitude, maxLongitude, maxLatitude] =
+      selection.bbox;
+    return new LngLatBounds(
+      [minLongitude, minLatitude],
+      [maxLongitude, maxLatitude],
+    );
+  }
+
+  if (selection.center) {
+    const [longitude, latitude] = selection.center;
+    return new LngLatBounds(
+      [longitude - 0.05, latitude - 0.05],
+      [longitude + 0.05, latitude + 0.05],
+    );
+  }
+
+  return null;
+};
 
 interface Props {
   mode: "create" | "edit";
@@ -39,6 +65,8 @@ export const CreateCorridorForm = ({
   const [stopList, setStopList] = useState<CorridorStop[]>(
     initialCorridor?.stops ?? [],
   );
+  const [selectedLocationBounds, setSelectedLocationBounds] =
+    useState<LngLatBounds | null>(null);
   const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -50,12 +78,22 @@ export const CreateCorridorForm = ({
   const isStopSearch = searchMode === "stop";
   const firstStopSearchEnabled =
     stopList.length === 0 &&
-    (isStopSearch ? stopQuery.trim().length > 3 : stopQuery.trim().length > 0);
+    (isStopSearch
+      ? stopQuery.trim().length > 3
+      : validLocationSearchBounds(selectedLocationBounds));
   const { data: firstStopData, isLoading: searchingFirstStop } = useSWR(
     firstStopSearchEnabled
-      ? ["corridor-first-stop-search", stopQuery.trim()]
+      ? [
+          "corridor-first-stop-search",
+          isStopSearch ? stopQuery.trim() : "location",
+          selectedLocationBounds?.toArray(),
+        ]
       : null,
-    ([, query]) => corridorsService.queryStops(query),
+    () =>
+      corridorsService.queryStops(
+        isStopSearch ? stopQuery.trim() : undefined,
+        isStopSearch ? undefined : selectedLocationBounds ?? undefined,
+      ),
   );
 
   const subsequentSearchEnabled = stopList.length > 0;
@@ -76,7 +114,7 @@ export const CreateCorridorForm = ({
     : null;
 
   const { data: otherStopsData } = useSWR(
-    stopList.length > 0 && boundsKey
+    stopList.length > 0 && validLocationSearchBounds(mapBounds) && boundsKey
       ? ["corridor-other-stops", boundsKey]
       : null,
     () => corridorsService.queryStops(undefined, mapBounds ?? undefined),
@@ -122,6 +160,7 @@ export const CreateCorridorForm = ({
 
   const resetSearch = () => {
     setStopQuery("");
+    setSelectedLocationBounds(null);
     setActionError(null);
   };
 
@@ -268,7 +307,7 @@ export const CreateCorridorForm = ({
 
         <div className="govuk-grid-row">
           <div className="govuk-grid-column-one-half">
-            <div className="corridor-stop-column">
+            <div className={styles["corridor-stop-column"]}>
               <h2 className="govuk-heading-m govuk-!-margin-bottom-2">Stops</h2>
 
               <CorridorStopList
@@ -278,7 +317,7 @@ export const CreateCorridorForm = ({
                 onRemoveLastStop={removeLastStop}
               />
 
-              <div className="corridor-stop-column__search-panel">
+              <div className={styles["corridor-stop-column__search-panel"]}>
                 {showSearchModeSelector ? (
                   <div className="govuk-form-group">
                     <label className="govuk-label" htmlFor="search-mode">
@@ -305,7 +344,13 @@ export const CreateCorridorForm = ({
                       id="stop-query"
                       label="Location name or postcode"
                       value={stopQuery}
-                      onValueChange={setStopQuery}
+                      onValueChange={(value) => {
+                        setStopQuery(value);
+                        setSelectedLocationBounds(null);
+                      }}
+                      onSelect={(selection) => {
+                        setSelectedLocationBounds(locationBounds(selection));
+                      }}
                       mapboxToken={mapboxToken}
                       containerClassName="govuk-form-group"
                       placeholder="Search"

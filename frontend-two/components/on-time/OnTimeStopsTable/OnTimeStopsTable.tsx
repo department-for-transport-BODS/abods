@@ -210,19 +210,30 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
   },
 ];
 
+const STOP_NUMERIC_COLUMN_KEYS = new Set<StopsTableColumnKey>([
+  "scheduledDepartures",
+  "actualDepartures",
+  "averageScheduled",
+  "averageActual",
+  "averageDelay",
+  "onTimeRatio",
+  "lateRatio",
+  "earlyRatio",
+]);
+
 const STOP_TABLE_COLUMN_WIDTHS = {
-  stopId: "11%",
-  timingPoint: "3%",
-  stopName: "23%",
-  direction: "9%",
-  scheduledDepartures: "9%",
-  actualDepartures: "9%",
-  averageScheduled: "9%",
-  averageActual: "9%",
-  averageDelay: "4.5%",
-  onTimeRatio: "4.5%",
-  lateRatio: "4.5%",
-  earlyRatio: "4.5%",
+  stopId: "12%",
+  timingPoint: "4%",
+  stopName: "21%",
+  direction: "7%",
+  scheduledDepartures: "7%",
+  actualDepartures: "7%",
+  averageScheduled: "7%",
+  averageActual: "7%",
+  averageDelay: "7%",
+  onTimeRatio: "7%",
+  lateRatio: "7%",
+  earlyRatio: "7%",
 };
 
 export const STOPS_TABLE_COLUMN_KEYS = STOPS_TABLE_COLUMN_OPTIONS.map(
@@ -401,6 +412,19 @@ export const OnTimeStopsTable = ({
         ariaLabel:
           column.modalLabel ??
           (typeof column.label === "string" ? column.label : column.key),
+        alignment: STOP_NUMERIC_COLUMN_KEYS.has(column.key)
+          ? ("right" as const)
+          : undefined,
+        cellClassName:
+          column.key === "stopName"
+            ? styles.nameCell
+            : column.key === "stopId"
+              ? styles.naptanCell
+              : column.key === "timingPoint"
+                ? styles.timingCell
+                : column.key === "direction"
+                  ? styles.directionCell
+                  : undefined,
       })),
     [visibleColumns],
   );

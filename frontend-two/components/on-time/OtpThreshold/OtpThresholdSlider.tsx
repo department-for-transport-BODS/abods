@@ -1,3 +1,4 @@
+import styles from "./otp-threshold-slider.module.scss";
 import { RangeSlider } from "@/components/shared/RangeSlider/RangeSlider";
 
 /** Thresholds are whole minutes between 1 and 20 on each side of the scheduled departure. */
@@ -48,17 +49,17 @@ export const OtpThresholdSlider = ({
   const rightPct = 100 - (latePos / AXIS) * 100;
 
   return (
-    <div className="otp-threshold-slider">
-      <div className="otp-threshold-slider__labels">
-        <span className="otp-threshold-slider__label">Early</span>
-        <span className="otp-threshold-slider__scheduled">
+    <div className={styles["otp-threshold-slider"]}>
+      <div className={styles["otp-threshold-slider__labels"]}>
+        <span className={styles["otp-threshold-slider__label"]}>Early</span>
+        <span className={styles["otp-threshold-slider__scheduled"]}>
           <span>Scheduled departure</span>
-          <span className="otp-threshold-slider__scheduled-value">0:00</span>
+          <span className={styles["otp-threshold-slider__scheduled-value"]}>0:00</span>
         </span>
-        <span className="otp-threshold-slider__label">Late</span>
+        <span className={styles["otp-threshold-slider__label"]}>Late</span>
       </div>
       <RangeSlider
-        className="otp-threshold-slider__slider"
+        className={styles["otp-threshold-slider__slider"]}
         thumbs={[
           {
             min: 0,
@@ -84,21 +85,21 @@ export const OtpThresholdSlider = ({
           },
         ]}
       >
-        <div className="otp-threshold-slider__fill">
+        <div className={styles["otp-threshold-slider__fill"]}>
           <div
-            className="otp-threshold-slider__early"
+            className={styles["otp-threshold-slider__early"]}
             style={{ width: `${leftPct}%` }}
           />
           <div
-            className="otp-threshold-slider__on-time"
+            className={styles["otp-threshold-slider__on-time"]}
             style={{ left: `${leftPct}%`, right: `${rightPct}%` }}
           />
           <div
-            className="otp-threshold-slider__late"
+            className={styles["otp-threshold-slider__late"]}
             style={{ width: `${rightPct}%` }}
           />
         </div>
-        <div className="otp-threshold-slider__center" />
+        <div className={styles["otp-threshold-slider__center"]} />
       </RangeSlider>
     </div>
   );

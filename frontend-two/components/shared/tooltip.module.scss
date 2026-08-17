@@ -1,0 +1,23 @@
+@import "../../styles/govuk-module";
+
+.tooltip {
+  color: inherit;
+  display: inline-block;
+
+  &:global(.govuk-link),
+  &:global(.button-link) {
+    color: $govuk-link-colour;
+
+    &:hover:not(:focus) {
+      color: $govuk-link-hover-colour;
+    }
+  }
+}
+
+.underline {
+  border-bottom: 2px dotted currentColor;
+}
+
+.selectable {
+  user-select: text;
+}

@@ -1,0 +1,10 @@
+@import "../../../styles/govuk-module";
+.corridor-stop-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.corridor-stop-column__search-panel {
+  width: 100%;
+  max-width: 50ex;
+}

@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./stop-analysis-table.module.scss";
 import { useMemo, useState, type ReactNode } from "react";
 import { Direction, StopPerformanceRow } from "@/types/stop-analysis";
 import {
@@ -74,7 +76,7 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "stopId", label: "NAPTAN", alwaysVisible: true },
   {
     key: "timingPoint",
-    label: <TimingIcon className="stop-analysis-table__timing-icon" />,
+    label: <TimingIcon className={styles["stop-analysis-table__timing-icon"]} />,
     modalLabel: "Timing Point",
   },
   { key: "stopName", label: "Name" },
@@ -252,7 +254,7 @@ export const StopAnalysisTable = ({
       totals
         ? {
             key: "__totals__",
-            rowClassName: "stop-analysis-table__summary-row",
+            rowClassName: styles["stop-analysis-table__summary-row"],
             stopId: "-",
             timingPoint: "",
             stopName: "-",
@@ -291,18 +293,18 @@ export const StopAnalysisTable = ({
   }
 
   return (
-    <div className="stop-analysis-table govuk-!-margin-top-6">
-      <div className="stop-analysis-table__display-toolbar">
-        <div className="stop-analysis-table__display-actions">
+    <div className={clsx(styles["stop-analysis-table"], "govuk-!-margin-top-6")}>
+      <div className={styles["stop-analysis-table__display-toolbar"]}>
+        <div className={styles["stop-analysis-table__display-actions"]}>
           <button
             type="button"
-            className="govuk-link button-link stop-analysis-table__display-options-link"
+            className={clsx("govuk-link", "button-link", styles["stop-analysis-table__display-options-link"])}
             onClick={openDisplayOptions}
           >
             Display options
           </button>
           <fieldset
-            className="govuk-fieldset stop-analysis-table__display-mode"
+            className={clsx("govuk-fieldset", styles["stop-analysis-table__display-mode"])}
             aria-label="Show stop performance values as"
           >
             <legend className="govuk-visually-hidden">
@@ -341,11 +343,12 @@ export const StopAnalysisTable = ({
         onClose={() => setShowDisplayOptions(false)}
         onApply={handleDisplayOptionsApply}
       />
-      <div className="stop-analysis-table__controls">
-        <div className="stop-analysis-table__direction-filters">
+      <div className={styles["stop-analysis-table__controls"]}>
+        <div className={styles["stop-analysis-table__direction-filters"]}>
           <MultiselectCheckbox
             id="stop-analysis-directions"
             label="Directions"
+            showAllLabel="All Directions"
             options={directionOptions}
             selectedValues={directions}
             onChange={(values) => onDirectionsChange(values as Direction[])}
@@ -354,11 +357,9 @@ export const StopAnalysisTable = ({
         </div>
       </div>
 
-      <div className="stop-analysis-table__grid">
+      <div className={styles["stop-analysis-table__grid"]}>
         <div
-          className={
-            showTotals ? "stop-analysis-table__table--with-totals" : undefined
-          }
+          className={showTotals ? styles["stop-analysis-table__table--with-totals"] : undefined}
         >
           <SortedPaginatedTable
             key={`${displayMode}-${visibleColumns.join(",")}`}
@@ -371,14 +372,14 @@ export const StopAnalysisTable = ({
               key: `${row.stopId}-${row.direction}`,
               stopId: row.stopId,
               timingPoint: row.timingPoint ? (
-                <TimingIcon className="stop-analysis-table__timing-icon" />
+                <TimingIcon className={styles["stop-analysis-table__timing-icon"]} />
               ) : (
                 ""
               ),
               stopName: (
                 <Tooltip
                   message={`${row.localityName}, ${row.adminAreaName}`}
-                  className="stop-analysis-table__stop-link"
+                  className={styles["stop-analysis-table__stop-link"]}
                   onClick={() => onStopNameClick(row)}
                 >
                   {row.stopName}

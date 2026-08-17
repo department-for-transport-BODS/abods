@@ -1,4 +1,5 @@
 import { StopTypeOption } from "@/types/dashboard";
+import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 
 interface StopTypeToggleProps {
   stopType: StopTypeOption;
@@ -6,37 +7,15 @@ interface StopTypeToggleProps {
 }
 
 export const StopTypeToggle = ({ stopType, onChange }: StopTypeToggleProps) => (
-  <fieldset className="segmented-toggle app-stop-type-segmented-toggle">
-    <legend className="govuk-label govuk-visually-hidden">
-      Show performance using data from
-    </legend>
-    <div className="segmented-toggle__controls">
-      <div className="segmented-toggle-item">
-        <input
-          className="segmented-toggle-item__input"
-          id="all-stops"
-          name="stop-type"
-          type="radio"
-          checked={stopType === "AllStops"}
-          onChange={() => onChange("AllStops")}
-        />
-        <label className="segmented-toggle-item__label" htmlFor="all-stops">
-          All stops
-        </label>
-      </div>
-      <div className="segmented-toggle-item">
-        <input
-          className="segmented-toggle-item__input"
-          id="timing-points"
-          name="stop-type"
-          type="radio"
-          checked={stopType === "TimingPoints"}
-          onChange={() => onChange("TimingPoints")}
-        />
-        <label className="segmented-toggle-item__label" htmlFor="timing-points">
-          Timing points
-        </label>
-      </div>
-    </div>
-  </fieldset>
+  <SegmentedToggle
+    legend="Show performance using data from"
+    hideLegend
+    name="stop-type"
+    value={stopType}
+    onChange={onChange}
+    options={[
+      { value: "AllStops", label: "All stops" },
+      { value: "TimingPoints", label: "Timing points" },
+    ]}
+  />
 );

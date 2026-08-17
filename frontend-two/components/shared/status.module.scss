@@ -1,0 +1,54 @@
+@use "sass:math";
+@import "../../styles/govuk-module";
+
+.status {
+  display: flex;
+  align-items: center;
+}
+
+.active {
+  color: govuk-colour("green");
+}
+
+.inactive {
+  color: govuk-colour("red");
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  display: block;
+  flex-shrink: 0;
+
+  .active & {
+    color: govuk-colour("green");
+  }
+
+  .small & {
+    width: 20px;
+    height: 20px;
+  }
+
+  .medium & {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.label {
+  text-transform: capitalize;
+  font-weight: $govuk-font-weight-bold;
+  margin-left: govuk-spacing(2);
+
+  .small &,
+  .medium & {
+    @include govuk-font(19);
+    margin-left: govuk-spacing(1);
+  }
+
+  .large & {
+    font-size: rem(32);
+    line-height: math.div(35, 32);
+    margin-left: govuk-spacing(2);
+  }
+}

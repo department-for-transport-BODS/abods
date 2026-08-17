@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { DateTime, Interval } from "luxon";
 import { CalendarIcon } from "@/components/icons/CalendarIcon";
 import { DateCalendarMonth } from "@/components/shared/DateCalendarMonth";
+import { clsx } from "clsx";
 import {
   formatDateToISODateString,
   formatISODateStringToDate,
@@ -81,9 +82,7 @@ export const DateSelect = ({
     !rangeStart || month.startOf("month") > rangeStart.startOf("month");
   const canGoNext = !rangeEnd || month.endOf("month") < rangeEnd.endOf("month");
   const hasError = Boolean(error);
-  const formGroupClass = hasError
-    ? "govuk-form-group govuk-form-group--error container"
-    : "govuk-form-group container";
+  const formGroupClass = clsx(styles.container, "govuk-form-group", hasError && "govuk-form-group--error");
 
   const commitDate = (next: DateTime) => {
     const iso = formatDateToISODateString(next);
@@ -135,7 +134,7 @@ export const DateSelect = ({
         </button>
       </div>
       {open ? (
-        <div className={styles.container}>
+        <div className={styles.controls}>
           <div className={styles.calendarHeader}>
             <button
               type="button"

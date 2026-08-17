@@ -1,0 +1,59 @@
+@import "../../../styles/govuk-module";
+.otp-threshold-slider__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: govuk-spacing(1);
+}
+.otp-threshold-slider__label {
+  display: flex;
+  flex-direction: column-reverse;
+  @include govuk-font(19);
+}
+.otp-threshold-slider__scheduled {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  line-height: 1.2;
+  @include govuk-font(16);
+}
+.otp-threshold-slider__scheduled-value {
+  color: $govuk-secondary-text-colour;
+  font-feature-settings: normal;
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
+}
+.otp-threshold-slider__slider {
+  margin-top: govuk-spacing(1);
+  margin-bottom: govuk-spacing(2);
+}
+.otp-threshold-slider__fill {
+  position: absolute;
+  inset: 4px;
+}
+.otp-threshold-slider__early, .otp-threshold-slider__on-time, .otp-threshold-slider__late {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.otp-threshold-slider__early {
+  left: 0;
+  background-color: govuk-colour("pink");
+}
+.otp-threshold-slider__late {
+  right: 0;
+  background-color: govuk-colour("yellow");
+}
+.otp-threshold-slider__on-time {
+  background-color: govuk-colour("purple");
+}
+.otp-threshold-slider__center {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  z-index: 1;
+  width: 2px;
+  transform: translateX(-50%);
+  background-color: govuk-colour("black");
+}

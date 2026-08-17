@@ -10,6 +10,7 @@ import OnTimeOperatorPage from "@/pages/on-time/[nocCode]";
 import { Direction } from "../../../src/generated/graphql";
 import type { FrequentServicePerformance } from "@/services/on-time/performance.service";
 import { Settings } from "luxon";
+import boxStyles from "@/components/shared/Box/box.module.scss";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -301,7 +302,7 @@ describe("OnTimeOperatorPage", () => {
       "We have not received any vehicle location data for the time period and filters selected.",
     );
 
-    expect(message.closest(".app-box")).not.toBeNull();
+    expect(message.closest(`.${boxStyles.box}`)).not.toBeNull();
     expect(message.closest('[class*="noData"]')).not.toBeNull();
   });
 

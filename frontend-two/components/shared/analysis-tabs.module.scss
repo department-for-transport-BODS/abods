@@ -1,0 +1,34 @@
+@import "../../styles/govuk-module";
+
+.analysis-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid $govuk-border-colour;
+}
+
+.analysis-tabs--panel {
+  border-bottom: 0;
+  .analysis-tabs__tab {
+    margin-bottom: 0;
+  }
+}
+
+.analysis-tabs__tab {
+  @include govuk-font(19);
+  background: none;
+  border: none;
+  border-bottom: 4px solid transparent;
+  padding: govuk-spacing(2) govuk-spacing(3);
+  cursor: pointer;
+  color: $govuk-link-colour;
+  margin-bottom: -1px;
+  &:focus-visible {
+    outline: 3px solid $govuk-focus-colour;
+    outline-offset: 0;
+  }
+}
+
+.analysis-tabs__tab--active {
+  font-weight: $govuk-font-weight-bold;
+  border-bottom-color: $govuk-link-colour;
+}

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { useEffect } from "react";
+import pageStyles from "@/components/layout/Page/page.module.scss";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { clsx } from "clsx";
 
 const OnTimeOperatorNotFoundPage = () => {
   useRequireAuth();
@@ -15,7 +17,7 @@ const OnTimeOperatorNotFoundPage = () => {
   return (
     <BaseLayout
       title="Not found: Analyse Bus Open Data"
-      mainClassName="app__content--page"
+      mainClassName="contentPage"
       backLink={
         <Link
           href="/on-time"
@@ -27,7 +29,9 @@ const OnTimeOperatorNotFoundPage = () => {
     >
       <header className="govuk-!-margin-bottom-8">
         <span className="govuk-caption-xl">On-time performance</span>
-        <h1 className="govuk-heading-xl page-header__title">Not found</h1>
+        <h1 className={clsx(pageStyles.headerTitle, "govuk-heading-xl")}>
+          Not found
+        </h1>
       </header>
       <p className="govuk-body">
         Operator not found, or you do not have permission to view. Go back to{" "}

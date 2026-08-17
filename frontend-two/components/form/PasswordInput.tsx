@@ -1,5 +1,7 @@
 import { ChangeEvent, KeyboardEvent, useState } from "react";
+import styles from "./password-input.module.scss";
 import { ErrorInfo } from "@/types";
+import { clsx } from "clsx";
 
 interface PasswordInputProps<T> {
   display: string;
@@ -58,7 +60,7 @@ export const PasswordInput = <T,>({
       }
     >
       <label
-        className={`govuk-label${required ? " password-input__label--required" : ""}`}
+        className={clsx("govuk-label", required && styles.labelRequired)}
         htmlFor={inputId}
       >
         {display}
@@ -71,7 +73,14 @@ export const PasswordInput = <T,>({
       ) : null}
       <div className="govuk-input__wrapper">
         <input
-          className={`govuk-input password-input__input ${widthClass ?? ""} ${error ? "govuk-input--error" : ""}`.trim()}
+          className={clsx(
+            "govuk-input",
+            styles.input,
+            widthClass?.startsWith("govuk-")
+              ? widthClass
+              : widthClass && styles[widthClass],
+            error && "govuk-input--error",
+          )}
           id={inputId}
           name={inputId}
           type={showPassword ? "text" : "password"}
@@ -84,7 +93,7 @@ export const PasswordInput = <T,>({
         />
         <button
           type="button"
-          className="govuk-input__suffix password-input__suffix-button"
+          className={clsx("govuk-input__suffix", styles.suffixButton)}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}

@@ -1,0 +1,55 @@
+@import "../../../styles/govuk-module";
+.corridor__map-wrapper {
+  position: relative;
+}
+.corridor__map {
+  height: 440px;
+}
+.corridor__map-style-toggle {
+  position: absolute;
+  top: govuk-spacing(2);
+  left: govuk-spacing(2);
+  display: flex;
+  gap: 0;
+  z-index: 1;
+}
+.corridor__map-style-btn {
+  @include govuk-font(16);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  border: 2px solid $govuk-border-colour;
+  background: govuk-colour("white");
+  cursor: pointer;
+}
+.corridor__map-style-btn + .corridor__map-style-btn {
+  border-left: 0;
+}
+.corridor__map-style-btn--active {
+  background: govuk-colour("dark-grey");
+  color: govuk-colour("white");
+  font-weight: $govuk-font-weight-bold;
+  border-color: govuk-colour("dark-grey");
+}
+.corridor__map-recentre {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  margin: 0 0 govuk-spacing(1) govuk-spacing(2);
+  border: 0;
+  border-radius: 0;
+  background: govuk-colour("white");
+  color: govuk-colour("blue");
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  cursor: pointer;
+  &:hover {
+    background: govuk-colour("light-grey");
+  }
+}
+.corridor__map-recentre-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

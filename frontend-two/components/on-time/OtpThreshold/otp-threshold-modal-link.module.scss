@@ -1,0 +1,20 @@
+@import "../../../styles/govuk-module";
+.otp-threshold-modal-button {
+  text-align: right;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-left: 0;
+  @include govuk-font(19);
+  text-decoration: underline;
+
+  &:global(.govuk-link),
+  &:global(.button-link) {
+    color: $govuk-link-colour;
+    text-decoration: underline;
+
+    &:hover:not(:focus) {
+      color: $govuk-link-hover-colour;
+      text-decoration: underline;
+    }
+  }
+}

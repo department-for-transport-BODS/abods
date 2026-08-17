@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./feed-status-summary-stat.module.scss";
 import Image from "next/image";
 interface FeedStatusSummaryStatProps {
   title: string;
@@ -10,15 +12,15 @@ export const FeedStatusSummaryStat = ({
 }: FeedStatusSummaryStatProps) => {
   const active = value === "Active";
   return (
-    <div className="feed-status-summary-stat">
-      <span className="feed-status-summary-stat__title">{title}</span>
-      <div className="feed-status-summary-stat__row">
+    <div className={styles["feed-status-summary-stat"]}>
+      <span className={styles["feed-status-summary-stat__title"]}>{title}</span>
+      <div className={styles["feed-status-summary-stat__row"]}>
         {active ? (
           <Image
             src="/assets/icons/check-in-circle-solid.svg"
             width={36}
             height={36}
-            className="feed-status-summary-stat__check"
+            className={styles["feed-status-summary-stat__check"]}
             alt="Active Feed"
           />
         ) : (
@@ -26,17 +28,17 @@ export const FeedStatusSummaryStat = ({
             src="/assets/icons/cross-in-circle-solid.svg"
             width={36}
             height={36}
-            className="feed-status-summary-stat__cross"
+            className={styles["feed-status-summary-stat__cross"]}
             alt="Inactive Feed"
           />
         )}
         <span
-          className={
-            "feed-status-summary-stat__value" +
-            (active
-              ? " feed-status-summary-stat__value--active"
-              : " feed-status-summary-stat__value--inactive")
-          }
+          className={clsx(
+            styles["feed-status-summary-stat__value"],
+            active
+              ? styles["feed-status-summary-stat__value--active"]
+              : styles["feed-status-summary-stat__value--inactive"],
+          )}
         >
           {value}
         </span>

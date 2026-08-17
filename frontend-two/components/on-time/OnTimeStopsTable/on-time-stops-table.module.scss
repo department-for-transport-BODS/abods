@@ -2,7 +2,6 @@
 
 .timingIcon {
   display: inline-flex;
-  min-width: 20px;
   color: $govuk-text-colour;
 }
 
@@ -19,18 +18,38 @@
     min-width: 0;
     align-items: flex-start;
   }
-
-  .sortable-table .sortable-header__label {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-    overflow-wrap: normal;
-    word-break: normal;
-    hyphens: manual;
-  }
 }
 
 .container .sortable-table {
-  min-width: 1100px;
+  width: 100%;
+
+  :global(.govuk-table__cell),
+  :global(.govuk-table__header) {
+    overflow: hidden;
+    vertical-align: middle;
+  }
+}
+
+.naptanCell,
+.directionCell,
+.nameCell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timingCell {
+  overflow: hidden;
+}
+
+.nameCell {
+  :global(button),
+  :global(span) {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+  }
 }

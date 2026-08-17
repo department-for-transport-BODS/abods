@@ -23,6 +23,16 @@ $raas-colours: (
   early: (
     base: govuk-colour("pink"),
   ),
+  change: (
+    up: #dfeae5,
+    down: #f9dfdf,
+  ),
+  success: (
+    hover: #005a30,
+  ),
+  placeholder: (
+    base: #757575,
+  ),
 );
 
 // GDS COLOURS

@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./stop-analysis-map.module.scss";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl, { Map, LngLatBoundsLike, GeoJSONSource } from "mapbox-gl";
 import type { FeatureCollection, Feature } from "geojson";
@@ -70,12 +72,18 @@ export const StopAnalysisMap = ({
     "default",
   );
   const lastAutoFitBoundsKeyRef = useRef<string | null>(null);
-  const popupRef = useRef<mapboxgl.Popup | null>(null);
+  const adminPopupRef = useRef<mapboxgl.Popup | null>(null);
+  const statsPopupRef = useRef<mapboxgl.Popup | null>(null);
   const hoveredAdminAreaRef = useRef<ClipableFeature | null>(null);
 
-  const clearPopup = useCallback(() => {
-    popupRef.current?.remove();
-    popupRef.current = null;
+  const clearAdminPopup = useCallback(() => {
+    adminPopupRef.current?.remove();
+    adminPopupRef.current = null;
+  }, []);
+
+  const clearStatsPopup = useCallback(() => {
+    statsPopupRef.current?.remove();
+    statsPopupRef.current = null;
   }, []);
 
   const updateAdminAreaPopup = useCallback(
@@ -86,7 +94,6 @@ export const StopAnalysisMap = ({
       const hoveredAdminArea = hoveredAdminAreaRef.current;
       if (!hoveredAdminArea) return;
       if (map.getZoom() >= ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD) {
-        clearPopup();
         return;
       }
 
@@ -113,12 +120,12 @@ export const StopAnalysisMap = ({
           coordinates = [rawCoordinates[0], rawCoordinates[1]];
         }
       } catch {
-        clearPopup();
+        clearAdminPopup();
         return;
       }
 
       if (!coordinates) {
-        clearPopup();
+        clearAdminPopup();
         return;
       }
 
@@ -130,11 +137,11 @@ export const StopAnalysisMap = ({
         | undefined;
 
       if (!properties?.name || !properties?.id) {
-        clearPopup();
+        clearAdminPopup();
         return;
       }
 
-      clearPopup();
+      clearAdminPopup();
 
       const content = document.createElement("div");
       const name = document.createElement("div");
@@ -148,7 +155,7 @@ export const StopAnalysisMap = ({
       id.textContent = properties.id;
       content.appendChild(id);
 
-      popupRef.current = new mapboxgl.Popup({
+      adminPopupRef.current = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
         maxWidth: "200px",
@@ -158,7 +165,7 @@ export const StopAnalysisMap = ({
         .setDOMContent(content)
         .addTo(map);
     },
-    [clearPopup],
+    [clearAdminPopup],
   );
 
   useEffect(() => {
@@ -241,6 +248,10 @@ export const StopAnalysisMap = ({
     mapRef.current = map;
 
     return () => {
+      adminPopupRef.current?.remove();
+      adminPopupRef.current = null;
+      statsPopupRef.current?.remove();
+      statsPopupRef.current = null;
       map.remove();
       mapRef.current = null;
     };
@@ -289,9 +300,13 @@ export const StopAnalysisMap = ({
         // Admin area hover
         let hoveredId: string | number | null = null;
         map.on("mouseenter", "admin-area-boundaries", () => {
+          if (map.getZoom() >= ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD) return;
           map.getCanvas().style.cursor = "pointer";
         });
         map.on("mousemove", "admin-area-boundaries", (e) => {
+          if (map.getZoom() >= ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD) {
+            return;
+          }
           if (!e.features || e.features.length === 0) return;
 
           const hoveredFeature = e.features[0] as Feature | undefined;
@@ -315,7 +330,9 @@ export const StopAnalysisMap = ({
           updateAdminAreaPopup(map);
         });
         map.on("mouseleave", "admin-area-boundaries", () => {
-          map.getCanvas().style.cursor = "";
+          if (map.getZoom() < ADMIN_AREA_HIDDEN_ZOOM_THRESHOLD) {
+            map.getCanvas().style.cursor = "";
+          }
           if (hoveredId !== null) {
             map.setFeatureState(
               { source: "boundaries", id: hoveredId },
@@ -324,7 +341,7 @@ export const StopAnalysisMap = ({
             hoveredId = null;
           }
           hoveredAdminAreaRef.current = null;
-          clearPopup();
+          clearAdminPopup();
         });
 
         map.on("moveend", () => {
@@ -347,7 +364,7 @@ export const StopAnalysisMap = ({
     adminAreaShapes,
     onAdminAreaClick,
     styleRevision,
-    clearPopup,
+    clearAdminPopup,
     updateAdminAreaPopup,
   ]);
 
@@ -509,10 +526,11 @@ export const StopAnalysisMap = ({
             ? (e.features[0].geometry.coordinates.slice() as [number, number])
             : ([e.lngLat.lng, e.lngLat.lat] as [number, number]);
 
-        popupRef.current?.remove();
-        popupRef.current = new mapboxgl.Popup({
+        clearStatsPopup();
+        statsPopupRef.current = new mapboxgl.Popup({
           closeButton: false,
           closeOnClick: false,
+          offset: 16,
         })
           .setLngLat(coords)
           .setHTML(
@@ -530,8 +548,7 @@ export const StopAnalysisMap = ({
 
       map.on("mouseleave", ["timing-stops", "other-stops"], () => {
         map.getCanvas().style.cursor = "";
-        popupRef.current?.remove();
-        popupRef.current = null;
+        clearStatsPopup();
       });
 
       // Cluster hover popup
@@ -568,10 +585,11 @@ export const StopAnalysisMap = ({
             ? (e.features[0].geometry.coordinates.slice() as [number, number])
             : ([e.lngLat.lng, e.lngLat.lat] as [number, number]);
 
-        popupRef.current?.remove();
-        popupRef.current = new mapboxgl.Popup({
+        clearStatsPopup();
+        statsPopupRef.current = new mapboxgl.Popup({
           closeButton: false,
           closeOnClick: false,
+          offset: 16,
         })
           .setLngLat(coords)
           .setHTML(
@@ -588,8 +606,7 @@ export const StopAnalysisMap = ({
 
       map.on("mouseleave", "clusters", () => {
         map.getCanvas().style.cursor = "";
-        popupRef.current?.remove();
-        popupRef.current = null;
+        clearStatsPopup();
       });
 
       // Individual stop click
@@ -599,7 +616,14 @@ export const StopAnalysisMap = ({
         if (props) onStopClick?.(props as unknown as StopStatistics);
       });
     }
-  }, [mapLoaded, boundingBoxTooBig, stopGeoJSON, onStopClick, styleRevision]);
+  }, [
+    mapLoaded,
+    boundingBoxTooBig,
+    stopGeoJSON,
+    onStopClick,
+    styleRevision,
+    clearStatsPopup,
+  ]);
 
   useEffect(() => {
     if (!focusStop || !mapLoaded || !mapRef.current) return;
@@ -693,21 +717,21 @@ export const StopAnalysisMap = ({
   }, []);
 
   return (
-    <div className="stop-analysis-map">
-      <div ref={mapContainer} className="stop-analysis-map__container" />
+    <div className={styles["stop-analysis-map"]}>
+      <div ref={mapContainer} className={styles["stop-analysis-map__container"]} />
       <MapDisplayOptions
         activeStyle={activeStyle}
         mapboxSatelliteStyle={mapboxSatelliteStyle}
         onStyleChange={switchStyle}
       />
       {boundingBoxTooBig && mapLoaded && (
-        <div className="stop-analysis-map__overlay">
+        <div className={styles["stop-analysis-map__overlay"]}>
           <p>Zoom in to show stops</p>
         </div>
       )}
       {loading && (
         <div
-          className="stop-analysis-map__loading-overlay"
+          className={styles["stop-analysis-map__loading-overlay"]}
           role="status"
           aria-live="polite"
           aria-label="Loading stop analysis map"
@@ -721,14 +745,14 @@ export const StopAnalysisMap = ({
 };
 
 const StopAnalysisLegend = () => (
-  <div className="stop-analysis-map__legend">
-    <span className="stop-analysis-map__dot stop-analysis-map__dot--high" />
+  <div className={styles["stop-analysis-map__legend"]}>
+    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--high"])} />
     <span>&gt; 80% on-time</span>
-    <span className="stop-analysis-map__dot stop-analysis-map__dot--med" />
+    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--med"])} />
     <span>60% - 80% on-time</span>
-    <span className="stop-analysis-map__dot stop-analysis-map__dot--low" />
+    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--low"])} />
     <span>&lt; 60% on-time</span>
-    <span className="stop-analysis-map__dot stop-analysis-map__dot--no-data" />
+    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--no-data"])} />
     <span>No data</span>
   </div>
 );

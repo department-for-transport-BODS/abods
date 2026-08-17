@@ -1,4 +1,6 @@
 import styles from "./charts-section.module.scss";
+import tabStyles from "@/components/shared/analysis-tabs.module.scss";
+import { clsx } from "clsx";
 
 import { ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
@@ -236,12 +238,14 @@ export const ChartsSection = ({
   return (
     <div className="govuk-!-margin-bottom-8">
       <Box minHeight="440px">
-        <div className="analysis-tabs analysis-tabs--panel govuk-!-margin-bottom-4">
+        <div
+          className={clsx(tabStyles["analysis-tabs"], tabStyles["analysis-tabs--panel"], "govuk-!-margin-bottom-4")}
+        >
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
-              className={`analysis-tabs__tab${activeTab === tab.id ? " analysis-tabs__tab--active" : ""}`}
+              className={clsx(tabStyles["analysis-tabs__tab"], activeTab === tab.id && tabStyles["analysis-tabs__tab--active"])}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}

@@ -169,16 +169,24 @@ const ALL_COLUMNS: ServiceTableColumnDefinition[] = [
   },
 ];
 
+const SERVICE_NUMERIC_COLUMN_KEYS = new Set<ServiceTableColumnKey>([
+  "scheduledDepartures",
+  "recordedDepartures",
+  "averageDelay",
+  "onTime",
+  "late",
+  "early",
+]);
+
 const SERVICE_TABLE_COLUMN_WIDTHS = {
   frequent: "4%",
-  service: "40%",
-  direction: "9%",
+  direction: "10%",
   scheduledDepartures: "12%",
   recordedDepartures: "10%",
-  averageDelay: "7%",
-  onTime: "6%",
-  late: "6%",
-  early: "6%",
+  averageDelay: "8%",
+  onTime: "8%",
+  late: "8%",
+  early: "8%",
 };
 
 export const SERVICE_TABLE_COLUMN_KEYS = ALL_COLUMNS.map(
@@ -325,6 +333,15 @@ export const OnTimeServicesTable = ({
         ariaLabel:
           column.modalLabel ??
           (typeof column.label === "string" ? column.label : column.key),
+        alignment: SERVICE_NUMERIC_COLUMN_KEYS.has(column.key)
+          ? ("right" as const)
+          : undefined,
+        cellClassName:
+          column.key === "service"
+            ? styles.serviceCell
+            : column.key === "frequent"
+              ? styles.frequentCell
+              : undefined,
       })),
     [visibleColumns],
   );

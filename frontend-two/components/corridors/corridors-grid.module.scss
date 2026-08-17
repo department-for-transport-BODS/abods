@@ -1,0 +1,18 @@
+@import "../../styles/govuk-module";
+.corridors-grid-search {
+  position: relative;
+  display: inline-block;
+}
+.corridors-grid-search__icon {
+  position: absolute;
+  left: govuk-spacing(2);
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: govuk-colour("dark-grey");
+}
+.corridors-grid-search__input {
+  padding-left: govuk-spacing(5);
+}
