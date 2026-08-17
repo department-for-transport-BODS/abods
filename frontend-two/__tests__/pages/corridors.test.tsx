@@ -2,6 +2,7 @@ import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SWRConfig } from "swr";
 import CorridorsPage from "@/pages/corridors";
+import { corridorsService } from "@/services/corridors/corridors.service";
 
 const renderPage = () =>
   render(
@@ -19,10 +20,6 @@ vi.mock("@/components/layout/BaseLayout", () => ({
   BaseLayout: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="base-layout">{children}</div>
   ),
-}));
-
-vi.mock("@/contexts/ConfigContext", () => ({
-  useConfig: vi.fn(),
 }));
 
 vi.mock("@/contexts/HelpdeskContext", () => ({
@@ -53,20 +50,12 @@ vi.mock("next/router", () => ({
   }),
 }));
 
-import { useConfig } from "@/contexts/ConfigContext";
-import { corridorsService } from "@/services/corridors/corridors.service";
-
-const mockUseConfig = vi.mocked(useConfig);
 const mockFetchCorridors = vi.mocked(corridorsService.fetchCorridors);
 
 describe("CorridorsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQuery = {};
-    mockUseConfig.mockReturnValue({
-      isLoading: false,
-      error: null,
-    } as ReturnType<typeof useConfig>);
   });
 
   afterEach(() => {

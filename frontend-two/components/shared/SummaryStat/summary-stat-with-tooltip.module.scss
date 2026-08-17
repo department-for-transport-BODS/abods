@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 
 .value {
   border-bottom: 4px dotted #000000;

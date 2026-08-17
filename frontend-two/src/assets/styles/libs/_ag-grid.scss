@@ -1,7 +1,4 @@
-@import "../settings/settings.scss";
-@import "../helpers/helpers.scss";
-@import "ag-grid-community/styles/ag-grid.css";
-// @import 'ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine.scss';
+@use "../settings/settings" as *;
 
 // adds space above 'no rows' display so it doesn't overlap the header
 

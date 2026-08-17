@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 .otp-threshold-slider__labels {
   display: flex;
   justify-content: space-between;

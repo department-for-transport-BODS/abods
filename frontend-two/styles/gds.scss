@@ -1,4 +1,4 @@
-@import "src/assets/styles/settings/settings.scss";
-@import "src/assets/styles/base/base.scss";
-@import "src/assets/styles/utils/utils.scss";
-@import "src/assets/styles/libs/libs.scss";
+@use "src/assets/styles/settings/settings";
+@use "src/assets/styles/base/base";
+@use "src/assets/styles/utils/utils";
+@use "src/assets/styles/libs/libs";

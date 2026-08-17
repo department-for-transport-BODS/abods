@@ -1,20 +1,17 @@
-$govuk-output-custom-properties: false;
+// Token + mixin API for CSS modules. Does not emit GOV.UK component CSS.
+@forward "govuk-frontend/dist/govuk/base" with (
+  $govuk-output-custom-properties: false
+);
 
-@import "govuk-frontend/dist/govuk/tools/index";
-@import "govuk-frontend/dist/govuk/helpers/index";
-@import "govuk-frontend/dist/govuk/helpers/_colour.scss";
-@import "govuk-frontend/dist/govuk/settings/index";
-
-$rem-base: 16;
-
-@import "src/assets/styles/settings/layout";
-@import "src/assets/styles/settings/breakpoints";
-@import "src/assets/styles/settings/colours";
-@import "src/assets/styles/settings/spacing";
-@import "src/assets/styles/settings/typography";
-@import "src/assets/styles/settings/z-index";
-@import "src/assets/styles/settings/animations";
-@import "src/assets/styles/helpers/bp";
-@import "src/assets/styles/helpers/raas-colour";
-@import "src/assets/styles/helpers/strip-unit";
-@import "src/assets/styles/helpers/rem";
+@forward "src/assets/styles/settings/rem-base";
+@forward "src/assets/styles/settings/layout";
+@forward "src/assets/styles/settings/breakpoints";
+@forward "src/assets/styles/settings/colours";
+@forward "src/assets/styles/settings/spacing";
+@forward "src/assets/styles/settings/typography";
+@forward "src/assets/styles/settings/z-index";
+@forward "src/assets/styles/settings/animations";
+@forward "src/assets/styles/helpers/bp";
+@forward "src/assets/styles/helpers/raas-colour";
+@forward "src/assets/styles/helpers/strip-unit";
+@forward "src/assets/styles/helpers/rem";

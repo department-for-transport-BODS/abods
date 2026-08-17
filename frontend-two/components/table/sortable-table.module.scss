@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .sortable-table :global(.govuk-table__header) {
   font-weight: $govuk-font-weight-bold;
   min-width: 0;

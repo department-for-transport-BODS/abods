@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .feed-table__check {
   width: 30px;
   min-width: 24px;

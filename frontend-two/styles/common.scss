@@ -1,4 +1,4 @@
-@import "src/assets/styles/helpers/helpers";
+@use "src/assets/styles/settings/settings" as *;
 
 .govuk-select {
   min-width: fit-content;

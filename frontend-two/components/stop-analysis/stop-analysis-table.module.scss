@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .stop-analysis-table__display-modal {
   display: flex;
   flex-direction: column;

@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 
 .searchContainer {
   flex: 0 1 30%;

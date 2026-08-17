@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 .corridor-stop-column {
   display: flex;
   flex-direction: column;

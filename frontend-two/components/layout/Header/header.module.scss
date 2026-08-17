@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 
 .header {
   background-color: govuk-functional-colour(brand);

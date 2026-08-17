@@ -1,6 +1,7 @@
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import { ConfigProvider } from "@/contexts/ConfigContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { HelpdeskProvider } from "@/contexts/HelpdeskContext";
@@ -45,6 +46,9 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 
   return (
     <ConfigProvider>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
       <AuthProvider>
         <HelpdeskProvider>
           <NavProvider>

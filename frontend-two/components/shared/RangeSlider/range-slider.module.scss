@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 
 // Matches original noUiSlider appearance:
 // square track, black border, tall narrow square thumbs

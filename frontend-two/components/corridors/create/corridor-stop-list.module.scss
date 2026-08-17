@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 .corridor-stop-list {
   background-color: govuk-colour("black", $variant: "tint-95");
   width: 50ex;

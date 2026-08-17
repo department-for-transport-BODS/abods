@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .performance-chart {
   min-height: rem(300);
   height: rem(300);

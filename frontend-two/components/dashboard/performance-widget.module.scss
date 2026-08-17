@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .performance__no-data, .performance__chart {
   min-height: rem(300);
   margin-bottom: govuk-spacing(6);

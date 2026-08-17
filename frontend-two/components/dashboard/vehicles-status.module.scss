@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .vehicles-status__stats {
   display: flex;
   gap: govuk-spacing(6);

@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 .otp-threshold-modal-button {
   text-align: right;
   flex: 0 0 auto;

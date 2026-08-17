@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .vehicle-journeys__header-container {
   display: grid;
   grid-template-columns: minmax(20rem, 1fr) minmax(18rem, auto);

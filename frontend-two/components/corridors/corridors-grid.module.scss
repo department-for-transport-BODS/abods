@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .corridors-grid-search {
   position: relative;
   display: inline-block;

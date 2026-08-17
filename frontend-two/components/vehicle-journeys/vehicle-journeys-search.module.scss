@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 
 .vehicle-journeys-search__controls {
   display: grid;

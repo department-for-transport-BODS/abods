@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 $segment-stop-size: 30px;
 $segment-stop-surround: 3px;
 $segment-min-width: 75px;

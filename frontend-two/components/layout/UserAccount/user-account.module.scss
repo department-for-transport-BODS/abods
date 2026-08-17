@@ -1,4 +1,4 @@
-@import "../../../styles/govuk-module";
+@use "../../../styles/govuk-module" as *;
 
 .userAccount {
   margin-bottom: govuk-spacing(4);

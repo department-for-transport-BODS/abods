@@ -1,3 +1,6 @@
+@use "govuk-frontend/dist/govuk/settings" as *;
+@use "govuk-frontend/dist/govuk/helpers/colour" as *;
+
 $font-family-default: $govuk-font-family;
 $font-color-default: govuk-colour("black");
 $font-weight-normal: 400 !default;

@@ -1,7 +1,4 @@
-@import "tippy.js/dist/tippy.css";
-@import "ag-grid-community/styles/ag-grid.css";
-@import "_ag-grid.scss";
-@import "./ngx-tippy-wrapper";
-@import "./ngx-mapbox-gl";
-
-@import "nouislider/dist/nouislider.css";
+@use "vendor";
+@use "ag-grid";
+@use "ngx-tippy-wrapper";
+@use "ngx-mapbox-gl";

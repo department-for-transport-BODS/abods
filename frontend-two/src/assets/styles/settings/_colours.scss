@@ -1,4 +1,4 @@
-@import "govuk-frontend/dist/govuk/helpers/_colour.scss";
+@use "govuk-frontend/dist/govuk/helpers/colour" as *;
 
 // -----------------------------------------------------------------------------
 // Colors

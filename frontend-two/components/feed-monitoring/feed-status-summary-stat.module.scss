@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .feed-status-summary-stat {
   background: govuk-functional-colour(body-background);
   display: flex;

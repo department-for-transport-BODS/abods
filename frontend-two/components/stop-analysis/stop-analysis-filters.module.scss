@@ -1,4 +1,4 @@
-@import "../../styles/govuk-module";
+@use "../../styles/govuk-module" as *;
 .stop-analysis-filters {
   @media (max-width: 1120px) {
     .stop-analysis-filters__grid {

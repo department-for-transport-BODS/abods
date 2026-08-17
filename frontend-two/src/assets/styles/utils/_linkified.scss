@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .linkified {
   color: govuk-functional-colour(link);
   &:hover {

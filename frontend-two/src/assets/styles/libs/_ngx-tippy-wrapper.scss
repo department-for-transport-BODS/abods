@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 // tippy theme
 $tooltip-arrow-size: 16px;
 $tooltip-background: govuk-colour("black");
