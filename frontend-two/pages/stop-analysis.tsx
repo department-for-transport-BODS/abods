@@ -697,7 +697,11 @@ const StopAnalysisPage = () => {
             <RefineResultsButton
               isLoading={stopsLoading}
               showPerformanceFilters={false}
-              buttonClassName={clsx("govuk-link", "button-link", styles.refineButton)}
+              buttonClassName={clsx(
+                "govuk-link",
+                "button-link",
+                styles.refineButton,
+              )}
               initialValues={refineResultsInitialValues}
               onApply={(values) =>
                 updateQuery(refineValuesToStopFiltersQuery(values))
@@ -795,7 +799,12 @@ const StopAnalysisPage = () => {
           />
         )}
         {stopsLoading ? (
-          <div className={clsx(styles["stop-analysis-page__loading-state"], "govuk-!-margin-top-4")}>
+          <div
+            className={clsx(
+              styles["stop-analysis-page__loading-state"],
+              "govuk-!-margin-top-4",
+            )}
+          >
             <LoadingDots />
           </div>
         ) : (

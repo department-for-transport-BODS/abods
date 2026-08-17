@@ -59,7 +59,12 @@ export const CorridorSegmentSelector = ({
 
   return (
     <>
-      <div className={clsx(styles["segment-selector-wrapper"], "govuk-!-margin-bottom-6")}>
+      <div
+        className={clsx(
+          styles["segment-selector-wrapper"],
+          "govuk-!-margin-bottom-6",
+        )}
+      >
         <div className={styles["segment-selector"]}>
           {/* All segments button — top half of the rail */}
           <button
@@ -88,14 +93,16 @@ export const CorridorSegmentSelector = ({
                   styles["segment-selector__segment"],
                   isInvalidServiceLink(seg.from.naptan, seg.to.naptan)
                     ? clsx(
-                        styles["segment-selector__segment__invalid-service-link"],
+                        styles[
+                          "segment-selector__segment__invalid-service-link"
+                        ],
                         selectedSegmentIndex === seg.index &&
                           styles[
                             "segment-selector__segment__invalid-service-link--active"
                           ],
                       )
                     : selectedSegmentIndex === seg.index &&
-                      styles["segment-selector__segment--active"],
+                        styles["segment-selector__segment--active"],
                 )}
                 onClick={() => onChangeSegmentIndex(seg.index)}
                 disabled={isDisabled}
@@ -119,7 +126,10 @@ export const CorridorSegmentSelector = ({
                 seg.to.naptan,
               );
               return (
-                <div key={seg.index} className={styles["segment-selector__distance"]}>
+                <div
+                  key={seg.index}
+                  className={styles["segment-selector__distance"]}
+                >
                   {distance && <span>{distance}</span>}
                   {invalid && <span>*</span>}
                 </div>

@@ -105,12 +105,17 @@ export const CorridorAnalysisPanel = ({
 
   return (
     <div className="govuk-!-margin-bottom-6">
-      <div className={clsx(tabStyles["analysis-tabs"], "govuk-!-margin-bottom-4")}>
+      <div
+        className={clsx(tabStyles["analysis-tabs"], "govuk-!-margin-bottom-4")}
+      >
         {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
-            className={clsx(tabStyles["analysis-tabs__tab"], tab === item.id && tabStyles["analysis-tabs__tab--active"])}
+            className={clsx(
+              tabStyles["analysis-tabs__tab"],
+              tab === item.id && tabStyles["analysis-tabs__tab--active"],
+            )}
             onClick={() => onChangeTab(item.id)}
           >
             {item.label}
@@ -130,7 +135,13 @@ export const CorridorAnalysisPanel = ({
             whiskerColor={JOURNEY_TIME_WHISKER}
             boxColor={JOURNEY_TIME_BOX}
           />
-          <div className={clsx("govuk-checkboxes", "govuk-checkboxes--small", styles["corridor__hide-outliers"])}>
+          <div
+            className={clsx(
+              "govuk-checkboxes",
+              "govuk-checkboxes--small",
+              styles["corridor__hide-outliers"],
+            )}
+          >
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"
@@ -164,7 +175,13 @@ export const CorridorAnalysisPanel = ({
             whiskerColor={JOURNEY_TIME_WHISKER}
             boxColor={JOURNEY_TIME_BOX}
           />
-          <div className={clsx("govuk-checkboxes", "govuk-checkboxes--small", styles["corridor__hide-outliers"])}>
+          <div
+            className={clsx(
+              "govuk-checkboxes",
+              "govuk-checkboxes--small",
+              styles["corridor__hide-outliers"],
+            )}
+          >
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"
@@ -198,7 +215,13 @@ export const CorridorAnalysisPanel = ({
             whiskerColor={JOURNEY_TIME_WHISKER}
             boxColor={JOURNEY_TIME_BOX}
           />
-          <div className={clsx("govuk-checkboxes", "govuk-checkboxes--small", styles["corridor__hide-outliers"])}>
+          <div
+            className={clsx(
+              "govuk-checkboxes",
+              "govuk-checkboxes--small",
+              styles["corridor__hide-outliers"],
+            )}
+          >
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"

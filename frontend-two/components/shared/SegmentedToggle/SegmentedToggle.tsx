@@ -43,10 +43,7 @@ export const SegmentedToggle = <T extends string>({
             checked={value === option.value}
             onChange={() => onChange(option.value)}
           />
-          <label
-            className={styles.label}
-            htmlFor={`${name}-${option.value}`}
-          >
+          <label className={styles.label} htmlFor={`${name}-${option.value}`}>
             {option.label}
           </label>
         </div>

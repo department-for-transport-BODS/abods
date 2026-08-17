@@ -228,7 +228,12 @@ const CorridorsViewPage = () => {
             </div>
           </div>
 
-          <div className={clsx(styles["corridor__date-wrapper"], "govuk-!-margin-bottom-5")}>
+          <div
+            className={clsx(
+              styles["corridor__date-wrapper"],
+              "govuk-!-margin-bottom-5",
+            )}
+          >
             <div className={styles["corridor__date-range-picker"]}>
               <div className={styles.dateRange}>
                 <DateRangeSelect
@@ -289,7 +294,12 @@ const CorridorsViewPage = () => {
             />
           ) : null}
 
-          <div className={clsx(styles.corridor__summary, "govuk-!-margin-bottom-7")}>
+          <div
+            className={clsx(
+              styles.corridor__summary,
+              "govuk-!-margin-bottom-7",
+            )}
+          >
             <Stat
               id="corridor-total-transits"
               label="Recorded transits"
@@ -371,7 +381,12 @@ const CorridorsViewPage = () => {
             />
           </div>
 
-          <div className={clsx(styles["corridor__analysis-selector"], "govuk-!-margin-bottom-4")}>
+          <div
+            className={clsx(
+              styles["corridor__analysis-selector"],
+              "govuk-!-margin-bottom-4",
+            )}
+          >
             <h2 className="govuk-heading-m govuk-!-margin-top-0 govuk-!-margin-bottom-0">
               Analysis
             </h2>

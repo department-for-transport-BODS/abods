@@ -147,7 +147,8 @@ const mockFetchDropdownInputs = vi.mocked(distanceService.fetchDropdownInputs);
 const mockFetchAdminOrg = vi.mocked(distanceService.fetchAdminOrg);
 
 const getDropdownOption = (option: string) =>
-  screen.queryByLabelText(option) ?? screen.getByRole("option", { name: option });
+  screen.queryByLabelText(option) ??
+  screen.getByRole("option", { name: option });
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -282,21 +283,11 @@ it("Defaults to no selection for all the filters", async () => {
     ).toBeInTheDocument();
   });
 
-  expect(
-    screen.getByDisplayValue(/All areas/i),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByDisplayValue(/All organisations/i),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByDisplayValue(/All operators/i),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByDisplayValue(/All licenses/i),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByDisplayValue(/All services/i),
-  ).toBeInTheDocument();
+  expect(screen.getByDisplayValue(/All areas/i)).toBeInTheDocument();
+  expect(screen.getByDisplayValue(/All organisations/i)).toBeInTheDocument();
+  expect(screen.getByDisplayValue(/All operators/i)).toBeInTheDocument();
+  expect(screen.getByDisplayValue(/All licenses/i)).toBeInTheDocument();
+  expect(screen.getByDisplayValue(/All services/i)).toBeInTheDocument();
 });
 
 it("Renders all data when generate button is pressed and no filters are applied", async () => {
@@ -692,7 +683,7 @@ it.each(filteredTableDataTestCases)(
     if (optionCheckbox) {
       fireEvent.click(optionCheckbox);
     } else {
-        fireEvent.click(screen.getByRole("option", { name: selectedOption }));
+      fireEvent.click(screen.getByRole("option", { name: selectedOption }));
     }
 
     fireEvent.mouseDown(document.body);
@@ -791,9 +782,7 @@ it.each(clearAllDropdownTestCases)(
 
     // Check options have been selected (Button text should show number of selected options)
     fireEvent.blur(dropdownButton, { relatedTarget: null });
-    expect(
-      screen.getByDisplayValue(displayText),
-    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue(displayText)).toBeInTheDocument();
 
     const newDropdownButton = await screen.findByDisplayValue(displayText);
     fireEvent.mouseDown(newDropdownButton);
@@ -806,8 +795,6 @@ it.each(clearAllDropdownTestCases)(
 
     // Dropdown button should reset to default text
     fireEvent.blur(newDropdownButton, { relatedTarget: null });
-    expect(
-      screen.getByDisplayValue(defaultText),
-    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue(defaultText)).toBeInTheDocument();
   },
 );

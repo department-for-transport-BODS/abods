@@ -83,7 +83,8 @@
   .sortable-table__footer-row > :last-child {
     margin-left: 0;
   }
-  .paging-panel, .paging-panel > nav {
+  .paging-panel,
+  .paging-panel > nav {
     flex-wrap: wrap;
   }
   .paging-panel {

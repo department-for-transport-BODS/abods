@@ -200,19 +200,12 @@ export const LocationLookupField = ({
         {open &&
           !disabled &&
           (selectedOption || value.trim().length === 0 || hasResults) && (
-            <div
-              className={styles.results}
-              role="listbox"
-            >
+            <div className={styles.results} role="listbox">
               {value.trim().length === 0 && (
-                <div className={styles.hint}>
-                  Type to search
-                </div>
+                <div className={styles.hint}>Type to search</div>
               )}
               {value.trim().length > 0 && loading && (
-                <div className={styles.loading}>
-                  Searching...
-                </div>
+                <div className={styles.loading}>Searching...</div>
               )}
               {value.trim().length > 0 &&
                 !loading &&

@@ -29,9 +29,7 @@ export const RangeSlider = ({
     className={`${styles.slider}${className ? ` ${className}` : ""}`}
     id={id}
   >
-    <div className={styles.track}>
-      {children}
-    </div>
+    <div className={styles.track}>{children}</div>
 
     {thumbs.map((thumb, index) => (
       <input
@@ -45,9 +43,7 @@ export const RangeSlider = ({
         aria-invalid={thumb.ariaInvalid}
         aria-describedby={thumb.ariaDescribedBy}
         onChange={(event: ChangeEvent<HTMLInputElement>) =>
-          thumb.onChange(
-            Number.parseInt(event.target.value, 10),
-          )
+          thumb.onChange(Number.parseInt(event.target.value, 10))
         }
       />
     ))}

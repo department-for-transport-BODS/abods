@@ -483,31 +483,61 @@ const addJourneyLayers = (
 const OtpLegend = () => (
   <div className={clsx(styles["otp-legend"], "govuk-!-margin-top-4")}>
     <div className={styles["otp-legend__item"]}>
-      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--on-time"])} />
+      <span
+        className={clsx(
+          styles["otp-legend__icon"],
+          styles["otp-legend__icon--on-time"],
+        )}
+      />
       <span className={styles["otp-legend__value"]}>
         <strong>On-time</strong>
       </span>
     </div>
     <div className={styles["otp-legend__item"]}>
-      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--late"])} />
+      <span
+        className={clsx(
+          styles["otp-legend__icon"],
+          styles["otp-legend__icon--late"],
+        )}
+      />
       <span className={styles["otp-legend__value"]}>
         <strong>Late</strong>
       </span>
-      <span className={clsx(styles["otp-legend__value"], styles["otp-legend__value--muted"])}>
+      <span
+        className={clsx(
+          styles["otp-legend__value"],
+          styles["otp-legend__value--muted"],
+        )}
+      >
         (&gt; 5:59 minutes)
       </span>
     </div>
     <div className={styles["otp-legend__item"]}>
-      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--early"])} />
+      <span
+        className={clsx(
+          styles["otp-legend__icon"],
+          styles["otp-legend__icon--early"],
+        )}
+      />
       <span className={styles["otp-legend__value"]}>
         <strong>Early</strong>
       </span>
-      <span className={clsx(styles["otp-legend__value"], styles["otp-legend__value--muted"])}>
+      <span
+        className={clsx(
+          styles["otp-legend__value"],
+          styles["otp-legend__value--muted"],
+        )}
+      >
         (&gt; 1 minute)
       </span>
     </div>
     <div className={styles["otp-legend__item"]}>
-      <span className={clsx(styles["otp-legend__icon"], styles["otp-legend__icon--scheduled-route"])} />
+      <span
+        className={clsx(
+          styles["otp-legend__icon"],
+          styles["otp-legend__icon--scheduled-route"],
+        )}
+      />
       <span className={styles["otp-legend__value"]}>
         <strong>Scheduled Route</strong>
       </span>
@@ -803,13 +833,17 @@ export const VehicleJourneyMap = ({
             className={styles["vehicle-journeys__map-recentre"]}
             onClick={recentre}
           >
-            <ReCentreIcon className={styles["vehicle-journeys__map-recentre-icon"]} />
+            <ReCentreIcon
+              className={styles["vehicle-journeys__map-recentre-icon"]}
+            />
             Re-centre
           </button>,
           recentrePortal,
         )}
       {!hasMapData && !loading ? (
-        <p className={clsx("govuk-body", styles["vehicle-journeys__map-empty"])}>
+        <p
+          className={clsx("govuk-body", styles["vehicle-journeys__map-empty"])}
+        >
           No map data available
         </p>
       ) : null}

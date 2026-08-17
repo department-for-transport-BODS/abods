@@ -96,7 +96,10 @@ export const DistanceFilters = ({
         </div>
       </div>
       <div
-        className={clsx(styles["distance-grid__filters"], styles["distance-grid__filtersLast"])}
+        className={clsx(
+          styles["distance-grid__filters"],
+          styles["distance-grid__filtersLast"],
+        )}
       >
         <div className={styles["distance-grid__filter"]}>
           <MultiselectCheckbox

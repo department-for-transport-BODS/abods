@@ -9,9 +9,7 @@ interface PageProps {
 
 export const Page = ({ backLink, children }: PageProps) => (
   <div className={styles.page}>
-    {backLink ? (
-      <div className={styles.backLink}>{backLink}</div>
-    ) : null}
+    {backLink ? <div className={styles.backLink}>{backLink}</div> : null}
     <main
       id="content"
       className={clsx(styles.mainWrapper, "govuk-main-wrapper")}

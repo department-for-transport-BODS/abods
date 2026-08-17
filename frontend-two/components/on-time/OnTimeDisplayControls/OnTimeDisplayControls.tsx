@@ -58,9 +58,7 @@ export const OnTimeDisplayControls = ({
   );
 
   return (
-    <div
-      className={clsx(styles.container, "govuk-!-margin-top-6", className)}
-    >
+    <div className={clsx(styles.container, "govuk-!-margin-top-6", className)}>
       {groupInputs ? (
         <div className={styles.inputsContainer}>
           {beforeDirections}

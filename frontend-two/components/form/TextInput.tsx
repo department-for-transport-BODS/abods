@@ -52,7 +52,11 @@ export const TextInput = <T,>({
         </p>
       ) : null}
       <input
-        className={clsx("govuk-input", widthClass, error && "govuk-input--error")}
+        className={clsx(
+          "govuk-input",
+          widthClass,
+          error && "govuk-input--error",
+        )}
         id={inputId}
         name={inputId}
         type={isPassword ? "password" : "text"}

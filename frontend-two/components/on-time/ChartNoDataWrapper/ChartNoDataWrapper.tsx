@@ -77,4 +77,4 @@ export const ChartNoDataWrapper = ({
       </div>
     </div>
   );
-}; 
+};

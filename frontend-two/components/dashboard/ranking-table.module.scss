@@ -53,7 +53,8 @@
   overflow-wrap: normal;
   word-break: normal;
 }
-.ranking-table__stat, .ranking-table__trend {
+.ranking-table__stat,
+.ranking-table__trend {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -63,7 +64,8 @@
 .ranking-table__trend {
   text-align: right;
 }
-.ranking-table__no-data, .ranking-table__loading {
+.ranking-table__no-data,
+.ranking-table__loading {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -84,10 +86,14 @@
       padding-right: govuk-spacing(2);
     }
   }
-  .ranking-table__col-service, .ranking-table__col-operator, .ranking-table__col-stat, .ranking-table__col-trend {
+  .ranking-table__col-service,
+  .ranking-table__col-operator,
+  .ranking-table__col-stat,
+  .ranking-table__col-trend {
     width: auto;
   }
-  .ranking-table__service, .ranking-table__operator {
+  .ranking-table__service,
+  .ranking-table__operator {
     min-width: 0;
   }
 }

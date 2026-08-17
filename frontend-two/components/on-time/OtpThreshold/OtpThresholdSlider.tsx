@@ -54,7 +54,9 @@ export const OtpThresholdSlider = ({
         <span className={styles["otp-threshold-slider__label"]}>Early</span>
         <span className={styles["otp-threshold-slider__scheduled"]}>
           <span>Scheduled departure</span>
-          <span className={styles["otp-threshold-slider__scheduled-value"]}>0:00</span>
+          <span className={styles["otp-threshold-slider__scheduled-value"]}>
+            0:00
+          </span>
         </span>
         <span className={styles["otp-threshold-slider__label"]}>Late</span>
       </div>

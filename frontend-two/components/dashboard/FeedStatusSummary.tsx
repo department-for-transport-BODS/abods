@@ -28,7 +28,10 @@ export const FeedStatusSummary = ({ operators }: FeedStatusSummaryProps) => (
         {operators.length === 0 ? (
           <tr>
             <td
-              className={clsx(styles["feed-status-summary__operator"], styles["feed-status-summary__operator--muted"])}
+              className={clsx(
+                styles["feed-status-summary__operator"],
+                styles["feed-status-summary__operator--muted"],
+              )}
               colSpan={2}
             >
               No operators available.

@@ -27,7 +27,8 @@
   .dashboard__feeds {
     display: flex;
   }
-  .dashboard__vehicles-status, .dashboard__feed-alerts {
+  .dashboard__vehicles-status,
+  .dashboard__feed-alerts {
     flex-basis: 50%;
   }
   .dashboard__vehicles-status {
@@ -51,7 +52,8 @@
   .dashboard__vehicles-status {
     margin-bottom: govuk-spacing(6);
   }
-  .dashboard__vehicles-status, .dashboard__feed-alerts {
+  .dashboard__vehicles-status,
+  .dashboard__feed-alerts {
     flex-basis: auto;
     margin-right: 0;
   }

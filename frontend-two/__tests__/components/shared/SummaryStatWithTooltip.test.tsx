@@ -19,8 +19,6 @@ describe("SummaryStatWithTooltip", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "92.00%" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "92.00%" })).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 @use "../../styles/govuk-module" as *;
-.performance__no-data, .performance__chart {
+.performance__no-data,
+.performance__chart {
   min-height: rem(300);
   margin-bottom: govuk-spacing(6);
 }

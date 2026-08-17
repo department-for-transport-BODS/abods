@@ -104,7 +104,12 @@ const JourneySummaryList = ({
   vehicleRef: string | null;
   distance?: number | null;
 }) => (
-  <dl className={clsx("govuk-summary-list", styles["vehicle-journeys__summary-list"])}>
+  <dl
+    className={clsx(
+      "govuk-summary-list",
+      styles["vehicle-journeys__summary-list"],
+    )}
+  >
     <div className="govuk-summary-list__row">
       <dt className="govuk-summary-list__key">Operator:</dt>
       <dd className="govuk-summary-list__value">
@@ -199,7 +204,9 @@ const JourneyNav = ({
     currentJourneyIndex >= 0 && currentJourneyIndex < journeys.length - 1
       ? journeys[currentJourneyIndex + 1]
       : null;
-  const previousIcon = <CaretLeftIcon className={styles["journey-nav__icon"]} />;
+  const previousIcon = (
+    <CaretLeftIcon className={styles["journey-nav__icon"]} />
+  );
   const nextIcon = <CaretRightIcon className={styles["journey-nav__icon"]} />;
 
   return (
@@ -221,7 +228,12 @@ const JourneyNav = ({
           <span>{formatJourneyStartTime(previous)}</span>
         </JourneyNavLink>
       ) : (
-        <span className={clsx(styles["journey-nav__link"], styles["journey-nav__link--disabled"])}>
+        <span
+          className={clsx(
+            styles["journey-nav__link"],
+            styles["journey-nav__link--disabled"],
+          )}
+        >
           {previousIcon}
         </span>
       )}
@@ -241,7 +253,12 @@ const JourneyNav = ({
           {nextIcon}
         </JourneyNavLink>
       ) : (
-        <span className={clsx(styles["journey-nav__link"], styles["journey-nav__link--disabled"])}>
+        <span
+          className={clsx(
+            styles["journey-nav__link"],
+            styles["journey-nav__link--disabled"],
+          )}
+        >
           {nextIcon}
         </span>
       )}
@@ -332,15 +349,21 @@ const StopTime = ({
 }) => {
   const formatted = formatStopTime(dateTime, includeSeconds);
   if (!includeSeconds || formatted === "-" || formatted.length < 8) {
-    return <span className={styles["stop-list-item__scheduled"]}>{formatted}</span>;
+    return (
+      <span className={styles["stop-list-item__scheduled"]}>{formatted}</span>
+    );
   }
 
   const [hoursMinutes, seconds] = [formatted.slice(0, 5), formatted.slice(5)];
 
   return (
     <span className={styles["stop-list-item__time-container"]}>
-      <span className={styles["stop-list-item__scheduled"]}>{hoursMinutes}</span>
-      <span className={styles["stop-list-item__time-container--seconds"]}>{seconds}</span>
+      <span className={styles["stop-list-item__scheduled"]}>
+        {hoursMinutes}
+      </span>
+      <span className={styles["stop-list-item__time-container--seconds"]}>
+        {seconds}
+      </span>
     </span>
   );
 };
@@ -368,24 +391,37 @@ const StopList = ({
       className={styles["vehicle-journeys__stop-list"]}
       aria-label="Scheduled and actual stops"
     >
-      <div className={clsx(styles["stop-list-item"], styles["stop-list-header"])}>
+      <div
+        className={clsx(styles["stop-list-item"], styles["stop-list-header"])}
+      >
         <div></div>
         <div></div>
         <div className={styles["stop-list-item__heading"]}>Scheduled</div>
         <div className={styles["stop-list-item__heading"]}>Actual</div>
       </div>
       {loading ? (
-        <div className={styles["vehicle-journeys__stop-list-loading"]} aria-live="polite">
+        <div
+          className={styles["vehicle-journeys__stop-list-loading"]}
+          aria-live="polite"
+        >
           <Spinner size="x-small" />
           <span className="govuk-visually-hidden">Loading stops</span>
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className={clsx(styles["stop-list-item"], styles["stop-list-item--skeleton"])}
+              className={clsx(
+                styles["stop-list-item"],
+                styles["stop-list-item--skeleton"],
+              )}
               aria-hidden="true"
             >
               <div className={styles["stop-list-item__skeleton-block"]} />
-              <div className={clsx(styles["stop-list-item__skeleton-block"], styles["stop-list-item__skeleton-block--wide"])} />
+              <div
+                className={clsx(
+                  styles["stop-list-item__skeleton-block"],
+                  styles["stop-list-item__skeleton-block--wide"],
+                )}
+              />
               <div className={styles["stop-list-item__skeleton-block"]} />
               <div className={styles["stop-list-item__skeleton-block"]} />
             </div>
@@ -451,7 +487,10 @@ const StopList = ({
                 <div className={styles["stop-list-item__value-container"]}>
                   <button
                     type="button"
-                    className={clsx(styles["stop-list-item__name"], "unbuttoned")}
+                    className={clsx(
+                      styles["stop-list-item__name"],
+                      "unbuttoned",
+                    )}
                     onClick={() => onStopSelect(stop)}
                     onMouseEnter={() => onStopHover(stop)}
                     onMouseLeave={() => onStopHover(null)}
@@ -461,7 +500,12 @@ const StopList = ({
                     <span>{stop.stopName || "-"}</span>
                   </button>
                 </div>
-                <div className={clsx(styles["stop-list-item__value-container"], styles["stop-list-item__value-container__align-right"])}>
+                <div
+                  className={clsx(
+                    styles["stop-list-item__value-container"],
+                    styles["stop-list-item__value-container__align-right"],
+                  )}
+                >
                   {displayTimingDetails ? (
                     <StopTime
                       dateTime={stop.scheduledDepartureUtc}
@@ -469,7 +513,12 @@ const StopList = ({
                     />
                   ) : null}
                 </div>
-                <div className={clsx(styles["stop-list-item__value-container"], styles["stop-list-item__value-container__align-right"])}>
+                <div
+                  className={clsx(
+                    styles["stop-list-item__value-container"],
+                    styles["stop-list-item__value-container__align-right"],
+                  )}
+                >
                   {displayTimingDetails ? (
                     actualDeparture ? (
                       <Tooltip

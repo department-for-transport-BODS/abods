@@ -147,7 +147,8 @@
   align-items: center;
   min-width: 0;
 }
-.stop-list-item__heading, .stop-list-item__value-container__align-right {
+.stop-list-item__heading,
+.stop-list-item__value-container__align-right {
   text-align: right;
   justify-content: flex-end;
 }
@@ -200,7 +201,8 @@
     stroke-width: 2px;
   }
 }
-.stop-list-item__scheduled, .stop-list-item__actual {
+.stop-list-item__scheduled,
+.stop-list-item__actual {
   font-variant-numeric: tabular-nums;
 }
 .stop-list-item__time-container {
@@ -211,7 +213,8 @@
   font-size: calc(100% - 4px);
 }
 @media (max-width: 58.75em) {
-  .vehicle-journeys__header-container, .vehicle-journeys__stop-map-grid {
+  .vehicle-journeys__header-container,
+  .vehicle-journeys__stop-map-grid {
     grid-template-columns: 1fr;
   }
   .vehicle-journeys__sticky-container {

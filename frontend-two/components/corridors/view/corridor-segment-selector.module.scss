@@ -47,42 +47,42 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
     outline: 3px solid govuk-functional-colour(focus);
   }
 }
-.segment-selector__segment--active, .segment-selector__segment:active {
+.segment-selector__segment--active,
+.segment-selector__segment:active {
   background-color: govuk-colour("blue");
 }
 .segment-selector__segment--all {
   display: block;
   margin: 0 ($segment-stop-size + $segment-stop-surround) 2px;
-  width: calc(
-        100% - #{(2 * ($segment-stop-size + $segment-stop-surround))}
-      );
+  width: calc(100% - #{(2 * ($segment-stop-size + $segment-stop-surround))});
 }
 .segment-selector__segment__invalid-service-link {
   background: repeating-linear-gradient(
-        to right,
-        govuk-colour("black", $variant: "tint-95"),
-        govuk-colour("black", $variant: "tint-95") 10px,
-        govuk-colour("white") 4px,
-        govuk-colour("white") 14px
-      );
+    to right,
+    govuk-colour("black", $variant: "tint-95"),
+    govuk-colour("black", $variant: "tint-95") 10px,
+    govuk-colour("white") 4px,
+    govuk-colour("white") 14px
+  );
   &:hover {
     background: repeating-linear-gradient(
-          to right,
-          govuk-colour("blue", $variant: "tint-25"),
-          govuk-colour("blue", $variant: "tint-25") 10px,
-          govuk-colour("white") 4px,
-          govuk-colour("white") 14px
-        );
+      to right,
+      govuk-colour("blue", $variant: "tint-25"),
+      govuk-colour("blue", $variant: "tint-25") 10px,
+      govuk-colour("white") 4px,
+      govuk-colour("white") 14px
+    );
   }
 }
-.segment-selector__segment__invalid-service-link:active, .segment-selector__segment__invalid-service-link--active {
+.segment-selector__segment__invalid-service-link:active,
+.segment-selector__segment__invalid-service-link--active {
   background: repeating-linear-gradient(
-          to right,
-          govuk-colour("blue"),
-          govuk-colour("blue") 10px,
-          govuk-colour("white") 4px,
-          govuk-colour("white") 14px
-        );
+    to right,
+    govuk-colour("blue"),
+    govuk-colour("blue") 10px,
+    govuk-colour("white") 4px,
+    govuk-colour("white") 14px
+  );
 }
 .segment-selector__segments-wrapper {
   display: flex;

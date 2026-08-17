@@ -24,10 +24,7 @@ const Document = () => {
           href="/assets/images/govuk-icon-mask.svg"
           color="#1d70b8"
         />
-        <link
-          rel="apple-touch-icon"
-          href="/assets/images/govuk-icon-180.png"
-        />
+        <link rel="apple-touch-icon" href="/assets/images/govuk-icon-180.png" />
         <link rel="manifest" href="/assets/manifest.json" />
         <meta
           property="og:image"

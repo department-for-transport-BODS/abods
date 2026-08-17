@@ -47,19 +47,28 @@ export interface SortableTableProps {
 const ascIcon = (
   <span
     aria-hidden="true"
-    className={clsx(styles["sortable-table-sort-icon"], styles["sortable-table-sort-icon--asc"])}
+    className={clsx(
+      styles["sortable-table-sort-icon"],
+      styles["sortable-table-sort-icon--asc"],
+    )}
   />
 );
 const descIcon = (
   <span
     aria-hidden="true"
-    className={clsx(styles["sortable-table-sort-icon"], styles["sortable-table-sort-icon--desc"])}
+    className={clsx(
+      styles["sortable-table-sort-icon"],
+      styles["sortable-table-sort-icon--desc"],
+    )}
   />
 );
 const unsortedIcon = (
   <span
     aria-hidden="true"
-    className={clsx(styles["sortable-table-sort-icon"], styles["sortable-table-sort-icon--none"])}
+    className={clsx(
+      styles["sortable-table-sort-icon"],
+      styles["sortable-table-sort-icon--none"],
+    )}
   />
 );
 

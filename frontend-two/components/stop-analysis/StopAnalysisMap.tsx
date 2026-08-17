@@ -718,7 +718,10 @@ export const StopAnalysisMap = ({
 
   return (
     <div className={styles["stop-analysis-map"]}>
-      <div ref={mapContainer} className={styles["stop-analysis-map__container"]} />
+      <div
+        ref={mapContainer}
+        className={styles["stop-analysis-map__container"]}
+      />
       <MapDisplayOptions
         activeStyle={activeStyle}
         mapboxSatelliteStyle={mapboxSatelliteStyle}
@@ -746,13 +749,33 @@ export const StopAnalysisMap = ({
 
 const StopAnalysisLegend = () => (
   <div className={styles["stop-analysis-map__legend"]}>
-    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--high"])} />
+    <span
+      className={clsx(
+        styles["stop-analysis-map__dot"],
+        styles["stop-analysis-map__dot--high"],
+      )}
+    />
     <span>&gt; 80% on-time</span>
-    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--med"])} />
+    <span
+      className={clsx(
+        styles["stop-analysis-map__dot"],
+        styles["stop-analysis-map__dot--med"],
+      )}
+    />
     <span>60% - 80% on-time</span>
-    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--low"])} />
+    <span
+      className={clsx(
+        styles["stop-analysis-map__dot"],
+        styles["stop-analysis-map__dot--low"],
+      )}
+    />
     <span>&lt; 60% on-time</span>
-    <span className={clsx(styles["stop-analysis-map__dot"], styles["stop-analysis-map__dot--no-data"])} />
+    <span
+      className={clsx(
+        styles["stop-analysis-map__dot"],
+        styles["stop-analysis-map__dot--no-data"],
+      )}
+    />
     <span>No data</span>
   </div>
 );

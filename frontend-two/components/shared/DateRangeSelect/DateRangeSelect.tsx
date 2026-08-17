@@ -180,13 +180,20 @@ export const DateRangeSelect = ({
 
   return (
     <div
-      className={clsx(styles["date-range-select"], fullWidth && styles["date-range-select--full-width"], !hideLabel && "govuk-form-group")}
+      className={clsx(
+        styles["date-range-select"],
+        fullWidth && styles["date-range-select--full-width"],
+        !hideLabel && "govuk-form-group",
+      )}
       ref={ref}
     >
       {!hideLabel && <label className="govuk-label">{label}</label>}
       <button
         type="button"
-        className={clsx(styles["date-range-select__button"], fullWidth && styles["date-range-select__button--full-width"])}
+        className={clsx(
+          styles["date-range-select__button"],
+          fullWidth && styles["date-range-select__button--full-width"],
+        )}
         onClick={() => {
           setDraftDateRange(selectedDateRange);
           if (selectedDateRange.start?.isValid) {
@@ -208,7 +215,10 @@ export const DateRangeSelect = ({
               <label className="govuk-label">Starting</label>
               <input
                 readOnly={true}
-                className={clsx("govuk-input", styles["date-range-select__date-input"])}
+                className={clsx(
+                  "govuk-input",
+                  styles["date-range-select__date-input"],
+                )}
                 type="date"
                 max={formatDateToISODateString(maxDate)}
                 value={
@@ -223,7 +233,10 @@ export const DateRangeSelect = ({
               <label className="govuk-label">Ending</label>
               <input
                 readOnly={true}
-                className={clsx("govuk-input", styles["date-range-select__date-input"])}
+                className={clsx(
+                  "govuk-input",
+                  styles["date-range-select__date-input"],
+                )}
                 type="date"
                 max={formatDateToISODateString(maxDate)}
                 value={
@@ -237,12 +250,15 @@ export const DateRangeSelect = ({
           </div>
           <div className={styles["date-range-controls__calendar-wrapper"]}>
             <div className={styles["date-range-controls__calendar"]}>
-              <div
-                className={styles["date-range-controls__calendar-header"]}
-              >
+              <div className={styles["date-range-controls__calendar-header"]}>
                 <button
                   type="button"
-                  className={clsx(styles["date-range-controls__month-step"], styles["date-range-controls__month-step--prev"], prevMonthDisabled && styles["date-range-controls__month-step--disabled"])}
+                  className={clsx(
+                    styles["date-range-controls__month-step"],
+                    styles["date-range-controls__month-step--prev"],
+                    prevMonthDisabled &&
+                      styles["date-range-controls__month-step--disabled"],
+                  )}
                   onClick={() =>
                     !prevMonthDisabled &&
                     setMonthLeft((m) => m.minus({ months: 1 }))
@@ -251,7 +267,11 @@ export const DateRangeSelect = ({
                   ‹
                 </button>
                 <span
-                  className={clsx(styles["date-range-controls__month-name"], monthLeft.hasSame(today, "month") && styles["date-range-controls__month-name--this-month"])}
+                  className={clsx(
+                    styles["date-range-controls__month-name"],
+                    monthLeft.hasSame(today, "month") &&
+                      styles["date-range-controls__month-name--this-month"],
+                  )}
                 >
                   {monthLeft.toFormat("MMM yyyy")}
                 </span>
@@ -267,17 +287,24 @@ export const DateRangeSelect = ({
               />
             </div>
             <div className={styles["date-range-controls__calendar"]}>
-              <div
-                className={styles["date-range-controls__calendar-header"]}
-              >
+              <div className={styles["date-range-controls__calendar-header"]}>
                 <span
-                  className={clsx(styles["date-range-controls__month-name"], monthRight.hasSame(today, "month") && styles["date-range-controls__month-name--this-month"])}
+                  className={clsx(
+                    styles["date-range-controls__month-name"],
+                    monthRight.hasSame(today, "month") &&
+                      styles["date-range-controls__month-name--this-month"],
+                  )}
                 >
                   {monthRight.toFormat("MMM yyyy")}
                 </span>
                 <button
                   type="button"
-                  className={clsx(styles["date-range-controls__month-step"], styles["date-range-controls__month-step--next"], nextMonthDisabled && styles["date-range-controls__month-step--disabled"])}
+                  className={clsx(
+                    styles["date-range-controls__month-step"],
+                    styles["date-range-controls__month-step--next"],
+                    nextMonthDisabled &&
+                      styles["date-range-controls__month-step--disabled"],
+                  )}
                   onClick={() =>
                     !nextMonthDisabled &&
                     setMonthLeft((m) => m.plus({ months: 1 }))
@@ -307,7 +334,10 @@ export const DateRangeSelect = ({
             </button>
             <button
               type="button"
-              className={clsx("govuk-button", styles["date-range-select__apply"])}
+              className={clsx(
+                "govuk-button",
+                styles["date-range-select__apply"],
+              )}
               disabled={
                 !draftDateRange.start?.isValid || !draftDateRange.end?.isValid
               }

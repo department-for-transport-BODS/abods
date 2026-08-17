@@ -259,22 +259,28 @@ export const OperatorSelector = ({
           Operator
         </label>
       </div>
-      <div
-        ref={containerRef}
-        className={styles.selector}
-        onBlur={handleBlur}
-      >
+      <div ref={containerRef} className={styles.selector} onBlur={handleBlur}>
         <div
           data-labelforid="operator_selector"
-          className={clsx(styles.gdsSelect, isOpen && styles["gdsSelect--open"], isFocused && styles["gdsSelect--focused"], hasSearchTerm && styles["gdsSelect--filtering"])}
+          className={clsx(
+            styles.gdsSelect,
+            isOpen && styles["gdsSelect--open"],
+            isFocused && styles["gdsSelect--focused"],
+            hasSearchTerm && styles["gdsSelect--filtering"],
+          )}
         >
           <div
             className={styles.container}
             onMouseDown={handleContainerMouseDown}
           >
             <div className={styles.valueContainer}>
-              <div className={styles.value} aria-hidden={hasSearchTerm && isOpen}>
-                <span className={styles.valueLabel}>{selectedOption.label}</span>
+              <div
+                className={styles.value}
+                aria-hidden={hasSearchTerm && isOpen}
+              >
+                <span className={styles.valueLabel}>
+                  {selectedOption.label}
+                </span>
               </div>
               <div className={styles.input}>
                 <input
@@ -326,10 +332,7 @@ export const OperatorSelector = ({
               aria-label="Options List"
               style={{ opacity: 1 }}
             >
-              <div
-                role="listbox"
-                className={styles.dropdownItems}
-              >
+              <div role="listbox" className={styles.dropdownItems}>
                 {filteredOptions.map((option, index) => (
                   <div
                     key={option.value}
@@ -339,7 +342,12 @@ export const OperatorSelector = ({
                     id={`${panelId}-${index}`}
                     role="option"
                     aria-selected={option.value === selectedValue}
-                    className={clsx(styles.option, option.value === selectedValue && styles["option--selected"], index === activeIndex && styles["option--active"])}
+                    className={clsx(
+                      styles.option,
+                      option.value === selectedValue &&
+                        styles["option--selected"],
+                      index === activeIndex && styles["option--active"],
+                    )}
                     onMouseEnter={() => setActiveIndex(index)}
                     onMouseDown={(event) => {
                       // Keep focus on the combobox input until selection is applied.

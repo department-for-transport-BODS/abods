@@ -65,7 +65,13 @@ export const MapDisplayOptions = ({
     <div ref={optionsRef} className={styles.root}>
       <button
         type="button"
-        className={clsx("govuk-button", "govuk-button--secondary", "govuk-!-margin-bottom-0", styles.summary, showDisplayOptions && styles.summaryOpen)}
+        className={clsx(
+          "govuk-button",
+          "govuk-button--secondary",
+          "govuk-!-margin-bottom-0",
+          styles.summary,
+          showDisplayOptions && styles.summaryOpen,
+        )}
         aria-haspopup="true"
         aria-expanded={showDisplayOptions}
         aria-controls={panelId}

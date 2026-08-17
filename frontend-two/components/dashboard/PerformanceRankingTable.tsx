@@ -164,7 +164,10 @@ export const PerformanceRankingTable = ({
                 <tr key={`${noc}-${lineId}`}>
                   <td className={styles["ranking-table__service"]}>
                     <Link
-                      className={clsx("govuk-link", styles["ranking-table__link"])}
+                      className={clsx(
+                        "govuk-link",
+                        styles["ranking-table__link"],
+                      )}
                       href={noc ? `/on-time/${noc}/${lineId}` : "/on-time"}
                     >
                       {buildServiceName(service)}
@@ -173,13 +176,20 @@ export const PerformanceRankingTable = ({
                   {nocCode === null ? (
                     <td className={styles["ranking-table__operator"]}>
                       <Tooltip message={noc} selectable>
-                        <span className={styles["ranking-table__operator-text"]}>
+                        <span
+                          className={styles["ranking-table__operator-text"]}
+                        >
                           {getOperatorName(operators, noc)}
                         </span>
                       </Tooltip>
                     </td>
                   ) : null}
-                  <td className={clsx("govuk-!-font-weight-bold", styles["ranking-table__stat"])}>
+                  <td
+                    className={clsx(
+                      "govuk-!-font-weight-bold",
+                      styles["ranking-table__stat"],
+                    )}
+                  >
                     {pct.toFixed(2)}%
                   </td>
                   <td className={styles["ranking-table__trend"]}>

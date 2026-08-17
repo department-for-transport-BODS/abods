@@ -85,7 +85,11 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
                 id="corridors-grid-filter"
                 name="filter"
                 type="search"
-                className={clsx("govuk-input", "govuk-input--width-20", styles["corridors-grid-search__input"])}
+                className={clsx(
+                  "govuk-input",
+                  "govuk-input--width-20",
+                  styles["corridors-grid-search__input"],
+                )}
                 value={filter}
                 onChange={(e) => onFilterChange(e.target.value)}
               />

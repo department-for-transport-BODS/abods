@@ -209,8 +209,16 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
 
   if (loadFailed) {
     return (
-      <div className={clsx(styles["performance-chart"], styles["performance-chart--fallback"])}>
-        <div className={styles["performance-chart__fallback-bars"]} aria-hidden="true">
+      <div
+        className={clsx(
+          styles["performance-chart"],
+          styles["performance-chart--fallback"],
+        )}
+      >
+        <div
+          className={styles["performance-chart__fallback-bars"]}
+          aria-hidden="true"
+        >
           {chartData.map((item) => (
             <div
               key={item.category}

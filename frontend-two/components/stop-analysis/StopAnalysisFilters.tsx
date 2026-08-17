@@ -164,8 +164,18 @@ export const StopAnalysisFilters = ({
 
   return (
     <div className={styles["stop-analysis-filters"]}>
-      <div className={clsx(styles["stop-analysis-filters__grid"], "govuk-!-margin-bottom-2")}>
-        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--date"])}>
+      <div
+        className={clsx(
+          styles["stop-analysis-filters__grid"],
+          "govuk-!-margin-bottom-2",
+        )}
+      >
+        <div
+          className={clsx(
+            styles["stop-analysis-filters__item"],
+            styles["stop-analysis-filters__item--date"],
+          )}
+        >
           <label className="govuk-label">Date Range</label>
           <div className={styles["stop-analysis-filters__date-range"]}>
             <DateRangeSelect
@@ -175,7 +185,10 @@ export const StopAnalysisFilters = ({
               fullWidth
             />
             <select
-              className={clsx("govuk-select", styles["stop-analysis-filters__preset-select"])}
+              className={clsx(
+                "govuk-select",
+                styles["stop-analysis-filters__preset-select"],
+              )}
               value={activePreset}
               onChange={(event) =>
                 handlePresetChange(event.target.value as Period)
@@ -194,7 +207,12 @@ export const StopAnalysisFilters = ({
           </div>
         </div>
 
-        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--admin"])}>
+        <div
+          className={clsx(
+            styles["stop-analysis-filters__item"],
+            styles["stop-analysis-filters__item--admin"],
+          )}
+        >
           <MultiselectCheckbox
             id="stop-analysis-admin-areas"
             label="Admin Areas"
@@ -206,12 +224,23 @@ export const StopAnalysisFilters = ({
           />
         </div>
 
-        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--toggles"], styles["stop-analysis-filters__toggles"])}>
+        <div
+          className={clsx(
+            styles["stop-analysis-filters__item"],
+            styles["stop-analysis-filters__item--toggles"],
+            styles["stop-analysis-filters__toggles"],
+          )}
+        >
           <MatchTypeToggle matchType={matchType} onChange={onMatchTypeChange} />
           <StopTypeToggle stopType={stopType} onChange={onStopTypeChange} />
         </div>
 
-        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--location"])}>
+        <div
+          className={clsx(
+            styles["stop-analysis-filters__item"],
+            styles["stop-analysis-filters__item--location"],
+          )}
+        >
           <LocationLookupField
             id="sa-location-search"
             label="Location name or postcode"
@@ -228,7 +257,12 @@ export const StopAnalysisFilters = ({
           />
         </div>
 
-        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--operators"])}>
+        <div
+          className={clsx(
+            styles["stop-analysis-filters__item"],
+            styles["stop-analysis-filters__item--operators"],
+          )}
+        >
           <MultiselectCheckbox
             id="stop-analysis-operators"
             label="Operators"
@@ -240,7 +274,12 @@ export const StopAnalysisFilters = ({
           />
         </div>
 
-        <div className={clsx(styles["stop-analysis-filters__item"], styles["stop-analysis-filters__item--services"])}>
+        <div
+          className={clsx(
+            styles["stop-analysis-filters__item"],
+            styles["stop-analysis-filters__item--services"],
+          )}
+        >
           <MultiselectCheckbox
             id="stop-analysis-services"
             label="Services"

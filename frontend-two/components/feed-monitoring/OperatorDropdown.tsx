@@ -46,7 +46,9 @@ export const OperatorDropdown = ({
         onClick={() => setOpenDropdown((o) => !o)}
         className={styles["operator-dropdown__button"]}
       >
-        <span className={clsx("govuk-body", styles["operator-dropdown__label"])}>
+        <span
+          className={clsx("govuk-body", styles["operator-dropdown__label"])}
+        >
           {current ? `${current.name} (${current.nocCode})` : "Select operator"}
         </span>
         <svg
@@ -54,7 +56,10 @@ export const OperatorDropdown = ({
           height="16"
           viewBox="0 0 16 16"
           fill="none"
-          className={clsx(styles["operator-dropdown__chevron"], openDropdown && styles["operator-dropdown__chevron--open"])}
+          className={clsx(
+            styles["operator-dropdown__chevron"],
+            openDropdown && styles["operator-dropdown__chevron--open"],
+          )}
         >
           <path
             d="M2 5l6 6 6-6"
@@ -74,10 +79,17 @@ export const OperatorDropdown = ({
               onClick={() => handleSelect(op)}
               onMouseEnter={() => setHovered(op.nocCode)}
               onMouseLeave={() => setHovered(null)}
-              className={clsx(styles["operator-dropdown__item"], hovered === op.nocCode && styles["operator-dropdown__item--hovered"])}
+              className={clsx(
+                styles["operator-dropdown__item"],
+                hovered === op.nocCode &&
+                  styles["operator-dropdown__item--hovered"],
+              )}
             >
               <span
-                className={clsx("govuk-body", styles["operator-dropdown__item-text"])}
+                className={clsx(
+                  "govuk-body",
+                  styles["operator-dropdown__item-text"],
+                )}
               >
                 {op.name} ({op.nocCode})
               </span>

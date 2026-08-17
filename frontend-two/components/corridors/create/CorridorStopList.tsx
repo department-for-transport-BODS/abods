@@ -36,7 +36,9 @@ export const CorridorStopList = ({
               <div className={styles["corridor-stop-list__stop-label"]}>
                 {stop.stopName}
               </div>
-              <div className={styles["corridor-stop-list__naptan"]}>{stop.naptan}</div>
+              <div className={styles["corridor-stop-list__naptan"]}>
+                {stop.naptan}
+              </div>
             </div>
             {canRemove ? (
               <button

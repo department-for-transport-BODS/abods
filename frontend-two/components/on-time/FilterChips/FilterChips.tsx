@@ -26,14 +26,10 @@ const weekdays = "Mon, Tue, Wed, Thur, Fri";
 const DEFAULT_START_TIME = "00:00";
 const DEFAULT_END_TIME = "23:59";
 
-const getDayOfWeekValues = (
-  filters: PerformanceFiltersInputType,
-): string => {
+const getDayOfWeekValues = (filters: PerformanceFiltersInputType): string => {
   const value = getEntries(filters.dayOfWeekFlags ?? {})
     .filter(([, enabled]) => enabled)
-    .map(
-      ([day]) => dayOfWeekValueMap[day as keyof typeof dayOfWeekValueMap],
-    )
+    .map(([day]) => dayOfWeekValueMap[day as keyof typeof dayOfWeekValueMap])
     .join(", ");
 
   if (value === weekdays) {
@@ -111,9 +107,7 @@ export const FilterChips = ({
   const clearAdminAreaFilter = (adminAreaId: string) => {
     updateFilters({
       ...filters,
-      adminAreaIds: filters.adminAreaIds?.filter(
-        (id) => id !== adminAreaId,
-      ),
+      adminAreaIds: filters.adminAreaIds?.filter((id) => id !== adminAreaId),
     });
   };
 
@@ -134,21 +128,14 @@ export const FilterChips = ({
 
   const timeRange = `${filters.startTime ?? DEFAULT_START_TIME} - ${filters.endTime ?? DEFAULT_END_TIME}`;
 
-  const minDelay = filters.minDelay
-    ? `${filters.minDelay * -1} minutes`
-    : "";
+  const minDelay = filters.minDelay ? `${filters.minDelay * -1} minutes` : "";
 
-  const maxDelay = filters.maxDelay
-    ? `${filters.maxDelay} minutes`
-    : "";
+  const maxDelay = filters.maxDelay ? `${filters.maxDelay} minutes` : "";
 
   return (
     <ul className={styles.list} aria-label="Active filters">
       {filters.adminAreaIds?.map((adminAreaId) => (
-        <li
-          className={styles.listItem}
-          key={adminAreaId}
-        >
+        <li className={styles.listItem} key={adminAreaId}>
           <FilterChip
             label="Area"
             value={adminAreaNameById.get(adminAreaId) ?? adminAreaId}

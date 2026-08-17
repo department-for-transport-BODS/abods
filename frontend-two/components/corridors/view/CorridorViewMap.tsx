@@ -337,7 +337,12 @@ export const CorridorViewMap = ({
   };
 
   return (
-    <div className={clsx(styles["corridor__map-wrapper"], "govuk-!-margin-bottom-7")}>
+    <div
+      className={clsx(
+        styles["corridor__map-wrapper"],
+        "govuk-!-margin-bottom-7",
+      )}
+    >
       <div
         ref={containerRef}
         className={styles.corridor__map}

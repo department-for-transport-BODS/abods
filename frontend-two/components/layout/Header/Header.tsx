@@ -42,7 +42,11 @@ export const Header = ({ serviceName }: { serviceName: string }) => {
       {showAuthControls ? (
         <div className={styles.helpOverlay}>
           <button
-            className={clsx(styles.helpLink, "govuk-header__link", "unbuttoned")}
+            className={clsx(
+              styles.helpLink,
+              "govuk-header__link",
+              "unbuttoned",
+            )}
             type="button"
             onClick={openHelpdesk}
           >

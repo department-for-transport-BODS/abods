@@ -134,7 +134,12 @@ export const PerformanceWidget = ({
   return (
     <div className="performance app-performance">
       {!loaded ? (
-        <div className={clsx(styles["performance__no-data"], styles["performance__no-data--loading"])}>
+        <div
+          className={clsx(
+            styles["performance__no-data"],
+            styles["performance__no-data--loading"],
+          )}
+        >
           <Spinner size="default" message="Loading..." />
         </div>
       ) : !stats && !errored ? (

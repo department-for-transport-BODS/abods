@@ -184,7 +184,9 @@ describe("MultiselectCheckbox", () => {
     await user.click(screen.getByRole("textbox", { name: "Admin Areas" }));
 
     const dropdown = screen.getByRole("listbox");
-    expect(within(dropdown).queryByText("All Admin Areas")).not.toBeInTheDocument();
+    expect(
+      within(dropdown).queryByText("All Admin Areas"),
+    ).not.toBeInTheDocument();
     expect(
       within(dropdown).queryByRole("button", { name: "Show all" }),
     ).not.toBeInTheDocument();

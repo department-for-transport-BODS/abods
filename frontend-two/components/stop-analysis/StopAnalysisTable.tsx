@@ -76,7 +76,9 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "stopId", label: "NAPTAN", alwaysVisible: true },
   {
     key: "timingPoint",
-    label: <TimingIcon className={styles["stop-analysis-table__timing-icon"]} />,
+    label: (
+      <TimingIcon className={styles["stop-analysis-table__timing-icon"]} />
+    ),
     modalLabel: "Timing Point",
   },
   { key: "stopName", label: "Name" },
@@ -293,18 +295,27 @@ export const StopAnalysisTable = ({
   }
 
   return (
-    <div className={clsx(styles["stop-analysis-table"], "govuk-!-margin-top-6")}>
+    <div
+      className={clsx(styles["stop-analysis-table"], "govuk-!-margin-top-6")}
+    >
       <div className={styles["stop-analysis-table__display-toolbar"]}>
         <div className={styles["stop-analysis-table__display-actions"]}>
           <button
             type="button"
-            className={clsx("govuk-link", "button-link", styles["stop-analysis-table__display-options-link"])}
+            className={clsx(
+              "govuk-link",
+              "button-link",
+              styles["stop-analysis-table__display-options-link"],
+            )}
             onClick={openDisplayOptions}
           >
             Display options
           </button>
           <fieldset
-            className={clsx("govuk-fieldset", styles["stop-analysis-table__display-mode"])}
+            className={clsx(
+              "govuk-fieldset",
+              styles["stop-analysis-table__display-mode"],
+            )}
             aria-label="Show stop performance values as"
           >
             <legend className="govuk-visually-hidden">
@@ -359,7 +370,11 @@ export const StopAnalysisTable = ({
 
       <div className={styles["stop-analysis-table__grid"]}>
         <div
-          className={showTotals ? styles["stop-analysis-table__table--with-totals"] : undefined}
+          className={
+            showTotals
+              ? styles["stop-analysis-table__table--with-totals"]
+              : undefined
+          }
         >
           <SortedPaginatedTable
             key={`${displayMode}-${visibleColumns.join(",")}`}
@@ -372,7 +387,9 @@ export const StopAnalysisTable = ({
               key: `${row.stopId}-${row.direction}`,
               stopId: row.stopId,
               timingPoint: row.timingPoint ? (
-                <TimingIcon className={styles["stop-analysis-table__timing-icon"]} />
+                <TimingIcon
+                  className={styles["stop-analysis-table__timing-icon"]}
+                />
               ) : (
                 ""
               ),

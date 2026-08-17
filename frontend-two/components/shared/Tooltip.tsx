@@ -65,7 +65,13 @@ export const Tooltip = ({
     };
   }, [message]);
 
-  const classNames = clsx(styles.tooltip, as === "button" && "unbuttoned", underline && styles.underline, selectable && styles.selectable, className);
+  const classNames = clsx(
+    styles.tooltip,
+    as === "button" && "unbuttoned",
+    underline && styles.underline,
+    selectable && styles.selectable,
+    className,
+  );
 
   if (as === "span") {
     return (

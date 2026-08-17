@@ -198,7 +198,10 @@ export const VehicleJourneysSearch = ({
           <Spinner size="small" />
           <span className="govuk-visually-hidden">Loading journeys</span>
           <div
-            className={clsx(styles["journey-search-grid"], styles["journey-search-grid--skeleton"])}
+            className={clsx(
+              styles["journey-search-grid"],
+              styles["journey-search-grid--skeleton"],
+            )}
             aria-hidden="true"
           >
             {Array.from({ length: 12 }).map((_, index) => (
@@ -223,7 +226,11 @@ export const VehicleJourneysSearch = ({
                     key={`${journey.groupId}-${journey.directionRef ?? ""}-${journey.startTime}`}
                   >
                     <Link
-                      className={clsx("govuk-link", "govuk-body", styles["journey-search-grid__time"])}
+                      className={clsx(
+                        "govuk-link",
+                        "govuk-body",
+                        styles["journey-search-grid__time"],
+                      )}
                       href={{
                         pathname: "/vehicle-journeys/[journeyId]",
                         query: {
@@ -255,7 +262,11 @@ export const VehicleJourneysSearch = ({
 
       {journeysErrored ? (
         <div
-          className={clsx("govuk-body", "govuk-!-margin-top-8", styles["vehicle-journeys-search__error"])}
+          className={clsx(
+            "govuk-body",
+            "govuk-!-margin-top-8",
+            styles["vehicle-journeys-search__error"],
+          )}
           role="alert"
         >
           <ExclamationInCircleIcon

@@ -183,13 +183,17 @@ it("Renders inactive feeds tables with correct headers", async () => {
       within(tables[0]).getByRole("columnheader", { name: "Operator" }),
     ).toBeInTheDocument();
     expect(
-      within(tables[0]).getByRole("columnheader", { name: "Feed availability" }),
+      within(tables[0]).getByRole("columnheader", {
+        name: "Feed availability",
+      }),
     ).toBeInTheDocument();
     expect(
       within(tables[0]).getByRole("columnheader", { name: "Update frequency" }),
     ).toBeInTheDocument();
     expect(
-      within(tables[0]).getByRole("columnheader", { name: "Unavailable since" }),
+      within(tables[0]).getByRole("columnheader", {
+        name: "Unavailable since",
+      }),
     ).toBeInTheDocument();
   });
 });
@@ -209,7 +213,9 @@ it("Renders active feeds tables with correct headers", async () => {
       within(tables[1]).getByRole("columnheader", { name: "Operator" }),
     ).toBeInTheDocument();
     expect(
-      within(tables[1]).getByRole("columnheader", { name: "Feed availability" }),
+      within(tables[1]).getByRole("columnheader", {
+        name: "Feed availability",
+      }),
     ).toBeInTheDocument();
     expect(
       within(tables[1]).getByRole("columnheader", { name: "Update frequency" }),

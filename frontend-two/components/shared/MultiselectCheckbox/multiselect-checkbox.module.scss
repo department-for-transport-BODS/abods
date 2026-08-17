@@ -115,7 +115,10 @@
 
   &:hover,
   &:focus-within {
-    :global(.govuk-checkboxes__input:not(:disabled) + .govuk-checkboxes__label:before) {
+    :global(
+        .govuk-checkboxes__input:not(:disabled)
+          + .govuk-checkboxes__label:before
+      ) {
       box-shadow: 0 0 0 10px govuk-colour("black", $variant: "tint-80");
     }
   }
@@ -141,4 +144,3 @@
     cursor: not-allowed;
   }
 }
-

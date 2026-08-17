@@ -82,7 +82,11 @@ export const DateSelect = ({
     !rangeStart || month.startOf("month") > rangeStart.startOf("month");
   const canGoNext = !rangeEnd || month.endOf("month") < rangeEnd.endOf("month");
   const hasError = Boolean(error);
-  const formGroupClass = clsx(styles.container, "govuk-form-group", hasError && "govuk-form-group--error");
+  const formGroupClass = clsx(
+    styles.container,
+    "govuk-form-group",
+    hasError && "govuk-form-group--error",
+  );
 
   const commitDate = (next: DateTime) => {
     const iso = formatDateToISODateString(next);

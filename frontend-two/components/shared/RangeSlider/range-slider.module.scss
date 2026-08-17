@@ -120,9 +120,7 @@ $_thumb-height: 40px;
     background: govuk-colour("white");
     cursor: pointer;
     pointer-events: auto;
-    margin-top: calc(
-      (#{$_track-height} - #{$_thumb-height}) / 2
-    );
+    margin-top: calc((#{$_track-height} - #{$_thumb-height}) / 2);
     box-shadow: none;
   }
 

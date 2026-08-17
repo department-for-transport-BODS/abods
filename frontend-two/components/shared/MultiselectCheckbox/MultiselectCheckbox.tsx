@@ -49,18 +49,13 @@ export const MultiselectCheckbox = ({
   const filteredOptions = useMemo(
     () =>
       options.filter((option) =>
-        option.label
-          .toLowerCase()
-          .includes(searchText.toLowerCase()),
+        option.label.toLowerCase().includes(searchText.toLowerCase()),
       ),
     [options, searchText],
   );
 
   const normalizedSelectedValues = useMemo(
-    () =>
-      allowMultiselect
-        ? selectedValues
-        : selectedValues.slice(-1),
+    () => (allowMultiselect ? selectedValues : selectedValues.slice(-1)),
     [allowMultiselect, selectedValues],
   );
 
@@ -122,16 +117,14 @@ export const MultiselectCheckbox = ({
   const displayText = allSelected
     ? placeholder ?? label
     : normalizedSelectedValues.length === 1
-      ? options.find(
-          (option) => option.value === normalizedSelectedValues[0],
-        )?.label ?? `${normalizedSelectedValues.length} selected`
+      ? options.find((option) => option.value === normalizedSelectedValues[0])
+          ?.label ?? `${normalizedSelectedValues.length} selected`
       : `${normalizedSelectedValues.length} selected`;
 
   const selectionSummary =
     normalizedSelectedValues.length === 1
-      ? options.find(
-          (option) => option.value === normalizedSelectedValues[0],
-        )?.label ?? `${normalizedSelectedValues.length} selected`
+      ? options.find((option) => option.value === normalizedSelectedValues[0])
+          ?.label ?? `${normalizedSelectedValues.length} selected`
       : `${normalizedSelectedValues.length} selected`;
 
   const showSelectionSummary = isOpen && hasSelection;
@@ -162,9 +155,7 @@ export const MultiselectCheckbox = ({
             ref={summaryRef}
             className={styles.selectionSummary}
             style={{
-              visibility: showSelectionSummary
-                ? "visible"
-                : "hidden",
+              visibility: showSelectionSummary ? "visible" : "hidden",
             }}
           >
             {selectionSummary}
@@ -181,8 +172,7 @@ export const MultiselectCheckbox = ({
           style={
             showSelectionSummary && summaryRef.current
               ? {
-                  paddingLeft:
-                    summaryRef.current.offsetWidth + 16,
+                  paddingLeft: summaryRef.current.offsetWidth + 16,
                 }
               : undefined
           }
@@ -228,84 +218,85 @@ export const MultiselectCheckbox = ({
         />
 
         {isOpen && (
-        <div
-          className={styles.dropdown}
-          role="listbox"
-          onMouseDown={(event) => event.preventDefault()}
-        >
-
-          {showAllHeader ? (
-            <div className={styles.header}>
-              {showAllLabel ? (
-                <strong className={styles.headerLabel}>
-                  {showAllLabel}
-                </strong>
-              ) : null}
-
-              <button
-                type="button"
-                className={`button-link govuk-link ${styles.headerAction}${
-                  hasSelection || onShowAll
-                    ? ""
-                    : " button-link--disabled"
-                }`}
-                onClick={handleSelectAll}
-                disabled={disabled || (!hasSelection && !onShowAll)}
-              >
-                Show all
-              </button>
-            </div>
-          ) : null}
-
           <div
-            className={allowMultiselect
-              ? `govuk-checkboxes govuk-checkboxes--small ${styles.options}`
-              : styles.optionsSingle}
+            className={styles.dropdown}
+            role="listbox"
+            onMouseDown={(event) => event.preventDefault()}
           >
-            {filteredOptions.length === 0 ? (
-              <p className="govuk-body govuk-!-margin-bottom-0">
-                No items found
-              </p>
-            ) : (
-              filteredOptions.map((option) => (
-                allowMultiselect ? (
-                  <div
-                    key={option.value}
-                    className={`govuk-checkboxes__item ${styles.option}`}
-                  >
-                    <input
-                      id={getOptionId(option.value)}
-                      className="govuk-checkboxes__input"
-                      type="checkbox"
-                      checked={normalizedSelectedValues.includes(option.value)}
-                      onChange={() => handleToggle(option.value)}
-                      disabled={disabled}
-                    />
+            {showAllHeader ? (
+              <div className={styles.header}>
+                {showAllLabel ? (
+                  <strong className={styles.headerLabel}>{showAllLabel}</strong>
+                ) : null}
 
-                    <label
-                      className="govuk-label govuk-checkboxes__label"
-                      htmlFor={getOptionId(option.value)}
+                <button
+                  type="button"
+                  className={`button-link govuk-link ${styles.headerAction}${
+                    hasSelection || onShowAll ? "" : " button-link--disabled"
+                  }`}
+                  onClick={handleSelectAll}
+                  disabled={disabled || (!hasSelection && !onShowAll)}
+                >
+                  Show all
+                </button>
+              </div>
+            ) : null}
+
+            <div
+              className={
+                allowMultiselect
+                  ? `govuk-checkboxes govuk-checkboxes--small ${styles.options}`
+                  : styles.optionsSingle
+              }
+            >
+              {filteredOptions.length === 0 ? (
+                <p className="govuk-body govuk-!-margin-bottom-0">
+                  No items found
+                </p>
+              ) : (
+                filteredOptions.map((option) =>
+                  allowMultiselect ? (
+                    <div
+                      key={option.value}
+                      className={`govuk-checkboxes__item ${styles.option}`}
+                    >
+                      <input
+                        id={getOptionId(option.value)}
+                        className="govuk-checkboxes__input"
+                        type="checkbox"
+                        checked={normalizedSelectedValues.includes(
+                          option.value,
+                        )}
+                        onChange={() => handleToggle(option.value)}
+                        disabled={disabled}
+                      />
+
+                      <label
+                        className="govuk-label govuk-checkboxes__label"
+                        htmlFor={getOptionId(option.value)}
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ) : (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={styles.optionButton}
+                      onClick={() => handleToggle(option.value)}
+                      disabled={disabled}
+                      role="option"
+                      aria-selected={normalizedSelectedValues.includes(
+                        option.value,
+                      )}
                     >
                       {option.label}
-                    </label>
-                  </div>
-                ) : (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={styles.optionButton}
-                    onClick={() => handleToggle(option.value)}
-                    disabled={disabled}
-                    role="option"
-                    aria-selected={normalizedSelectedValues.includes(option.value)}
-                  >
-                    {option.label}
-                  </button>
+                    </button>
+                  ),
                 )
-              ))
-            )}
+              )}
+            </div>
           </div>
-        </div>
         )}
       </div>
     </div>

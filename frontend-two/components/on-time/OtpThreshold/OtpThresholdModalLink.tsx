@@ -29,7 +29,12 @@ export const OtpThresholdModalLink = ({
     <>
       <Tooltip
         message="Compare on-time performance thresholds"
-        className={clsx("govuk-body", "govuk-link", "button-link", styles["otp-threshold-modal-button"])}
+        className={clsx(
+          "govuk-body",
+          "govuk-link",
+          "button-link",
+          styles["otp-threshold-modal-button"],
+        )}
         onClick={() => setOpen(true)}
       >
         Compare thresholds

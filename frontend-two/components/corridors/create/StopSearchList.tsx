@@ -32,7 +32,10 @@ export const StopSearchList = ({
       {stops.map((stop, index) => (
         <div
           key={`${stop.stopId}-${index}`}
-          className={clsx(styles["corridor-stop-list__stop"], styles["corridor-stop-list__stop--matching"])}
+          className={clsx(
+            styles["corridor-stop-list__stop"],
+            styles["corridor-stop-list__stop--matching"],
+          )}
         >
           <div
             className={

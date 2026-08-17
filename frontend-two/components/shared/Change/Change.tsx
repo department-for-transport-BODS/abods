@@ -10,12 +10,10 @@ interface ChangeProps {
   children: ReactNode;
 }
 
-export const Change = ({
-  direction,
-  small = true,
-  children,
-}: ChangeProps) => (
-  <span className={clsx(styles.change, small && styles.small, styles[direction])}>
+export const Change = ({ direction, small = true, children }: ChangeProps) => (
+  <span
+    className={clsx(styles.change, small && styles.small, styles[direction])}
+  >
     {children}
   </span>
 );
