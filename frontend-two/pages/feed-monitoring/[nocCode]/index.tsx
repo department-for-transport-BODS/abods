@@ -67,10 +67,7 @@ const LiveStatusPage = () => {
 
   if (isLoading) {
     return (
-      <BaseLayout
-        title="Live status - Analyse Bus Open Data"
-        mainClassName="contentPage"
-      >
+      <BaseLayout title="Live status - Analyse Bus Open Data" noContentPadding>
         <p className="govuk-body">Loading...</p>
       </BaseLayout>
     );
@@ -79,7 +76,7 @@ const LiveStatusPage = () => {
   return (
     <BaseLayout
       title="Live status - Analyse Bus Open Data"
-      mainClassName="contentPage"
+      noContentPadding
       backLink={
         <Link
           href="/feed-monitoring"
@@ -191,8 +188,8 @@ const LiveStatusPage = () => {
       )}
       <div className="mt-8">
         <Box>
-          <div className={styles["live-vehicle-stats__container"]}>
-            <div className={styles["live-vehicle-stats__item"]}>
+          <div className={styles.container}>
+            <div className={styles.item}>
               <LiveVehicleStats
                 data={operator?.feedMonitoring?.liveStats?.last24Hours ?? []}
                 granularity="hour"
@@ -204,7 +201,7 @@ const LiveStatusPage = () => {
                 xAxisMax={new Date()}
               />
             </div>
-            <div className={clsx(styles["live-vehicle-stats__item"], "mt-8")}>
+            <div className={clsx(styles.item, "mt-8")}>
               <LiveVehicleStats
                 data={operator?.feedMonitoring?.liveStats?.last20Minutes ?? []}
                 granularity="minute"

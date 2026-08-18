@@ -17,7 +17,7 @@ const OnTimeOperatorNotFoundPage = () => {
   return (
     <BaseLayout
       title="Not found: Analyse Bus Open Data"
-      mainClassName="contentPage"
+      noContentPadding
       backLink={
         <Link
           href="/on-time"
