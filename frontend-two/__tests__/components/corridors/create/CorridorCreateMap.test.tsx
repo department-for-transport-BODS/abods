@@ -1,20 +1,32 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CorridorCreateMap } from "@/components/corridors/create/CorridorCreateMap";
 import type { CorridorStop } from "@/types/corridors";
+import type mapboxgl from "mapbox-gl";
 
 const mapboxMock = vi.hoisted(() => {
   const handlers: Record<string, Array<(...args: unknown[]) => void>> = {};
   const images = new Set<string>();
   const methods = {
-    addControl: vi.fn(),
+    addControl: vi.fn((control?: { onAdd?: () => HTMLElement }) => {
+      const controlElement = control?.onAdd?.();
+      if (controlElement) {
+        document.body.appendChild(controlElement);
+      }
+    }),
     addImage: vi.fn((name: string) => {
       images.add(name);
     }),
     addLayer: vi.fn(),
     addSource: vi.fn(),
     fitBounds: vi.fn(),
+    getBounds: vi.fn(() => ({
+      getSouth: () => 0,
+      getNorth: () => 1,
+      getWest: () => 0,
+      getEast: () => 0.1,
+    })),
     getCanvas: vi.fn(() => ({ style: {} })),
     getLayer: vi.fn(() => undefined),
     getSource: vi.fn(() => undefined),
@@ -37,6 +49,7 @@ const mapboxMock = vi.hoisted(() => {
     removeLayer: vi.fn(),
     removeSource: vi.fn(),
     setFeatureState: vi.fn(),
+    setPaintProperty: vi.fn(),
     setStyle: vi.fn(() => {
       images.clear();
       handlers["style.load"]?.forEach((handler) => handler());
@@ -49,25 +62,35 @@ const mapboxMock = vi.hoisted(() => {
     addLayer = methods.addLayer;
     addSource = methods.addSource;
     fitBounds = methods.fitBounds;
+    getBounds = methods.getBounds;
     getCanvas = methods.getCanvas;
     getLayer = methods.getLayer;
     getSource = methods.getSource;
     hasImage = methods.hasImage;
     isStyleLoaded = methods.isStyleLoaded;
-    on = vi.fn((event: string, handler: (...args: unknown[]) => void) => {
-      handlers[event] = handlers[event] ?? [];
-      handlers[event].push(handler);
-      methods.on(event, handler);
+    on = vi.fn(
+      (event: string, layerOrHandler: unknown, maybeHandler?: unknown) => {
+        const handler =
+          typeof layerOrHandler === "function" ? layerOrHandler : maybeHandler;
+        if (typeof handler !== "function") {
+          return;
+        }
 
-      if (event === "load") {
-        handler();
-      }
-    });
+        handlers[event] = handlers[event] ?? [];
+        handlers[event].push(handler as (...args: unknown[]) => void);
+        methods.on(event, handler);
+
+        if (event === "load") {
+          handler();
+        }
+      },
+    );
     loadImage = methods.loadImage;
     remove = methods.remove;
     removeLayer = methods.removeLayer;
     removeSource = methods.removeSource;
     setFeatureState = methods.setFeatureState;
+    setPaintProperty = methods.setPaintProperty;
     setStyle = methods.setStyle;
 
     constructor() {
@@ -79,7 +102,17 @@ const mapboxMock = vi.hoisted(() => {
     extend = vi.fn(() => this);
   }
 
-  return { methods, MockMap, MockLngLatBounds };
+  const fire = (event: string, ...args: unknown[]) => {
+    handlers[event]?.forEach((handler) => handler(...args));
+  };
+
+  const resetHandlers = () => {
+    for (const key of Object.keys(handlers)) {
+      delete handlers[key];
+    }
+  };
+
+  return { methods, MockMap, MockLngLatBounds, fire, resetHandlers };
 });
 
 vi.mock("mapbox-gl", () => ({
@@ -130,6 +163,10 @@ const corridorStops: CorridorStop[] = [
 describe("CorridorCreateMap", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mapboxMock.resetHandlers();
+    document
+      .querySelectorAll(".mapboxgl-ctrl")
+      .forEach((node) => node.remove());
   });
 
   it("shows the shared display options and switches map style", async () => {
@@ -177,6 +214,18 @@ describe("CorridorCreateMap", () => {
       );
     });
 
+    expect(mapboxMock.methods.addSource).toHaveBeenCalledWith(
+      "matching-stops",
+      expect.objectContaining({
+        cluster: true,
+        clusterMinPoints: 30,
+      }),
+    );
+    expect(mapboxMock.methods.addSource).toHaveBeenCalledWith(
+      "matching-stop-lines",
+      expect.anything(),
+    );
+
     const matchingLayer = mapboxMock.methods.addLayer.mock.calls.find(
       ([layer]) => layer.id === "matching-stop-markers",
     )?.[0];
@@ -186,6 +235,13 @@ describe("CorridorCreateMap", () => {
         "circle-color": "#ffffff",
       }),
     });
+
+    expect(mapboxMock.methods.addLayer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "matching-stop-clusters",
+        filter: ["has", "point_count"],
+      }),
+    );
 
     const otherLayer = mapboxMock.methods.addLayer.mock.calls.find(
       ([layer]) => layer.id === "other-stop-markers",
@@ -224,5 +280,73 @@ describe("CorridorCreateMap", () => {
     expect(mapboxMock.methods.setStyle).toHaveBeenCalledWith(
       "mapbox://styles/test/satellite",
     );
+  });
+
+  it("fits the map to the selected location before a stop is added", () => {
+    const locationBounds = {} as mapboxgl.LngLatBounds;
+
+    render(
+      <CorridorCreateMap
+        corridorStops={[]}
+        matchingStops={[]}
+        locationBounds={locationBounds}
+        onSelectStop={vi.fn()}
+        mapboxToken="test-token"
+        mapboxStyle="mapbox://styles/test/street"
+      />,
+    );
+
+    expect(mapboxMock.methods.fitBounds).toHaveBeenCalledWith(locationBounds, {
+      padding: 60,
+      maxZoom: 14,
+    });
+  });
+
+  it("fits the map to matching stops during stop-name search", () => {
+    render(
+      <CorridorCreateMap
+        corridorStops={[]}
+        matchingStops={corridorStops}
+        onSelectStop={vi.fn()}
+        mapboxToken="test-token"
+        mapboxStyle="mapbox://styles/test/street"
+      />,
+    );
+
+    expect(mapboxMock.methods.fitBounds).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        padding: 50,
+        maxZoom: 16,
+        duration: 500,
+      },
+    );
+  });
+
+  it("shows Re-centre after the user moves the map", async () => {
+    render(
+      <CorridorCreateMap
+        corridorStops={[]}
+        matchingStops={[]}
+        locationBounds={{} as mapboxgl.LngLatBounds}
+        showRecentre
+        onSelectStop={vi.fn()}
+        mapboxToken="test-token"
+        mapboxStyle="mapbox://styles/test/street"
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Re-centre" }),
+    ).not.toBeInTheDocument();
+
+    await act(async () => {
+      mapboxMock.fire("moveend");
+      mapboxMock.fire("moveend");
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Re-centre" }),
+    ).toBeInTheDocument();
   });
 });

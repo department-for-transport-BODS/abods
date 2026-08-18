@@ -1,4 +1,4 @@
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { render, screen, waitFor, cleanup, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SWRConfig } from "swr";
 import CorridorsCreatePage from "@/pages/corridors/create";
@@ -35,6 +35,26 @@ vi.mock("@/services/corridors/corridors.service", () => ({
     createCorridor: vi.fn(),
     updateCorridor: vi.fn(),
     deleteCorridor: vi.fn(),
+  },
+}));
+
+const mapHarness = vi.hoisted(() => ({
+  onBoundsChange: undefined as
+    | ((bounds: { getWest: () => number; getEast: () => number }) => void)
+    | undefined,
+}));
+
+vi.mock("@/components/corridors/create/CorridorCreateMap", () => ({
+  CorridorCreateMap: ({
+    onBoundsChange,
+  }: {
+    onBoundsChange?: (bounds: {
+      getWest: () => number;
+      getEast: () => number;
+    }) => void;
+  }) => {
+    mapHarness.onBoundsChange = onBoundsChange;
+    return <div data-testid="corridor-create-map" />;
   },
 }));
 
@@ -87,6 +107,17 @@ const stopB: CorridorStop = {
   intId: 2,
 };
 
+const fakeBounds = (west: number, east: number) => ({
+  getWest: () => west,
+  getEast: () => east,
+  getSouth: () => 50,
+  getNorth: () => 51,
+  toArray: () => [
+    [west, 50],
+    [east, 51],
+  ],
+});
+
 const renderPage = () =>
   render(
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
@@ -97,10 +128,12 @@ const renderPage = () =>
 describe("CorridorsCreatePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mapHarness.onBoundsChange = undefined;
     vi.stubGlobal("fetch", mockFetch);
     mockUseConfig.mockReturnValue({
       config: {
         mapboxToken: "test-mapbox-token",
+        mapboxStyle: "mapbox://styles/test/street",
       },
       isLoading: false,
       error: null,
@@ -115,6 +148,7 @@ describe("CorridorsCreatePage", () => {
         features: [
           {
             id: "place.1",
+            text: "Test location",
             place_name: "Test location",
             center: [-1, 53],
             bbox: [-1.1, 52.9, -0.9, 53.1],
@@ -135,6 +169,107 @@ describe("CorridorsCreatePage", () => {
     expect(screen.getByLabelText("Enter a corridor name")).toBeInTheDocument();
   });
 
+  it("shows matching stops after selecting a postcode location", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.type(
+      screen.getByLabelText("Location name or postcode"),
+      "SW1A 1AA",
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Test location" }),
+      ).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "Test location" }));
+
+    await waitFor(() => {
+      expect(mockQueryStops).toHaveBeenCalledWith(undefined, expect.anything());
+      expect(screen.getByText("1 matching stops")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Select" }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("shows error for a location search area that is too large", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        features: [
+          {
+            id: "place.2",
+            text: "Large location",
+            bbox: [-2, 50, -0.5, 51],
+          },
+        ],
+      }),
+    } as Response);
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.type(
+      screen.getByLabelText("Location name or postcode"),
+      "Large location",
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Large location" }),
+      ).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "Large location" }));
+
+    expect(
+      screen.getByText("Search area too large, please zoom in to show stops"),
+    ).toBeInTheDocument();
+    expect(mockQueryStops).not.toHaveBeenCalled();
+  });
+
+  it("does not show the too-large error before a location is selected", () => {
+    renderPage();
+
+    act(() => {
+      mapHarness.onBoundsChange?.(fakeBounds(-8, 2));
+    });
+
+    expect(
+      screen.queryByText("Search area too large, please zoom in to show stops"),
+    ).not.toBeInTheDocument();
+    expect(mockQueryStops).not.toHaveBeenCalled();
+  });
+
+  it("shows the too-large error after a location is selected when the map view is too wide", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.type(
+      screen.getByLabelText("Location name or postcode"),
+      "SW1A 1AA",
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Test location" }),
+      ).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "Test location" }));
+
+    await waitFor(() => {
+      expect(mockQueryStops).toHaveBeenCalled();
+    });
+
+    act(() => {
+      mapHarness.onBoundsChange?.(fakeBounds(-8, 2));
+    });
+
+    expect(
+      screen.getByText("Search area too large, please zoom in to show stops"),
+    ).toBeInTheDocument();
+  });
+
   it("shows validation error when trying to finish without name", async () => {
     const user = userEvent.setup();
     renderPage();
@@ -149,10 +284,16 @@ describe("CorridorsCreatePage", () => {
     await user.type(searchInput, "Test");
 
     await waitFor(() => {
+      expect(mockQueryStops).toHaveBeenCalledWith("Test", undefined);
       expect(
         screen.getByRole("button", { name: "Select" }),
       ).toBeInTheDocument();
     });
+
+    act(() => {
+      mapHarness.onBoundsChange?.(fakeBounds(-8, 2));
+    });
+    expect(mockQueryStops).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByRole("button", { name: "Select" }));
 

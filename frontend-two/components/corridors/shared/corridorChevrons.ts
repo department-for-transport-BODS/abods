@@ -47,3 +47,39 @@ export const displayCorridorChevrons = async (
     beforeLayerId,
   );
 };
+
+const MATCHING_STOP_CHEVRON_LAYER_ID = "matching-stop-chevrons";
+
+export const displayMatchingStopChevrons = async (map: mapboxgl.Map) => {
+  if (!map.hasImage(CORRIDOR_CHEVRON_ICON_ID)) {
+    map.addImage(
+      CORRIDOR_CHEVRON_ICON_ID,
+      await loadImageFromMap(map, CORRIDOR_CHEVRON_ICON_URL),
+    );
+  }
+
+  if (map.getLayer(MATCHING_STOP_CHEVRON_LAYER_ID)) {
+    return;
+  }
+
+  map.addLayer({
+    id: MATCHING_STOP_CHEVRON_LAYER_ID,
+    type: "symbol",
+    source: "matching-stop-lines",
+    paint: {
+      "icon-opacity": [
+        "case",
+        ["boolean", ["feature-state", "hover"], false],
+        1,
+        0,
+      ],
+    },
+    layout: {
+      "icon-image": CORRIDOR_CHEVRON_ICON_ID,
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true,
+      "symbol-placement": "line",
+      "symbol-spacing": 150,
+    },
+  });
+};
