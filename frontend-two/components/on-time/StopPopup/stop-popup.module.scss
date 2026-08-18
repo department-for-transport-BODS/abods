@@ -14,7 +14,7 @@
   white-space: normal;
   overflow-wrap: anywhere;
 
-  .govuk-body-small {
+  :global(.govuk-body-small) {
     color: govuk-colour("white");
     margin-bottom: 0;
   }

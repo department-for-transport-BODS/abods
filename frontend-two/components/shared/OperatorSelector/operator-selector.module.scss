@@ -19,7 +19,7 @@
   position: relative;
 }
 
-.gdsSelect--focused {
+.gdsSelectFocused {
   .container {
     outline: inherit;
     outline-offset: inherit;
@@ -113,21 +113,21 @@
   transform: rotate(45deg);
 }
 
-.gdsSelect:not(.gdsSelect--open) {
+.gdsSelect:not(.gdsSelectOpen) {
   .input input {
     opacity: 0;
     caret-color: transparent;
   }
 }
 
-.gdsSelect--open {
+.gdsSelectOpen {
   .arrow {
     top: 1px;
     transform: rotate(-135deg);
   }
 }
 
-.gdsSelect--open:not(.gdsSelect--filtering) {
+.gdsSelectOpen:not(.gdsSelectFiltering) {
   .value {
     margin-right: govuk-spacing(2);
     max-width: none;
@@ -143,7 +143,7 @@
   }
 }
 
-.gdsSelect--open.gdsSelect--filtering {
+.gdsSelectOpen.gdsSelectFiltering {
   .input input {
     opacity: 1;
     caret-color: govuk-functional-colour(link);
@@ -152,7 +152,7 @@
   }
 }
 
-.gdsSelect--filtering {
+.gdsSelectFiltering {
   .value {
     margin-right: 0;
     max-width: 0;
@@ -210,7 +210,7 @@
   font-weight: $font-weight-normal;
 }
 
-.option--selected {
+.optionSelected {
   background-color: transparent !important;
   color: govuk-functional-colour(text) !important;
 
@@ -220,8 +220,8 @@
   }
 }
 
-.option--active,
-.option--selected.option--active {
+.optionActive,
+.optionSelected.optionActive {
   background-color: govuk-colour("blue") !important;
 
   .optionLabel {
@@ -230,7 +230,7 @@
   }
 }
 
-.option:not(.option--active):not(.option--selected):hover {
+.option:not(.optionActive):not(.optionSelected):hover {
   background-color: govuk-colour("black", $variant: "tint-95") !important;
 
   .optionLabel {

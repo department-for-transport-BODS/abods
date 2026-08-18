@@ -6,7 +6,7 @@ import { clsx } from "clsx";
 interface TextInputProps<T> {
   display: string;
   inputName: keyof T;
-  widthClass?: string;
+  width?: 10 | 20;
   value?: string;
   initialErrors?: ErrorInfo[];
   stateUpdater: (value: string, field: keyof T) => void;
@@ -19,7 +19,7 @@ interface TextInputProps<T> {
 export const TextInput = <T,>({
   display,
   inputName,
-  widthClass,
+  width,
   value,
   initialErrors,
   stateUpdater,
@@ -54,7 +54,7 @@ export const TextInput = <T,>({
       <input
         className={clsx(
           "govuk-input",
-          widthClass,
+          width && `govuk-input--width-${width}`,
           error && "govuk-input--error",
         )}
         id={inputId}

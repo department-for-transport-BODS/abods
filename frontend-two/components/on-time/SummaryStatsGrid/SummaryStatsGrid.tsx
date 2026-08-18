@@ -1,8 +1,8 @@
 import styles from "./summary-stats-grid.module.scss";
-import tooltipListStyles from "@/components/shared/SummaryStat/summary-stat-with-tooltip.module.scss";
 
 import { Duration } from "luxon";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
+import { TooltipList } from "@/components/shared/Tooltip";
 import { clsx } from "clsx";
 
 interface SummaryStatsGridProps {
@@ -140,14 +140,14 @@ export const SummaryStatsGrid = ({
       <>
         <p>{baseText}</p>
         <p>Of these, there are:</p>
-        <ul className={tooltipListStyles.tooltipList}>
+        <TooltipList>
           {breakdownItems.map((item) => (
             <li key={item.key}>
               {" "}
               <b>{item.count}</b> {item.label}
             </li>
           ))}
-        </ul>
+        </TooltipList>
       </>
     ) : (
       baseText

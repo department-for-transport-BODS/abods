@@ -22,6 +22,11 @@ const getTooltipContent = (message: ReactNode) => {
   return renderToStaticMarkup(<>{message}</>);
 };
 
+// Bulleted list for use inside a Tooltip `message`
+export const TooltipList = ({ children }: { children: ReactNode }) => (
+  <ul className={styles.list}>{children}</ul>
+);
+
 export const Tooltip = ({
   message,
   underline,

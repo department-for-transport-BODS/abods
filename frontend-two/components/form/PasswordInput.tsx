@@ -6,7 +6,7 @@ import { clsx } from "clsx";
 interface PasswordInputProps<T> {
   display: string;
   inputName: keyof T;
-  widthClass?: string;
+  width?: 10 | 20;
   value?: string;
   initialErrors?: ErrorInfo[];
   stateUpdater: (value: string, field: keyof T) => void;
@@ -18,7 +18,7 @@ interface PasswordInputProps<T> {
 export const PasswordInput = <T,>({
   display,
   inputName,
-  widthClass,
+  width,
   value,
   initialErrors,
   stateUpdater,
@@ -76,9 +76,7 @@ export const PasswordInput = <T,>({
           className={clsx(
             "govuk-input",
             styles.input,
-            widthClass?.startsWith("govuk-")
-              ? widthClass
-              : widthClass && styles[widthClass],
+            width && styles[`width${width}`],
             error && "govuk-input--error",
           )}
           id={inputId}

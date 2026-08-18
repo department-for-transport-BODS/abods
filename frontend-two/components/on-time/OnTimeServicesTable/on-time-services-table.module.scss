@@ -8,12 +8,12 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.container .sortable-table {
+.container .sortableTable {
   width: 100%;
 }
 
 .container {
-  .sortable-header {
+  .sortableHeader {
     width: 100%;
     min-width: 0;
     align-items: flex-start;
@@ -29,7 +29,7 @@
   overflow-wrap: break-word;
   word-break: break-word;
 
-  .govuk-link {
+  :global(.govuk-link) {
     white-space: normal;
     overflow-wrap: break-word;
     word-break: break-word;

@@ -186,6 +186,8 @@ export const RefineResultsFilters = ({
                   <MultiselectCheckbox
                     id="refine-results-area"
                     label="Area"
+                    labelClassName="govuk-label--s"
+                    showAllLabel="Area"
                     options={adminAreaOptions}
                     selectedValues={values.adminAreaIds}
                     onChange={(adminAreaIds) =>
