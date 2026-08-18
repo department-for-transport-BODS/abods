@@ -122,6 +122,7 @@ export const OnTimeFilterPanel = ({
         <div className={styles.datePicker}>
           <DateRangeSelect
             hideLabel={true}
+            fullWidth={true}
             value={dateRange || undefined}
             onChange={onDateRangeChange}
           />
