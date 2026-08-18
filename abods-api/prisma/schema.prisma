@@ -404,9 +404,6 @@ model corridor {
   corridor_id     Int                   @id @default(autoincrement()) // TODO: fix - bigint and not id in database
   corridor_name   String // TODO: fix - nullable in db
   organisation_id Int // TODO: fix - nullable in db
-  user_id         Int // TODO: fix - nullable in db
-  bods_user       bods_user             @relation(fields: [user_id], references: [id])
-  bods_userorg    bods_userorganisation @relation(fields: [user_id, organisation_id], references: [user_id, organisation_id])
   corridor_stops  corridor_stops[] // TODO: fix - not in db
 }
 
@@ -522,7 +519,6 @@ view bods_user {
   account_type      Int?
   admin_org         Int?
   userOrganisations bods_userorganisation[]
-  corridor          corridor[]
   created_by_alerts Alert[]                 @relation("created_by_user")
   send_to_alerts    Alert[]                 @relation("send_to_user")
   Tokens            Tokens[]
@@ -533,7 +529,6 @@ view bods_userorganisation {
   organisation_id Int
   user            bods_user         @relation(fields: [user_id], references: [id])
   organisation    bods_organisation @relation(fields: [organisation_id], references: [id])
-  corridor        corridor[]
 
   @@id([user_id, organisation_id])
 }

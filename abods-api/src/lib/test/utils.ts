@@ -444,7 +444,6 @@ export const createCorridorTablesAndData = async (dbKysely: Kysely<DB>) => {
         corridor_id: 1,
         corridor_name: "Test Corridor",
         organisation_id: 1,
-        user_id: 1,
       })
       .execute(),
     dbKysely

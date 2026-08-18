@@ -1,8 +1,11 @@
-name: pr-checks
+name: Build on CI
 on:
-  pull_request:
-    branches:
-      - sandbox
+  push:
+    branches-ignore:
+        - main
+        - sandbox
+        - dev
+        - test
 
 permissions: read-all
 
@@ -29,7 +32,7 @@ jobs:
 
       - name: Check for changes
         env:
-          BASE_REF: ${{ github.event.pull_request.base.sha }}
+          BASE_REF: origin/sandbox
         run: |
           if git diff --quiet "$BASE_REF"...HEAD -- frontend; then
             git diff --name-only --exit-code HEAD -- . ':!frontend/package-lock.json' || (echo "It looks like generated files haven't been updated. You can do that by running 'npm install' in the root directory"; false)
@@ -113,3 +116,20 @@ jobs:
       - name: Build frontend code
         if: success() || failure()
         run: npm run build:production
+
+  checkov:
+    name: checkov-action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@dfb51aed1b783289b0d3f255028e7a88d5e8caa1 # master
+        with:
+          directory: ${{ github.workspace }}
+          framework: all
+          skip_check: ""
+          output_format: cli,sarif
+          quiet: true # display only failed checks

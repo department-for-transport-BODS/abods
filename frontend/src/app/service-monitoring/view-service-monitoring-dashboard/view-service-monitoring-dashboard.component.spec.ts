@@ -2,7 +2,7 @@ import { Renderer2 } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { createComponentFactory, Spectator } from "@ngneat/spectator";
 import { Subject } from "rxjs";
-import { AuthenticatedUserService } from "../../authentication/authenticated-user.service";
+import { UserGQL } from "../../../generated/graphql";
 import { LayoutModule } from "../../layout/layout.module";
 import { SharedModule } from "../../shared/shared.module";
 import { ViewServiceMonitoringDashboardComponent } from "./view-service-monitoring-dashboard.component";
@@ -10,25 +10,24 @@ import { ViewServiceMonitoringDashboardComponent } from "./view-service-monitori
 describe("ViewServiceMonitoringDashboardComponent", () => {
   let spectator: Spectator<ViewServiceMonitoringDashboardComponent>;
   let component: ViewServiceMonitoringDashboardComponent;
-  let userSubject: Subject<unknown>;
+  let userQueryMock: { fetch: jasmine.Spy };
   let renderer: Renderer2;
 
   const createComponent = createComponentFactory({
     component: ViewServiceMonitoringDashboardComponent,
     imports: [SharedModule, LayoutModule],
-    mocks: [AuthenticatedUserService],
   });
 
   beforeEach(() => {
-    userSubject = new Subject();
+    userQueryMock = {
+      fetch: jasmine.createSpy("fetch"),
+    };
     spectator = createComponent({
       detectChanges: false,
       providers: [
         {
-          provide: AuthenticatedUserService,
-          useValue: {
-            authenticatedUser$: userSubject.asObservable(),
-          },
+          provide: UserGQL,
+          useValue: userQueryMock,
         },
       ],
     });
@@ -41,52 +40,77 @@ describe("ViewServiceMonitoringDashboardComponent", () => {
   });
 
   it("should show spinner while loading", async () => {
-    component.loading = true;
+    const fetchSubject = new Subject();
+    userQueryMock.fetch.and.returnValue(fetchSubject.asObservable());
     spectator.fixture.detectChanges();
     const spinner = spectator.fixture.debugElement.query(By.css("app-spinner"));
     await expect(spinner).toBeTruthy();
   });
 
   it("should set errors if user cannot view service monitoring", async () => {
+    const fetchSubject = new Subject();
+    userQueryMock.fetch.and.returnValue(fetchSubject.asObservable());
+
     spectator.fixture.detectChanges();
-    userSubject.next({
-      canViewServiceMonitoring: false,
-      serviceMonitoringEmbedUrl: null,
+    fetchSubject.next({
+      data: {
+        user: {
+          canViewServiceMonitoring: false,
+          serviceMonitoringEmbedUrl: null,
+        },
+      },
     });
+    fetchSubject.complete();
     await spectator.fixture.whenStable();
     await expect(component.errors.length).toBe(1);
     await expect(component.errors[0].error).toContain(
-      "Unable to load dashboad",
+      "Unable to load dashboard",
     );
     expect(component.loading).toBeFalse();
   });
 
   it("should set errors if user has no embed url", async () => {
+    const fetchSubject = new Subject();
+    userQueryMock.fetch.and.returnValue(fetchSubject.asObservable());
+
     spectator.fixture.detectChanges();
-    userSubject.next({
-      canViewServiceMonitoring: true,
-      serviceMonitoringEmbedUrl: null,
+    fetchSubject.next({
+      data: {
+        user: {
+          canViewServiceMonitoring: true,
+          serviceMonitoringEmbedUrl: null,
+        },
+      },
     });
+    fetchSubject.complete();
     await spectator.fixture.whenStable();
     await expect(component.errors.length).toBe(1);
     await expect(component.errors[0].error).toContain(
-      "Unable to load dashboad",
+      "Unable to load dashboard",
     );
     expect(component.loading).toBeFalse();
   });
 
   it("should append iframe with correct attributes if user can view and has url", async () => {
     const testUrl = "https://test-url";
+    const fetchSubject = new Subject();
+    userQueryMock.fetch.and.returnValue(fetchSubject.asObservable());
+
     spyOn(renderer, "createElement").and.callThrough();
     spyOn(renderer, "setStyle").and.callThrough();
     spyOn(renderer, "setAttribute").and.callThrough();
     spyOn(renderer, "appendChild").and.callThrough();
 
     spectator.fixture.detectChanges();
-    userSubject.next({
-      canViewServiceMonitoring: true,
-      serviceMonitoringEmbedUrl: testUrl,
+    fetchSubject.next({
+      data: {
+        user: {
+          canViewServiceMonitoring: true,
+          serviceMonitoringEmbedUrl: testUrl,
+        },
+      },
     });
+    fetchSubject.complete();
     await spectator.fixture.whenStable();
 
     await expect(component.errors.length).toBe(0);
@@ -100,6 +124,21 @@ describe("ViewServiceMonitoringDashboardComponent", () => {
     expect(renderer.appendChild).toHaveBeenCalledWith(
       jasmine.anything(),
       jasmine.anything(),
+    );
+    expect(component.loading).toBeFalse();
+  });
+
+  it("should set fetch error state when request fails", async () => {
+    const fetchSubject = new Subject();
+    userQueryMock.fetch.and.returnValue(fetchSubject.asObservable());
+
+    spectator.fixture.detectChanges();
+    fetchSubject.error(new Error("network error"));
+    await spectator.fixture.whenStable();
+
+    expect(component.errors.length).toBe(1);
+    expect(component.errors[0].error).toContain(
+      "Failed to load dashboard. Please try again",
     );
     expect(component.loading).toBeFalse();
   });

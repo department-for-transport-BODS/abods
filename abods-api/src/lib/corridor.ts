@@ -1,5 +1,4 @@
 import {
-  bods_user,
   corridor,
   corridor_stops,
   naptan_adminarea,
@@ -32,7 +31,6 @@ export interface StopWithLocality {
 export type CorridorStopsWithNaptanStops = corridor_stops & StopWithLocality;
 
 export type CorridorResultsType = corridor & {
-  bods_user?: bods_user;
   corridor_stops?: CorridorStopsWithNaptanStops[];
 };
 
@@ -82,7 +80,6 @@ export const getCorridorList = (db: PrismaClient, sessionUser: SessionUser) => {
     },
     include: {
       corridor_stops: true,
-      bods_user: true,
     },
   });
 };
@@ -98,7 +95,6 @@ export const getCorridor = (
       organisation_id: { in: sessionUser.orgs.map((org) => org.id) },
     },
     include: {
-      bods_user: true,
       corridor_stops: {
         include: {
           naptan_stop: {
