@@ -307,7 +307,7 @@ export const CreateCorridorForm = ({
 
         <div className="govuk-grid-row">
           <div className="govuk-grid-column-one-half">
-            <div className={styles["corridor-stop-column"]}>
+            <div className={styles.corridorStopColumn}>
               <h2 className="govuk-heading-m govuk-!-margin-bottom-2">Stops</h2>
 
               <CorridorStopList
@@ -317,7 +317,7 @@ export const CreateCorridorForm = ({
                 onRemoveLastStop={removeLastStop}
               />
 
-              <div className={styles["corridor-stop-column__search-panel"]}>
+              <div className={styles.searchPanel}>
                 {showSearchModeSelector ? (
                   <div className="govuk-form-group">
                     <label className="govuk-label" htmlFor="search-mode">

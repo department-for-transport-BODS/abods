@@ -167,12 +167,7 @@ export const SortedPaginatedTable = <T,>({
         </div>
       )}
       {showEmptyMessage && footerAction ? (
-        <div
-          className={clsx(
-            styles["sortable-table__footer-row"],
-            styles["sortable-table__footer-row--empty"],
-          )}
-        >
+        <div className={clsx(styles.footerRow, styles.footerRowEmpty)}>
           <div>{footerAction}</div>
         </div>
       ) : null}

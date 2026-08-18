@@ -1,5 +1,5 @@
 @use "../../styles/govuk-module" as *;
-.feed-status-summary {
+.feedStatusSummary {
   width: 100%;
   margin-bottom: govuk-spacing(2);
   tr {
@@ -16,22 +16,22 @@
   td {
     @include govuk-font(19);
   }
-  td.feed-status-summary__status {
+  td.status {
     padding-left: 0;
     padding-top: 2px;
   }
 }
-.feed-status-summary__heading {
+.heading {
   text-align: right;
   @include govuk-typography-weight-regular();
 }
-.feed-status-summary__footer {
+.footer {
   display: flex;
   justify-content: flex-end;
   @include govuk-font(19);
   margin-top: govuk-spacing(4);
 }
-.feed-status-summary__operator--muted {
+.operatorMuted {
   color: govuk-functional-colour(secondary-text);
   @include govuk-font(16);
 }

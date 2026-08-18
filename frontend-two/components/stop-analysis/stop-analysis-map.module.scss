@@ -1,5 +1,5 @@
 @use "../../styles/govuk-module" as *;
-.stop-analysis-map {
+.stopAnalysisMap {
   position: relative;
   margin-bottom: govuk-spacing(4);
 
@@ -8,11 +8,11 @@
     pointer-events: none;
   }
 }
-.stop-analysis-map__container {
+.container {
   width: 100%;
   height: 500px;
 }
-.stop-analysis-map__overlay {
+.overlay {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -31,7 +31,7 @@
     white-space: nowrap;
   }
 }
-.stop-analysis-map__loading-overlay {
+.loadingOverlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -45,7 +45,7 @@
   );
   z-index: 2;
 }
-.stop-analysis-map__legend {
+.legend {
   display: flex;
   flex-wrap: nowrap;
   gap: govuk-spacing(3);
@@ -61,22 +61,22 @@
   white-space: nowrap;
   pointer-events: none;
 }
-.stop-analysis-map__dot {
+.dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   display: inline-block;
   flex: 0 0 auto;
 }
-.stop-analysis-map__dot--high {
+.dotHigh {
   background-color: govuk-colour("teal");
 }
-.stop-analysis-map__dot--med {
+.dotMed {
   background-color: govuk-colour("yellow");
 }
-.stop-analysis-map__dot--low {
+.dotLow {
   background-color: govuk-colour("red");
 }
-.stop-analysis-map__dot--no-data {
+.dotNoData {
   background-color: govuk-colour("black", $variant: "tint-80");
 }

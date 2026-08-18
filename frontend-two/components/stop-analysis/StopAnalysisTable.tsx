@@ -76,9 +76,7 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "stopId", label: "NAPTAN", alwaysVisible: true },
   {
     key: "timingPoint",
-    label: (
-      <TimingIcon className={styles["stop-analysis-table__timing-icon"]} />
-    ),
+    label: <TimingIcon className={styles.timingIcon} />,
     modalLabel: "Timing Point",
   },
   { key: "stopName", label: "Name" },
@@ -124,6 +122,21 @@ const COLUMN_LABELS: Record<string, ReactNode> = {
   early: "Early",
 };
 const ALWAYS_VISIBLE_KEYS = ["stopId"];
+
+const STOP_ANALYSIS_COLUMN_WIDTHS = {
+  stopId: "8rem",
+  timingPoint: "2rem",
+  stopName: "12rem",
+  direction: "5.5rem",
+  scheduledDepartures: "5rem",
+  actualDepartures: "6rem",
+  averageScheduled: "5rem",
+  averageActual: "5rem",
+  averageDelay: "5rem",
+  onTime: "4.5rem",
+  early: "4.5rem",
+  late: "4.5rem",
+};
 
 interface StopAnalysisTableProps {
   data: StopPerformanceRow[];
@@ -256,7 +269,7 @@ export const StopAnalysisTable = ({
       totals
         ? {
             key: "__totals__",
-            rowClassName: styles["stop-analysis-table__summary-row"],
+            rowClassName: styles.summaryRow,
             stopId: "-",
             timingPoint: "",
             stopName: "-",
@@ -295,27 +308,22 @@ export const StopAnalysisTable = ({
   }
 
   return (
-    <div
-      className={clsx(styles["stop-analysis-table"], "govuk-!-margin-top-6")}
-    >
-      <div className={styles["stop-analysis-table__display-toolbar"]}>
-        <div className={styles["stop-analysis-table__display-actions"]}>
+    <div className={clsx(styles.stopAnalysisTable, "govuk-!-margin-top-6")}>
+      <div className={styles.displayToolbar}>
+        <div className={styles.displayActions}>
           <button
             type="button"
             className={clsx(
               "govuk-link",
               "button-link",
-              styles["stop-analysis-table__display-options-link"],
+              styles.displayOptionsLink,
             )}
             onClick={openDisplayOptions}
           >
             Display options
           </button>
           <fieldset
-            className={clsx(
-              "govuk-fieldset",
-              styles["stop-analysis-table__display-mode"],
-            )}
+            className={clsx("govuk-fieldset", styles.displayMode)}
             aria-label="Show stop performance values as"
           >
             <legend className="govuk-visually-hidden">
@@ -354,8 +362,8 @@ export const StopAnalysisTable = ({
         onClose={() => setShowDisplayOptions(false)}
         onApply={handleDisplayOptionsApply}
       />
-      <div className={styles["stop-analysis-table__controls"]}>
-        <div className={styles["stop-analysis-table__direction-filters"]}>
+      <div className={styles.controls}>
+        <div className={styles.directionFilters}>
           <MultiselectCheckbox
             id="stop-analysis-directions"
             label="Directions"
@@ -368,14 +376,8 @@ export const StopAnalysisTable = ({
         </div>
       </div>
 
-      <div className={styles["stop-analysis-table__grid"]}>
-        <div
-          className={
-            showTotals
-              ? styles["stop-analysis-table__table--with-totals"]
-              : undefined
-          }
-        >
+      <div className={styles.grid}>
+        <div className={showTotals ? styles.tableWithTotals : undefined}>
           <SortedPaginatedTable
             key={`${displayMode}-${visibleColumns.join(",")}`}
             columns={tableColumns}
@@ -387,16 +389,14 @@ export const StopAnalysisTable = ({
               key: `${row.stopId}-${row.direction}`,
               stopId: row.stopId,
               timingPoint: row.timingPoint ? (
-                <TimingIcon
-                  className={styles["stop-analysis-table__timing-icon"]}
-                />
+                <TimingIcon className={styles.timingIcon} />
               ) : (
                 ""
               ),
               stopName: (
                 <Tooltip
                   message={`${row.localityName}, ${row.adminAreaName}`}
-                  className={styles["stop-analysis-table__stop-link"]}
+                  className={styles.stopLink}
                   onClick={() => onStopNameClick(row)}
                 >
                   {row.stopName}
@@ -426,20 +426,7 @@ export const StopAnalysisTable = ({
             })}
             pinnedRows={totalsRow ? [totalsRow] : undefined}
             onSortChange={handleSortChange}
-            colWidths={{
-              stopId: "8rem",
-              timingPoint: "2rem",
-              stopName: "12rem",
-              direction: "5.5rem",
-              scheduledDepartures: "5rem",
-              actualDepartures: "6rem",
-              averageScheduled: "5rem",
-              averageActual: "5rem",
-              averageDelay: "5rem",
-              onTime: "4.5rem",
-              early: "4.5rem",
-              late: "4.5rem",
-            }}
+            colWidths={STOP_ANALYSIS_COLUMN_WIDTHS}
             initialSortKey={sortState.key}
             initialSortOrder={sortState.order}
             emptyMessage="No stop data found"

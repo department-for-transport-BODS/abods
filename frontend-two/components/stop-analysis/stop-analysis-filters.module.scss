@@ -1,94 +1,94 @@
 @use "../../styles/govuk-module" as *;
-.stop-analysis-filters {
+.stopAnalysisFilters {
   @media (max-width: 1120px) {
-    .stop-analysis-filters__grid {
+    .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .stop-analysis-filters__item--date,
-    .stop-analysis-filters__item--admin,
-    .stop-analysis-filters__item--toggles,
-    .stop-analysis-filters__item--location,
-    .stop-analysis-filters__item--operators,
-    .stop-analysis-filters__item--services {
+    .itemDate,
+    .itemAdmin,
+    .itemToggles,
+    .itemLocation,
+    .itemOperators,
+    .itemServices {
       grid-column: auto;
     }
   }
   @media (max-width: 720px) {
-    .stop-analysis-filters__grid {
+    .grid {
       grid-template-columns: 1fr;
     }
   }
 }
-.stop-analysis-filters__grid {
+.grid {
   display: grid;
   grid-template-columns: 3fr 2fr 2fr;
   gap: govuk-spacing(3);
   align-items: start;
 }
-.stop-analysis-filters__item {
+.item {
   min-width: 0;
 }
-.stop-analysis-filters__item--date {
+.itemDate {
   grid-column: 1;
   grid-row: 1;
 }
-.stop-analysis-filters__item--admin {
+.itemAdmin {
   grid-column: 2;
   grid-row: 1;
 }
-.stop-analysis-filters__item--toggles {
+.itemToggles {
   grid-column: 3;
   grid-row: 1;
   align-self: start;
 }
-.stop-analysis-filters__item--location {
+.itemLocation {
   grid-column: 1;
   grid-row: 2;
 }
-.stop-analysis-filters__item--operators {
+.itemOperators {
   grid-column: 2;
   grid-row: 2;
 }
-.stop-analysis-filters__item--services {
+.itemServices {
   grid-column: 3;
   grid-row: 2;
 }
-.stop-analysis-filters__date-range {
+.dateRange {
   display: grid;
   grid-template-columns: minmax(0, 65%) minmax(0, 35%);
   gap: govuk-spacing(1);
   align-items: center;
 }
 
-.stop-analysis-filters__preset-select {
+.presetSelect {
   width: 100%;
   min-width: 0;
 }
-.stop-analysis-filters__toggles {
+.toggles {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-start;
   gap: govuk-spacing(2);
 }
-.stop-analysis-filters__refine-button {
+.refineButton {
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
 }
-.stop-analysis-filters__refine-panel {
+.refinePanel {
   margin-top: govuk-spacing(3);
   padding: govuk-spacing(4);
   background: govuk-colour("black", $variant: "tint-95");
 }
-.stop-analysis-filters__chips {
+.chips {
   display: flex;
   flex-wrap: wrap;
   gap: govuk-spacing(2);
   margin-top: govuk-spacing(2);
 }
-.stop-analysis-filters__chip {
+.chip {
   @include govuk-font(16);
   background: govuk-colour("black", $variant: "tint-95");
   padding: govuk-spacing(1) govuk-spacing(2);

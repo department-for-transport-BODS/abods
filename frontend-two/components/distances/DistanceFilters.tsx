@@ -53,8 +53,8 @@ export const DistanceFilters = ({
 
   return (
     <>
-      <div className={styles["distance-grid__filters"]}>
-        <div className={styles["distance-grid__filter"]}>
+      <div className={styles.filters}>
+        <div className={styles.filter}>
           <DateRangeSelect
             label="Date Range"
             fullWidth
@@ -65,7 +65,7 @@ export const DistanceFilters = ({
             }}
           />
         </div>
-        <div className={styles["distance-grid__filter"]}>
+        <div className={styles.filter}>
           <MultiselectCheckbox
             id="distance-admin-area"
             label="Admin Area"
@@ -76,7 +76,7 @@ export const DistanceFilters = ({
             placeholder={isLoading ? "Loading..." : "All areas"}
           />
         </div>
-        <div className={styles["distance-grid__filter"]}>
+        <div className={styles.filter}>
           <MultiselectCheckbox
             id="distance-organisations"
             label="Organisations"
@@ -95,13 +95,8 @@ export const DistanceFilters = ({
           />
         </div>
       </div>
-      <div
-        className={clsx(
-          styles["distance-grid__filters"],
-          styles["distance-grid__filtersLast"],
-        )}
-      >
-        <div className={styles["distance-grid__filter"]}>
+      <div className={clsx(styles.filters, styles.filtersLast)}>
+        <div className={styles.filter}>
           <MultiselectCheckbox
             id="distance-operators"
             label="Operators"
@@ -112,7 +107,7 @@ export const DistanceFilters = ({
             placeholder={isLoading ? "Loading..." : "All operators"}
           />
         </div>
-        <div className={styles["distance-grid__filter"]}>
+        <div className={styles.filter}>
           <MultiselectCheckbox
             id="distance-licenses"
             label="Licenses"
@@ -123,7 +118,7 @@ export const DistanceFilters = ({
             placeholder={isLoading ? "Loading..." : "All licenses"}
           />
         </div>
-        <div className={styles["distance-grid__filter"]}>
+        <div className={styles.filter}>
           <MultiselectCheckbox
             id="distance-services"
             label="Services"

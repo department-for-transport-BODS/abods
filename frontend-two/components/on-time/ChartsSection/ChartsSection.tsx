@@ -240,8 +240,8 @@ export const ChartsSection = ({
       <Box minHeight="440px">
         <div
           className={clsx(
-            tabStyles["analysis-tabs"],
-            tabStyles["analysis-tabs--panel"],
+            tabStyles.analysisTabs,
+            tabStyles.panel,
             "govuk-!-margin-bottom-4",
           )}
         >
@@ -250,8 +250,8 @@ export const ChartsSection = ({
               key={tab.id}
               type="button"
               className={clsx(
-                tabStyles["analysis-tabs__tab"],
-                activeTab === tab.id && tabStyles["analysis-tabs__tab--active"],
+                tabStyles.tab,
+                activeTab === tab.id && tabStyles.tabActive,
               )}
               onClick={() => setActiveTab(tab.id)}
             >

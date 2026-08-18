@@ -1,15 +1,15 @@
 @use "../../../styles/govuk-module" as *;
 
-.date-range-select {
+.dateRangeSelect {
   position: relative;
   display: block;
 }
 
-.date-range-select--full-width {
+.fullWidth {
   width: 100%;
 }
 
-.date-range-select__button {
+.button {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -26,13 +26,13 @@
   }
 }
 
-.date-range-select__button--full-width {
+.buttonFullWidth {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
 
-.date-range-select__button-text {
+.buttonText {
   color: govuk-functional-colour(secondary-text);
   font-size: 19px;
   white-space: nowrap;
@@ -41,13 +41,13 @@
   max-width: 100%;
 }
 
-.date-range-select__icon {
+.icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
 }
 
-.date-range-select__panel {
+.panel {
   position: absolute;
   z-index: 200;
   background: govuk-functional-colour(body-background);
@@ -59,18 +59,18 @@
   overflow-x: auto;
 }
 
-.date-range-select__inputs {
+.inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 0.5rem;
 }
 
-.date-range-select__date-input {
+.dateInput {
   width: 100%;
 }
 
-.date-range-select__footer {
+.footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -78,7 +78,9 @@
   margin-top: 0.5rem;
 }
 
-.date-range-select__apply {
+.apply {
+  // !important: overrides govuk-button's background-color, which is set on the
+  // element via the .govuk-button class applied alongside this one.
   background-color: govuk-colour("green") !important;
 
   &:hover {
@@ -87,39 +89,39 @@
 }
 
 @media (max-width: 47.99em) {
-  .date-range-select__panel {
+  .panel {
     max-height: calc(100vh - #{govuk-spacing(6)});
     overflow: auto;
   }
 
-  .date-range-select__inputs {
+  .inputs {
     grid-template-columns: 1fr;
   }
 
-  .date-range-controls__calendar-wrapper {
+  .dateRangeControlsCalendarWrapper {
     flex-direction: column;
   }
 }
 
 @media (min-width: 48em) {
-  .date-range-select__panel {
+  .panel {
     width: 700px;
   }
 }
 
 $day-width: 46px;
 
-.date-range-controls__calendar-wrapper {
+.dateRangeControlsCalendarWrapper {
   display: flex;
   gap: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
-.date-range-controls__calendar {
+.dateRangeControlsCalendar {
   width: calc(#{$day-width} * 7);
 }
 
-.date-range-controls__calendar-header {
+.dateRangeControlsCalendarHeader {
   user-select: none;
   display: flex;
   align-items: center;
@@ -128,16 +130,16 @@ $day-width: 46px;
   margin-bottom: 0.5rem;
 }
 
-.date-range-controls__month-name {
+.dateRangeControlsMonthName {
   font-size: 19px;
   font-family: "GDS Transport", arial, sans-serif;
-
-  &--this-month {
-    font-weight: 700;
-  }
 }
 
-.date-range-controls__month-step {
+.dateRangeControlsMonthNameThisMonth {
+  font-weight: 700;
+}
+
+.dateRangeControlsMonthStep {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -153,17 +155,17 @@ $day-width: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
-  &--prev {
-    left: 0;
-  }
+.dateRangeControlsMonthStepPrev {
+  left: 0;
+}
 
-  &--next {
-    right: 0;
-  }
+.dateRangeControlsMonthStepNext {
+  right: 0;
+}
 
-  &--disabled {
-    pointer-events: none;
-    color: govuk-colour("black", $variant: "tint-80");
-  }
+.dateRangeControlsMonthStepDisabled {
+  pointer-events: none;
+  color: govuk-colour("black", $variant: "tint-80");
 }

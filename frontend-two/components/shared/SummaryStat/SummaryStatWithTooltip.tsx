@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Tooltip } from "@/components/shared/Tooltip";
+import { clsx } from "clsx";
 import styles from "./summary-stat-with-tooltip.module.scss";
 
 interface SummaryStatWithTooltipProps {
@@ -16,21 +17,16 @@ export const SummaryStatWithTooltip = ({
   const displayValue = value === "-" ? "Unavailable" : value;
 
   return (
-    <div
-      className="bg-white flex flex-col"
-      style={{ borderTop: "2px solid #cecece" }}
-    >
-      <span className="govuk-body mt-4" style={{ color: "#484949" }}>
-        {title}
-      </span>
+    <div className={styles.stat}>
+      <span className={clsx("govuk-body", styles.title)}>{title}</span>
       {tooltip ? (
-        <div className="font-bold govuk-!-font-size-36">
+        <div className={styles.figure}>
           <Tooltip message={tooltip}>
             <span className={styles.value}>{displayValue}</span>
           </Tooltip>
         </div>
       ) : (
-        <div className="font-bold govuk-!-font-size-36">{displayValue}</div>
+        <div className={styles.figure}>{displayValue}</div>
       )}
     </div>
   );

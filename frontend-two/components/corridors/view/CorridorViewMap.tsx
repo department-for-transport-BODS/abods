@@ -337,15 +337,10 @@ export const CorridorViewMap = ({
   };
 
   return (
-    <div
-      className={clsx(
-        styles["corridor__map-wrapper"],
-        "govuk-!-margin-bottom-7",
-      )}
-    >
+    <div className={clsx(styles.mapWrapper, "govuk-!-margin-bottom-7")}>
       <div
         ref={containerRef}
-        className={styles.corridor__map}
+        className={styles.map}
         aria-label="Corridor map"
       />
       <MapDisplayOptions
@@ -358,10 +353,10 @@ export const CorridorViewMap = ({
         createPortal(
           <button
             type="button"
-            className={styles["corridor__map-recentre"]}
+            className={styles.mapRecentre}
             onClick={recentre}
           >
-            <ReCentreIcon className={styles["corridor__map-recentre-icon"]} />
+            <ReCentreIcon className={styles.mapRecentreIcon} />
             Re-centre
           </button>,
           recentrePortal,

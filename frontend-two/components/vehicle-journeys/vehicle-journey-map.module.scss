@@ -1,19 +1,19 @@
 @use "../../styles/govuk-module" as *;
-.vehicle-journeys__map-wrapper {
+.vehicleJourneysMapWrapper {
   position: relative;
 }
-.vehicle-journeys__map-controls {
+.vehicleJourneysMapControls {
   position: absolute;
   z-index: 2;
   top: govuk-spacing(2);
   left: govuk-spacing(2);
 }
-.vehicle-journeys__map {
+.vehicleJourneysMap {
   width: 100%;
   min-height: 80vh;
   border: 1px solid govuk-functional-colour(border);
 }
-.vehicle-journeys__map-loading {
+.vehicleJourneysMapLoading {
   position: absolute;
   z-index: 3;
   inset: 0;
@@ -22,7 +22,7 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.7);
 }
-.vehicle-journeys__map-recentre {
+.vehicleJourneysMapRecentre {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -39,12 +39,12 @@
     background: govuk-colour("black", $variant: "tint-95");
   }
 }
-.vehicle-journeys__map-recentre-icon {
+.vehicleJourneysMapRecentreIcon {
   display: inline-flex;
   width: 1.25rem;
   height: 1.25rem;
 }
-.vehicle-journeys__map-empty {
+.vehicleJourneysMapEmpty {
   position: absolute;
   right: govuk-spacing(3);
   bottom: govuk-spacing(2);
@@ -52,44 +52,44 @@
   background: govuk-colour("white");
 }
 @media (max-width: 58.75em) {
-  .vehicle-journeys__map {
+  .vehicleJourneysMap {
     min-height: 34rem;
   }
 }
-.otp-legend {
+.otpLegend {
   display: flex;
   flex-wrap: wrap;
   gap: govuk-spacing(2) govuk-spacing(4);
 }
-.otp-legend__item {
+.item {
   display: flex;
   align-items: center;
   white-space: nowrap;
 }
-.otp-legend__icon {
+.icon {
   display: inline-block;
   width: 16px;
   height: 16px;
   margin-right: govuk-spacing(1);
 }
-.otp-legend__icon--on-time {
+.iconOnTime {
   background-color: govuk-colour("purple");
 }
-.otp-legend__icon--early {
+.iconEarly {
   background-color: govuk-colour("magenta");
 }
-.otp-legend__icon--late {
+.iconLate {
   background-color: raas-colour("late");
 }
-.otp-legend__icon--scheduled-route {
+.iconScheduledRoute {
   width: 24px;
   height: 0;
   border-top: 2px dotted govuk-colour("black", $variant: "tint-80");
 }
-.otp-legend__value {
+.value {
   margin-top: 2px;
 }
-.otp-legend__value--muted {
+.valueMuted {
   margin-left: govuk-spacing(1);
   color: govuk-functional-colour(secondary-text);
 }

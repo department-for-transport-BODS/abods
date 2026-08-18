@@ -1,14 +1,14 @@
 @use "../../styles/govuk-module" as *;
-.performance-chart {
+.performanceChart {
   min-height: rem(300);
   height: rem(300);
 }
-.performance-chart--fallback {
+.fallback {
   display: flex;
   gap: govuk-spacing(6);
   align-items: stretch;
 }
-.performance-chart__fallback-bars {
+.fallbackBars {
   display: flex;
   align-items: flex-end;
   gap: govuk-spacing(4);
@@ -16,7 +16,7 @@
   width: 60%;
   border-bottom: 1px solid govuk-functional-colour(border);
 }
-.performance-chart__fallback-bar {
+.fallbackBar {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -24,25 +24,25 @@
   width: rem(100);
   height: 100%;
 }
-.performance-chart__fallback-value {
+.fallbackValue {
   font-weight: $govuk-font-weight-bold;
   margin-bottom: govuk-spacing(2);
 }
-.performance-chart__fallback-fill {
+.fallbackFill {
   width: 100%;
   min-height: 2px;
   border-radius: 2px 2px 0 0;
 }
-.performance-chart__fallback-fill--ontime {
+.fallbackFillOntime {
   background: govuk-colour("purple");
 }
-.performance-chart__fallback-fill--late {
+.fallbackFillLate {
   background: raas-colour("late");
 }
-.performance-chart__fallback-fill--early {
+.fallbackFillEarly {
   background: raas-colour("early");
 }
-.performance-chart__fallback-legend {
+.fallbackLegend {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -50,22 +50,22 @@
   min-height: rem(240);
   margin-left: govuk-spacing(4);
 }
-.performance-chart__fallback-legend-item {
+.fallbackLegendItem {
   display: flex;
   align-items: center;
   gap: govuk-spacing(2);
 }
-.performance-chart__fallback-swatch {
+.fallbackSwatch {
   display: inline-block;
   width: 15px;
   height: 15px;
 }
-.performance-chart__fallback-swatch--ontime {
+.fallbackSwatchOntime {
   background: govuk-colour("purple");
 }
-.performance-chart__fallback-swatch--late {
+.fallbackSwatchLate {
   background: raas-colour("late");
 }
-.performance-chart__fallback-swatch--early {
+.fallbackSwatchEarly {
   background: raas-colour("early");
 }

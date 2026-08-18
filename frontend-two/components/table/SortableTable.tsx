@@ -48,8 +48,8 @@ const ascIcon = (
   <span
     aria-hidden="true"
     className={clsx(
-      styles["sortable-table-sort-icon"],
-      styles["sortable-table-sort-icon--asc"],
+      styles.sortableTableSortIcon,
+      styles.sortableTableSortIconAsc,
     )}
   />
 );
@@ -57,8 +57,8 @@ const descIcon = (
   <span
     aria-hidden="true"
     className={clsx(
-      styles["sortable-table-sort-icon"],
-      styles["sortable-table-sort-icon--desc"],
+      styles.sortableTableSortIcon,
+      styles.sortableTableSortIconDesc,
     )}
   />
 );
@@ -66,14 +66,20 @@ const unsortedIcon = (
   <span
     aria-hidden="true"
     className={clsx(
-      styles["sortable-table-sort-icon"],
-      styles["sortable-table-sort-icon--none"],
+      styles.sortableTableSortIcon,
+      styles.sortableTableSortIconNone,
     )}
   />
 );
 
+const alignmentClassNames = {
+  left: styles.alignLeft,
+  right: styles.alignRight,
+  center: styles.alignCenter,
+};
+
 const getAlignmentClassName = (alignment?: "left" | "right" | "center") =>
-  alignment ? styles[`sortable-table__align--${alignment}`] : undefined;
+  alignment ? alignmentClassNames[alignment] : undefined;
 
 const renderHeaderLabel = (label: ReactNode): ReactNode => {
   if (typeof label !== "string") {
@@ -86,10 +92,7 @@ const renderHeaderLabel = (label: ReactNode): ReactNode => {
   }
 
   return words.map((word, index) => (
-    <span
-      key={`${word}-${index}`}
-      className={styles["sortable-header__label-word"]}
-    >
+    <span key={`${word}-${index}`} className={styles.sortableHeaderLabelWord}>
       {word}
     </span>
   ));
@@ -131,8 +134,8 @@ export const SortableTable = ({
       <table
         className={clsx(
           "govuk-table",
-          styles["sortable-table"],
-          colWidths && styles["sortable-table--fixed"],
+          styles.sortableTable,
+          colWidths && styles.fixed,
         )}
         style={{ width: "100%" }}
       >
@@ -165,12 +168,12 @@ export const SortableTable = ({
                 }
                 {...(item?.sortable && { "aria-sort": getAriaSort(item) })}
               >
-                <div className={styles["sortable-table__clip"]}>
+                <div className={styles.clip}>
                   {item.sortable ? (
                     <button
                       type="button"
                       className={clsx(
-                        styles["sortable-header"],
+                        styles.sortableHeader,
                         getAlignmentClassName(item.alignment),
                         item.headerClassName,
                       )}
@@ -178,13 +181,13 @@ export const SortableTable = ({
                       aria-label={`Sort by ${item.ariaLabel ?? (typeof item.label === "string" ? item.label : item.key)} ${getAriaSort(item)}`}
                       data-testid={`sortable-header-${item.key}`}
                     >
-                      <span className={styles["sortable-header__label"]}>
+                      <span className={styles.sortableHeaderLabel}>
                         {renderHeaderLabel(item.label)}
                       </span>
                       {getSortIcon(item)}
                     </button>
                   ) : (
-                    <span className={styles["sortable-header__label"]}>
+                    <span className={styles.sortableHeaderLabel}>
                       {renderHeaderLabel(item.label)}
                     </span>
                   )}
@@ -219,9 +222,7 @@ export const SortableTable = ({
                       : column.ariaLabel ?? column.key
                   }
                 >
-                  <div className={styles["sortable-table__clip"]}>
-                    {row[column.key]}
-                  </div>
+                  <div className={styles.clip}>{row[column.key]}</div>
                 </td>
               ))}
             </tr>
@@ -229,7 +230,7 @@ export const SortableTable = ({
         </tbody>
       </table>
       {pagination || footerAction ? (
-        <div className={styles["sortable-table__footer-row"]}>
+        <div className={styles.footerRow}>
           <div>{footerAction ?? null}</div>
           <div>
             {pagination ? (

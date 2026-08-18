@@ -1,11 +1,11 @@
 @use "../../../styles/govuk-module" as *;
-.corridor__map-wrapper {
+.mapWrapper {
   position: relative;
 }
-.corridor__map {
+.map {
   height: 440px;
 }
-.corridor__map-style-toggle {
+.mapStyleToggle {
   position: absolute;
   top: govuk-spacing(2);
   left: govuk-spacing(2);
@@ -13,23 +13,23 @@
   gap: 0;
   z-index: 1;
 }
-.corridor__map-style-btn {
+.mapStyleBtn {
   @include govuk-font(16);
   padding: govuk-spacing(1) govuk-spacing(2);
   border: 2px solid govuk-functional-colour(border);
   background: govuk-colour("white");
   cursor: pointer;
 }
-.corridor__map-style-btn + .corridor__map-style-btn {
+.mapStyleBtn + .mapStyleBtn {
   border-left: 0;
 }
-.corridor__map-style-btn--active {
+.mapStyleBtnActive {
   background: govuk-colour("black", $variant: "tint-25");
   color: govuk-colour("white");
   font-weight: $govuk-font-weight-bold;
   border-color: govuk-colour("black", $variant: "tint-25");
 }
-.corridor__map-recentre {
+.mapRecentre {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +47,7 @@
     background: govuk-colour("black", $variant: "tint-95");
   }
 }
-.corridor__map-recentre-icon {
+.mapRecentreIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;

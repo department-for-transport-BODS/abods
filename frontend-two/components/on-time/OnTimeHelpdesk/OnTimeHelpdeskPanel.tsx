@@ -1,6 +1,7 @@
 import styles from "./on-time-helpdesk-panel.module.scss";
 
 import { ReactNode, useMemo, useState } from "react";
+import { clsx } from "clsx";
 
 export interface OnTimeHelpdeskSection {
   id: string;
@@ -172,9 +173,12 @@ export const OnTimeHelpdeskPanel = ({
 
         <button
           type="button"
-          className={`${styles.toggleAll} button-link govuk-link${
-            allSectionsExpanded ? ` ${styles.toggleAllExpanded}` : ""
-          }`}
+          className={clsx(
+            styles.toggleAll,
+            "button-link",
+            "govuk-link",
+            allSectionsExpanded && styles.toggleAllExpanded,
+          )}
           onClick={toggleAllSections}
           disabled={allExpandableSectionIds.length === 0}
         >
@@ -195,9 +199,12 @@ export const OnTimeHelpdeskPanel = ({
 
                 <button
                   type="button"
-                  className={`${styles.sectionToggle} button-link govuk-link${
-                    isExpanded ? ` ${styles.sectionToggleExpanded}` : ""
-                  }`}
+                  className={clsx(
+                    styles.sectionToggle,
+                    "button-link",
+                    "govuk-link",
+                    isExpanded && styles.sectionToggleExpanded,
+                  )}
                   onClick={() => toggleSection(section.id)}
                   disabled={!isExpandable}
                   aria-expanded={isExpanded}

@@ -1,12 +1,12 @@
 @use "../../styles/govuk-module" as *;
-.feed-table__check {
+.check {
   width: 30px;
   min-width: 24px;
   height: 30px;
   filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
     brightness(90%);
 }
-.feed-table__cross {
+.cross {
   width: 30px;
   min-width: 24px;
   height: 30px;

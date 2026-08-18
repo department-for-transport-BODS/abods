@@ -1,11 +1,11 @@
 @use "../../styles/govuk-module" as *;
 
-.operator-dropdown {
+.operatorDropdown {
   position: relative;
   display: inline-block;
 }
 
-.operator-dropdown__button {
+.button {
   background: none;
   border: none;
   cursor: pointer;
@@ -15,22 +15,22 @@
   padding: 0;
 }
 
-.operator-dropdown__label {
+.label {
   color: govuk-functional-colour(brand);
   font-weight: bold;
   font-size: 24px;
   margin: 0;
 }
 
-.operator-dropdown__chevron {
+.chevron {
   transition: transform 0.2s;
-
-  &--open {
-    transform: rotate(180deg);
-  }
 }
 
-.operator-dropdown__list {
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.list {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -46,19 +46,19 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.operator-dropdown__item {
+.item {
   padding: 8px 12px;
   cursor: pointer;
   background-color: govuk-functional-colour(body-background);
   color: govuk-functional-colour(text);
-
-  &--hovered {
-    background-color: govuk-functional-colour(brand);
-    color: govuk-colour("white");
-  }
 }
 
-.operator-dropdown__item-text {
+.itemHovered {
+  background-color: govuk-functional-colour(brand);
+  color: govuk-colour("white");
+}
+
+.itemText {
   margin: 0;
   color: inherit;
 }

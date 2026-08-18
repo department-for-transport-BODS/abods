@@ -79,20 +79,17 @@ export const DateCalendarMonth = ({
 
   return (
     <div>
-      <div className={styles["date-range-controls__calendar-day-names"]}>
+      <div className={styles.calendarDayNames}>
         {DAY_NAMES.map((name, index) => (
           <span
             key={`${name}-${index}`}
-            className={clsx(
-              styles["date-range-controls__day-name"],
-              index === 5 && styles["date-range-controls__day--saturday"],
-            )}
+            className={clsx(styles.dayName, index === 5 && styles.daySaturday)}
           >
             {name}
           </span>
         ))}
       </div>
-      <table className={styles["date-range-controls__table"]}>
+      <table className={styles.table}>
         <tbody>
           {table.map((row, rowIndex) => (
             <tr key={rowIndex}>
@@ -106,28 +103,23 @@ export const DateCalendarMonth = ({
                   <td
                     key={cellIndex}
                     className={clsx(
-                      styles["date-range-controls__table-cell"],
-                      included &&
-                        styles["date-range-controls__table-cell--included"],
-                      start && styles["date-range-controls__table-cell--start"],
-                      end && styles["date-range-controls__table-cell--end"],
+                      styles.tableCell,
+                      included && styles.tableCellIncluded,
+                      start && styles.tableCellStart,
+                      end && styles.tableCellEnd,
                     )}
                   >
                     {dayIsValid ? (
                       <button
                         type="button"
                         className={clsx(
-                          styles["date-range-controls__day"],
-                          day.isToday &&
-                            styles["date-range-controls__day--today"],
-                          !day.isSelectable &&
-                            styles["date-range-controls__day--disabled"],
-                          included &&
-                            styles["date-range-controls__day--included"],
-                          start && styles["date-range-controls__day--start"],
-                          end && styles["date-range-controls__day--end"],
-                          day.isSaturday &&
-                            styles["date-range-controls__day--saturday"],
+                          styles.day,
+                          day.isToday && styles.dayToday,
+                          !day.isSelectable && styles.dayDisabled,
+                          included && styles.dayIncluded,
+                          start && styles.dayStart,
+                          end && styles.dayEnd,
+                          day.isSaturday && styles.daySaturday,
                         )}
                         onClick={() => {
                           if (day.isSelectable) {

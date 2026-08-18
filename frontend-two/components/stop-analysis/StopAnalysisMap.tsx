@@ -717,24 +717,21 @@ export const StopAnalysisMap = ({
   }, []);
 
   return (
-    <div className={styles["stop-analysis-map"]}>
-      <div
-        ref={mapContainer}
-        className={styles["stop-analysis-map__container"]}
-      />
+    <div className={styles.stopAnalysisMap}>
+      <div ref={mapContainer} className={styles.container} />
       <MapDisplayOptions
         activeStyle={activeStyle}
         mapboxSatelliteStyle={mapboxSatelliteStyle}
         onStyleChange={switchStyle}
       />
       {boundingBoxTooBig && mapLoaded && (
-        <div className={styles["stop-analysis-map__overlay"]}>
+        <div className={styles.overlay}>
           <p>Zoom in to show stops</p>
         </div>
       )}
       {loading && (
         <div
-          className={styles["stop-analysis-map__loading-overlay"]}
+          className={styles.loadingOverlay}
           role="status"
           aria-live="polite"
           aria-label="Loading stop analysis map"
@@ -748,34 +745,14 @@ export const StopAnalysisMap = ({
 };
 
 const StopAnalysisLegend = () => (
-  <div className={styles["stop-analysis-map__legend"]}>
-    <span
-      className={clsx(
-        styles["stop-analysis-map__dot"],
-        styles["stop-analysis-map__dot--high"],
-      )}
-    />
+  <div className={styles.legend}>
+    <span className={clsx(styles.dot, styles.dotHigh)} />
     <span>&gt; 80% on-time</span>
-    <span
-      className={clsx(
-        styles["stop-analysis-map__dot"],
-        styles["stop-analysis-map__dot--med"],
-      )}
-    />
+    <span className={clsx(styles.dot, styles.dotMed)} />
     <span>60% - 80% on-time</span>
-    <span
-      className={clsx(
-        styles["stop-analysis-map__dot"],
-        styles["stop-analysis-map__dot--low"],
-      )}
-    />
+    <span className={clsx(styles.dot, styles.dotLow)} />
     <span>&lt; 60% on-time</span>
-    <span
-      className={clsx(
-        styles["stop-analysis-map__dot"],
-        styles["stop-analysis-map__dot--no-data"],
-      )}
-    />
+    <span className={clsx(styles.dot, styles.dotNoData)} />
     <span>No data</span>
   </div>
 );

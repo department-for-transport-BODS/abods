@@ -1,19 +1,19 @@
 @use "../../styles/govuk-module" as *;
 
-.analysis-tabs {
+.analysisTabs {
   display: flex;
   gap: 0;
   border-bottom: 1px solid govuk-functional-colour(border);
 }
 
-.analysis-tabs--panel {
+.panel {
   border-bottom: 0;
-  .analysis-tabs__tab {
+  .tab {
     margin-bottom: 0;
   }
 }
 
-.analysis-tabs__tab {
+.tab {
   @include govuk-font(19);
   background: none;
   border: none;
@@ -28,7 +28,7 @@
   }
 }
 
-.analysis-tabs__tab--active {
+.tabActive {
   font-weight: $govuk-font-weight-bold;
   border-bottom-color: govuk-functional-colour(link);
 }

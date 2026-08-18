@@ -129,7 +129,7 @@ export const DateSelect = ({
         />
         <button
           type="button"
-          className={`${styles.calendarToggle} unbuttoned`}
+          className={clsx(styles.calendarToggle, "unbuttoned")}
           aria-label="Toggle calendar"
           aria-expanded={open}
           onClick={() => setOpen((current) => !current)}
@@ -142,7 +142,12 @@ export const DateSelect = ({
           <div className={styles.calendarHeader}>
             <button
               type="button"
-              className={`${styles.monthStep} ${styles.monthStepPrev} unbuttoned${!canGoPrev ? " " + styles.monthStepDisabled : ""}`}
+              className={clsx(
+                styles.monthStep,
+                styles.monthStepPrev,
+                "unbuttoned",
+                !canGoPrev && styles.monthStepDisabled,
+              )}
               aria-label="Previous month"
               disabled={!canGoPrev}
               onClick={(event) => {
@@ -153,13 +158,21 @@ export const DateSelect = ({
               ‹
             </button>
             <span
-              className={`${styles.monthName}${month.hasSame(today, "month") ? " " + styles.monthNameCurrent : ""}`}
+              className={clsx(
+                styles.monthName,
+                month.hasSame(today, "month") && styles.monthNameCurrent,
+              )}
             >
               {month.toFormat("MMMM yyyy")}
             </span>
             <button
               type="button"
-              className={`${styles.monthStep} ${styles.monthStepNext} unbuttoned${!canGoNext ? " " + styles.monthStepDisabled : ""}`}
+              className={clsx(
+                styles.monthStep,
+                styles.monthStepNext,
+                "unbuttoned",
+                !canGoNext && styles.monthStepDisabled,
+              )}
               aria-label="Next month"
               disabled={!canGoNext}
               onClick={(event) => {

@@ -33,7 +33,7 @@ export const OtpThresholdModalLink = ({
           "govuk-body",
           "govuk-link",
           "button-link",
-          styles["otp-threshold-modal-button"],
+          styles.otpThresholdModalButton,
         )}
         onClick={() => setOpen(true)}
       >

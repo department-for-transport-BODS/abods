@@ -7,7 +7,7 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 
-  .sortable-table {
+  .sortableTable {
     width: 100%;
   }
 }
@@ -21,14 +21,14 @@
   overflow-wrap: break-word;
   word-break: break-word;
 
-  .govuk-link {
+  :global(.govuk-link) {
     white-space: normal;
     overflow-wrap: break-word;
     word-break: break-word;
   }
 }
 
-.nameHeader .sortable-header__label {
+.nameHeader .label {
   white-space: normal;
 }
 

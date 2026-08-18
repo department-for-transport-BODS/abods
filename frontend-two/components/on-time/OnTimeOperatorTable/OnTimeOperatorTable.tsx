@@ -67,6 +67,16 @@ const columns = [
   },
 ];
 
+const OPERATOR_TABLE_COLUMN_WIDTHS = {
+  nocCode: "7%",
+  averageDelay: "10%",
+  onTimeRatio: "10%",
+  lateRatio: "10%",
+  earlyRatio: "10%",
+  sparkline: "28%",
+
+};
+
 function getSparklineKey(row: OperatorPerformance): string | null {
   return row.nocCode ?? row.operatorId ?? null;
 }
@@ -314,14 +324,7 @@ export const OnTimeOperatorTable = ({
         data={sortedData}
         getRowValue={getRowValue}
         renderRow={renderOperatorRow}
-        colWidths={{
-          nocCode: "7%",
-          averageDelay: "10%",
-          onTimeRatio: "10%",
-          lateRatio: "10%",
-          earlyRatio: "10%",
-          sparkline: "28%",
-        }}
+        colWidths={OPERATOR_TABLE_COLUMN_WIDTHS}
         initialSortKey="name"
         initialSortOrder="asc"
         paginationNoun="operator"

@@ -1,22 +1,22 @@
 @use "../../../styles/govuk-module" as *;
-.corridor-stop-list {
+.corridorStopList {
   background-color: govuk-colour("black", $variant: "tint-95");
   width: 50ex;
   max-width: 100%;
   padding: govuk-spacing(2) govuk-spacing(2) 0;
   margin-bottom: govuk-spacing(4);
 }
-.corridor-stop-list__stop {
+.stop {
   display: flex;
   justify-content: space-between;
   gap: govuk-spacing(2);
   position: relative;
   padding: govuk-spacing(3) govuk-spacing(1) govuk-spacing(3) govuk-spacing(2);
 }
-.corridor-stop-list__stop--added {
+.stopAdded {
   background-color: govuk-colour("black", $variant: "tint-95");
 }
-.corridor-stop-list__stop--matching {
+.stopMatching {
   box-shadow: inset 0px -2px 0px govuk-functional-colour(border);
   padding-top: govuk-spacing(3);
   padding-left: govuk-spacing(1);
@@ -24,7 +24,7 @@
   width: 100%;
   box-sizing: border-box;
 }
-.corridor-stop-list__stop--connected::before {
+.stopConnected::before {
   content: "";
   position: absolute;
   display: block;
@@ -34,13 +34,13 @@
   height: 100%;
   z-index: 1;
 }
-.corridor-stop-list__stop:hover,
-.corridor-stop-list__stop--added {
-  .corridor-stop-list__stop-details:before {
+.stop:hover,
+.stopAdded {
+  .stopDetails:before {
     border-color: govuk-colour("black");
   }
 }
-.corridor-stop-list__stop-details {
+.stopDetails {
   @include govuk-font(19);
   position: relative;
   padding: 0 govuk-spacing(4) 0 govuk-spacing(8);
@@ -57,15 +57,15 @@
     z-index: 2;
   }
 }
-.corridor-stop-list__stop-details--no-graphic {
+.stopDetailsNoGraphic {
   padding-left: 0;
   &:before {
     content: none;
   }
 }
-.corridor-stop-list__stop-label {
+.stopLabel {
   @include govuk-responsive-margin(1, "bottom");
 }
-.corridor-stop-list__naptan {
+.naptan {
   color: govuk-functional-colour(secondary-text);
 }

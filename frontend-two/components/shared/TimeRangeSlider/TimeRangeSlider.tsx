@@ -1,5 +1,4 @@
 import styles from "./time-range-slider.module.scss";
-import sliderStyles from "../RangeSlider/range-slider.module.scss";
 
 import {
   ChangeEvent,
@@ -8,7 +7,10 @@ import {
   useMemo,
   useState,
 } from "react";
-import { RangeSlider } from "@/components/shared/RangeSlider/RangeSlider";
+import {
+  RangeSlider,
+  RangeSliderSelection,
+} from "@/components/shared/RangeSlider/RangeSlider";
 
 const MIN_HOUR = 0;
 const MAX_START_HOUR = 23;
@@ -222,7 +224,7 @@ export const TimeRangeSlider = ({
             },
           ]}
         >
-          <div className={sliderStyles.selected} style={sliderSelectedStyle} />
+          <RangeSliderSelection style={sliderSelectedStyle} />
         </RangeSlider>
 
         <div className={styles.textboxes}>

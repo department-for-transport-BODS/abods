@@ -14,13 +14,13 @@
 }
 
 .container {
-  .sortable-table .sortable-header {
+  .sortableTable .sortableHeader {
     min-width: 0;
     align-items: flex-start;
   }
 }
 
-.container .sortable-table {
+.container .sortableTable {
   width: 100%;
 
   :global(.govuk-table__cell),

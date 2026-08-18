@@ -1,5 +1,5 @@
 @use "../../styles/govuk-module" as *;
-.vehicles-status__stats {
+.stats {
   display: flex;
   gap: govuk-spacing(6);
   > * {
@@ -7,7 +7,7 @@
     margin-bottom: 0;
   }
 }
-.vehicles-status__footer {
+.footer {
   display: flex;
   justify-content: flex-end;
   @include govuk-font(19);

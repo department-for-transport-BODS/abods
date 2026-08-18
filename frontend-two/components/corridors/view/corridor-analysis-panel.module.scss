@@ -1,9 +1,9 @@
 @use "../../../styles/govuk-module" as *;
-.corridor__chart-wrapper {
+.chartWrapper {
   background: govuk-colour("black", $variant: "tint-95");
   padding-bottom: govuk-spacing(3);
 }
-.corridor__hide-outliers {
+.hideOutliers {
   display: flex;
   flex-direction: row-reverse;
   padding-right: govuk-spacing(3);

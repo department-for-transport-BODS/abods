@@ -1,15 +1,15 @@
 @use "../../styles/govuk-module" as *;
-.ranking-table__content {
+.content {
   position: relative;
   width: 100%;
   min-height: 108px;
 }
-.ranking-table__content--loading {
-  .ranking-table__data {
+.contentLoading {
+  .data {
     visibility: hidden;
   }
 }
-.ranking-table__data {
+.data {
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
@@ -23,49 +23,49 @@
     }
   }
 }
-.ranking-table__service {
+.service {
   :global(.govuk-link) {
     white-space: normal;
     overflow-wrap: normal;
     word-break: normal;
   }
 }
-.ranking-table__col-service {
+.colService {
   width: auto;
 }
-.ranking-table__col-operator {
+.colOperator {
   width: 12.5rem;
 }
-.ranking-table__col-stat {
+.colStat {
   width: 6.3rem;
 }
-.ranking-table__col-trend {
+.colTrend {
   width: 7.2rem;
 }
-.ranking-table__operator {
+.operator {
   color: govuk-functional-colour(text);
   :global(.unbuttoned) {
     color: govuk-functional-colour(text);
   }
 }
-.ranking-table__operator-text {
+.operatorText {
   white-space: normal;
   overflow-wrap: normal;
   word-break: normal;
 }
-.ranking-table__stat,
-.ranking-table__trend {
+.stat,
+.trend {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.ranking-table__link {
+.link {
   text-decoration: none;
 }
-.ranking-table__trend {
+.trend {
   text-align: right;
 }
-.ranking-table__no-data,
-.ranking-table__loading {
+.noData,
+.loading {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -76,34 +76,34 @@
   align-items: center;
   justify-content: center;
 }
-.app-performance-ranking {
+.appPerformanceRanking {
   width: 100%;
 }
 @include bp($to-tablet) {
-  .ranking-table__data {
+  .data {
     table-layout: auto;
     td {
       padding-right: govuk-spacing(2);
     }
   }
-  .ranking-table__col-service,
-  .ranking-table__col-operator,
-  .ranking-table__col-stat,
-  .ranking-table__col-trend {
+  .colService,
+  .colOperator,
+  .colStat,
+  .colTrend {
     width: auto;
   }
-  .ranking-table__service,
-  .ranking-table__operator {
+  .service,
+  .operator {
     min-width: 0;
   }
 }
-.tabs__list {
+.tabsList {
   list-style: none;
   margin: 0 0 govuk-spacing(3);
   padding: 0;
   display: flex;
 }
-.tabs__list-item {
+.tabsListItem {
   @include govuk-font(19);
   color: govuk-functional-colour(link);
   cursor: pointer;
@@ -121,7 +121,7 @@
     text-decoration: none;
   }
 }
-.tabs__list-item--selected {
+.tabsListItemSelected {
   font-weight: $govuk-font-weight-bold;
   border-bottom: govuk-functional-colour(link) 4px solid;
 }

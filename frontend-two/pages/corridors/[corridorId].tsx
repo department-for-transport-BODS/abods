@@ -228,13 +228,8 @@ const CorridorsViewPage = () => {
             </div>
           </div>
 
-          <div
-            className={clsx(
-              styles["corridor__date-wrapper"],
-              "govuk-!-margin-bottom-5",
-            )}
-          >
-            <div className={styles["corridor__date-range-picker"]}>
+          <div className={clsx(styles.dateWrapper, "govuk-!-margin-bottom-5")}>
+            <div className={styles.dateRangePicker}>
               <div className={styles.dateRange}>
                 <DateRangeSelect
                   value={{ from: fromDate.toISO()!, to: toDate.toISO()! }}
@@ -294,16 +289,11 @@ const CorridorsViewPage = () => {
             />
           ) : null}
 
-          <div
-            className={clsx(
-              styles.corridor__summary,
-              "govuk-!-margin-bottom-7",
-            )}
-          >
+          <div className={clsx(styles.summary, "govuk-!-margin-bottom-7")}>
             <Stat
               id="corridor-total-transits"
               label="Recorded transits"
-              className={styles["corridor__summary-stat"]}
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -317,7 +307,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-missing-transits"
               label="Missing transits"
-              className={styles["corridor__summary-stat"]}
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -337,7 +327,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-average-journey-time"
               label="Average journey time"
-              className={styles["corridor__summary-stat"]}
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -351,7 +341,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-average-speed"
               label="Average speed"
-              className={styles["corridor__summary-stat"]}
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -368,7 +358,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-services"
               label="Services"
-              className={styles["corridor__summary-stat"]}
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -382,10 +372,7 @@ const CorridorsViewPage = () => {
           </div>
 
           <div
-            className={clsx(
-              styles["corridor__analysis-selector"],
-              "govuk-!-margin-bottom-4",
-            )}
+            className={clsx(styles.analysisSelector, "govuk-!-margin-bottom-4")}
           >
             <h2 className="govuk-heading-m govuk-!-margin-top-0 govuk-!-margin-bottom-0">
               Analysis

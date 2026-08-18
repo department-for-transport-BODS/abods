@@ -174,7 +174,7 @@ export const OtpThresholdModal = ({
             "govuk-button",
             "govuk-button--secondary",
             "govuk-!-margin-bottom-0",
-            styles["otp-threshold-modal__close-button"],
+            styles.closeButton,
           )}
           onClick={onClose}
         >

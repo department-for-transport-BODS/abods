@@ -32,22 +32,15 @@ export const StopSearchList = ({
       {stops.map((stop, index) => (
         <div
           key={`${stop.stopId}-${index}`}
-          className={clsx(
-            styles["corridor-stop-list__stop"],
-            styles["corridor-stop-list__stop--matching"],
-          )}
+          className={clsx(styles.stop, styles.stopMatching)}
         >
           <div
             className={
-              showGraphic
-                ? styles["corridor-stop-list__stop-details"]
-                : styles["corridor-stop-list__stop-details--no-graphic"]
+              showGraphic ? styles.stopDetails : styles.stopDetailsNoGraphic
             }
           >
-            <div className={styles["corridor-stop-list__stop-label"]}>
-              {stop.stopName}
-            </div>
-            <div className={styles["corridor-stop-list__naptan"]}>
+            <div className={styles.stopLabel}>{stop.stopName}</div>
+            <div className={styles.naptan}>
               {stop.localityName ? `${stop.localityName} ` : ""}
               {stop.naptan}
             </div>

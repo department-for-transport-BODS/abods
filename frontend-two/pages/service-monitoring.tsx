@@ -80,7 +80,7 @@ const ServiceMonitoringPage = () => {
           <Spinner size="default" message="Loading..." vCentre />
         ) : (
           embedUrl && (
-            <div className={styles["service-monitoring__iframe-container"]}>
+            <div className={styles.iframeContainer}>
               <iframe
                 src={embedUrl}
                 width="100%"

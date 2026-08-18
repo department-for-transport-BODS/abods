@@ -264,9 +264,9 @@ export const OperatorSelector = ({
           data-labelforid="operator_selector"
           className={clsx(
             styles.gdsSelect,
-            isOpen && styles["gdsSelect--open"],
-            isFocused && styles["gdsSelect--focused"],
-            hasSearchTerm && styles["gdsSelect--filtering"],
+            isOpen && styles.gdsSelectOpen,
+            isFocused && styles.gdsSelectFocused,
+            hasSearchTerm && styles.gdsSelectFiltering,
           )}
         >
           <div
@@ -278,9 +278,7 @@ export const OperatorSelector = ({
                 className={styles.value}
                 aria-hidden={hasSearchTerm && isOpen}
               >
-                <span className={styles.valueLabel}>
-                  {selectedOption.label}
-                </span>
+                <span>{selectedOption.label}</span>
               </div>
               <div className={styles.input}>
                 <input
@@ -344,9 +342,8 @@ export const OperatorSelector = ({
                     aria-selected={option.value === selectedValue}
                     className={clsx(
                       styles.option,
-                      option.value === selectedValue &&
-                        styles["option--selected"],
-                      index === activeIndex && styles["option--active"],
+                      option.value === selectedValue && styles.optionSelected,
+                      index === activeIndex && styles.optionActive,
                     )}
                     onMouseEnter={() => setActiveIndex(index)}
                     onMouseDown={(event) => {

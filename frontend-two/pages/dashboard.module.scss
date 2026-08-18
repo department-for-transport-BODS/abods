@@ -1,5 +1,5 @@
 @use "../styles/govuk-module" as *;
-.dashboard__controls {
+.controls {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -8,52 +8,52 @@
     margin-bottom: govuk-spacing(3);
   }
 }
-.dashboard__layout {
+.layout {
   display: flex;
   flex-direction: column;
 }
-.dashboard__performance {
+.performance {
   margin-bottom: govuk-spacing(6);
   min-width: 0;
 }
-.dashboard__vehicles-status {
+.vehiclesStatus {
   margin-bottom: govuk-spacing(6);
 }
-.dashboard__feed-status-link {
+.feedStatusLink {
   @include govuk-font(19);
   text-align: right;
 }
 @include bp($tablet) {
-  .dashboard__feeds {
+  .feeds {
     display: flex;
   }
-  .dashboard__vehicles-status,
-  .dashboard__feed-alerts {
+  .vehiclesStatus,
+  .feedAlerts {
     flex-basis: 50%;
   }
-  .dashboard__vehicles-status {
+  .vehiclesStatus {
     margin-right: govuk-spacing(6);
     margin-bottom: 0;
   }
 }
 @include bp($xlg-desktop) {
-  .dashboard__layout {
+  .layout {
     flex-direction: row;
   }
-  .dashboard__performance {
+  .performance {
     flex: 1;
     margin-right: govuk-spacing(6);
     margin-bottom: 0;
   }
-  .dashboard__feeds {
+  .feeds {
     flex-direction: column;
     flex-basis: 383px;
   }
-  .dashboard__vehicles-status {
+  .vehiclesStatus {
     margin-bottom: govuk-spacing(6);
   }
-  .dashboard__vehicles-status,
-  .dashboard__feed-alerts {
+  .vehiclesStatus,
+  .feedAlerts {
     flex-basis: auto;
     margin-right: 0;
   }

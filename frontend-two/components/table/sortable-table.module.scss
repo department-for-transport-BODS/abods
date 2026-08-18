@@ -1,10 +1,10 @@
 @use "../../styles/govuk-module" as *;
-.sortable-table :global(.govuk-table__header) {
+.sortableTable :global(.govuk-table__header) {
   font-weight: $govuk-font-weight-bold;
   min-width: 0;
   overflow: hidden;
 }
-.sortable-table--fixed {
+.fixed {
   table-layout: fixed;
   width: 100%;
 
@@ -15,12 +15,12 @@
     box-sizing: border-box;
   }
 }
-.sortable-table__clip {
+.clip {
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
 }
-.sortable-table .sortable-header {
+.sortableTable .sortableHeader {
   display: flex;
   position: relative;
   width: 100%;
@@ -36,7 +36,7 @@
   align-items: flex-start;
   box-sizing: border-box;
 }
-.sortable-table .sortable-header__label {
+.sortableTable .sortableHeaderLabel {
   display: flex;
   flex: 1 1 auto;
   flex-wrap: wrap;
@@ -45,7 +45,7 @@
   max-width: 100%;
   font-weight: $govuk-font-weight-bold;
 }
-.sortable-table .sortable-header__label-word {
+.sortableTable .sortableHeaderLabelWord {
   flex: 0 1 auto;
   min-width: 0;
   max-width: 100%;
@@ -55,10 +55,10 @@
   overflow-wrap: normal;
   word-break: normal;
 }
-.sortable-table .sortable-header:hover {
+.sortableTable .sortableHeader:hover {
   color: govuk-functional-colour(link-hover);
 }
-.sortable-table__footer-row {
+.footerRow {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -66,52 +66,52 @@
   margin-top: govuk-spacing(3);
   margin-bottom: govuk-spacing(3);
 }
-.sortable-table__footer-row > :last-child {
+.footerRow > :last-child {
   margin-left: auto;
 }
-.sortable-table__footer-row--empty {
+.footerRowEmpty {
   justify-content: flex-start;
 }
-.sortable-table__footer-row--empty > :last-child {
+.footerRowEmpty > :last-child {
   margin-left: 0;
 }
 @media (max-width: 640px) {
-  .sortable-table__footer-row {
+  .footerRow {
     align-items: flex-start;
     flex-direction: column-reverse;
   }
-  .sortable-table__footer-row > :last-child {
+  .footerRow > :last-child {
     margin-left: 0;
   }
-  .paging-panel,
-  .paging-panel > nav {
+  .pagingPanel,
+  .pagingPanel > nav {
     flex-wrap: wrap;
   }
-  .paging-panel {
+  .pagingPanel {
     justify-content: flex-start;
   }
 }
-.sortable-table__align--right {
+.alignRight {
   justify-content: flex-end;
   width: 100%;
   text-align: right;
 
-  .sortable-header__label {
+  .sortableHeaderLabel {
     justify-content: flex-end;
     text-align: right;
   }
 }
-.sortable-table__align--center {
+.alignCenter {
   justify-content: center;
   width: 100%;
   text-align: center;
 }
-.sortable-table .sortable-header.sortable-table__align--left {
+.sortableTable .sortableHeader.alignLeft {
   justify-content: flex-start;
   width: 100%;
   text-align: left;
 }
-.sortable-table-sort-icon {
+.sortableTableSortIcon {
   position: absolute;
   top: 0;
   right: 0;
@@ -124,15 +124,15 @@
   vertical-align: middle;
   min-height: 16px;
 }
-.sortable-table-sort-icon--asc::before {
+.sortableTableSortIconAsc::before {
   content: "\25b2";
   font-size: 14px;
 }
-.sortable-table-sort-icon--desc::before {
+.sortableTableSortIconDesc::before {
   content: "\25bc";
   font-size: 14px;
 }
-.sortable-table-sort-icon--none {
+.sortableTableSortIconNone {
   color: govuk-colour("black", $variant: "tint-80");
   font-size: 8px;
   &::before {

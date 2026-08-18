@@ -209,27 +209,14 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
 
   if (loadFailed) {
     return (
-      <div
-        className={clsx(
-          styles["performance-chart"],
-          styles["performance-chart--fallback"],
-        )}
-      >
-        <div
-          className={styles["performance-chart__fallback-bars"]}
-          aria-hidden="true"
-        >
+      <div className={clsx(styles.performanceChart, styles.fallback)}>
+        <div className={styles.fallbackBars} aria-hidden="true">
           {chartData.map((item) => (
-            <div
-              key={item.category}
-              className={styles["performance-chart__fallback-bar"]}
-            >
-              <span className={styles["performance-chart__fallback-value"]}>
-                {item.value}%
-              </span>
+            <div key={item.category} className={styles.fallbackBar}>
+              <span className={styles.fallbackValue}>{item.value}%</span>
               <div
                 className={clsx(
-                  styles["performance-chart__fallback-fill"],
+                  styles.fallbackFill,
                   styles[
                     `performance-chart__fallback-fill--${item.category.toLowerCase()}`
                   ],
@@ -239,15 +226,12 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
             </div>
           ))}
         </div>
-        <div className={styles["performance-chart__fallback-legend"]}>
+        <div className={styles.fallbackLegend}>
           {orderedCategories.map((category) => (
-            <div
-              key={category}
-              className={styles["performance-chart__fallback-legend-item"]}
-            >
+            <div key={category} className={styles.fallbackLegendItem}>
               <span
                 className={clsx(
-                  styles["performance-chart__fallback-swatch"],
+                  styles.fallbackSwatch,
                   styles[
                     `performance-chart__fallback-swatch--${category.toLowerCase()}`
                   ],
@@ -266,7 +250,7 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
 
   return (
     <div
-      className={styles["performance-chart"]}
+      className={styles.performanceChart}
       id={resolvedChartId}
       ref={chartContainerRef}
     />

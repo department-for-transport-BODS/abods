@@ -73,7 +73,7 @@ export const PagingPanel = ({
   return (
     <div
       className={clsx(
-        styles["paging-panel"],
+        styles.pagingPanel,
         "flex w-full items-baseline gap-6",
         alignment === "left" ? "justify-start" : "justify-end",
       )}

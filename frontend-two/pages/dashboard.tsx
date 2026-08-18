@@ -141,7 +141,7 @@ const DashboardPage = () => {
         <div className="govuk-!-margin-bottom-2 govuk-!-margin-top-2">
           <h1 className="govuk-heading-xl app-page-header">Dashboard</h1>
         </div>
-        <div className={styles.dashboard__controls}>
+        <div className={styles.controls}>
           <OperatorSelector
             operators={operators}
             selectedOperatorId={nocCode}
@@ -152,8 +152,8 @@ const DashboardPage = () => {
         {isLoading ? (
           <p className="govuk-body">Loading dashboard data...</p>
         ) : (
-          <div className={styles.dashboard__layout}>
-            <div className={styles.dashboard__performance}>
+          <div className={styles.layout}>
+            <div className={styles.performance}>
               <Box>
                 <h2 className="govuk-heading-m">On-time performance</h2>
                 <PerformanceWidget
@@ -163,15 +163,15 @@ const DashboardPage = () => {
                 />
               </Box>
             </div>
-            <div className={styles.dashboard__feeds}>
-              <div className={styles["dashboard__vehicles-status"]}>
+            <div className={styles.feeds}>
+              <div className={styles.vehiclesStatus}>
                 <VehiclesStatus
                   actual={currentVehicles}
                   expected={expectedVehicles}
                   nocCode={nocCode}
                 />
               </div>
-              <div className={styles["dashboard__feed-alerts"]}>
+              <div className={styles.feedAlerts}>
                 <FeedStatusSummary operators={feedStatusOperators} />
               </div>
             </div>

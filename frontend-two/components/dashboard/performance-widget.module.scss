@@ -1,32 +1,32 @@
 @use "../../styles/govuk-module" as *;
-.performance__no-data,
-.performance__chart {
+.noData,
+.chart {
   min-height: rem(300);
   margin-bottom: govuk-spacing(6);
 }
-.performance__no-data {
+.noData {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.performance__no-data--loading {
+.noDataLoading {
   flex-direction: column;
 }
-.performance__chart {
+.chart {
   max-width: rem(800);
 }
-.performance__link {
+.link {
   @include govuk-font(19);
   margin-bottom: 0;
 }
-.performance__footer {
+.footer {
   margin-top: govuk-spacing(6);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 @include bp($to-tablet) {
-  .performance__footer {
+  .footer {
     flex-direction: column;
     align-items: flex-start;
     gap: govuk-spacing(3);

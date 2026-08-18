@@ -8,8 +8,7 @@ import { CaretRightIcon } from "@/components/icons/CaretRightIcon";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { Spinner } from "@/components/shared/Spinner";
 import { Stat } from "@/components/shared/SummaryStat/Stat";
-import tooltipListStyles from "@/components/shared/SummaryStat/summary-stat-with-tooltip.module.scss";
-import { Tooltip } from "@/components/shared/Tooltip";
+import { Tooltip, TooltipList } from "@/components/shared/Tooltip";
 import { clsx } from "clsx";
 import { TimingIcon } from "@/components/icons/TimingIcon";
 import { StopIcon } from "@/components/icons/StopIcon";
@@ -104,12 +103,7 @@ const JourneySummaryList = ({
   vehicleRef: string | null;
   distance?: number | null;
 }) => (
-  <dl
-    className={clsx(
-      "govuk-summary-list",
-      styles["vehicle-journeys__summary-list"],
-    )}
-  >
+  <dl className={clsx("govuk-summary-list", styles.vehicleJourneysSummaryList)}>
     <div className="govuk-summary-list__row">
       <dt className="govuk-summary-list__key">Operator:</dt>
       <dd className="govuk-summary-list__value">
@@ -175,7 +169,7 @@ const JourneyNavLink = ({
   }, [tooltip]);
 
   return (
-    <Link ref={linkRef} className={styles["journey-nav__link"]} href={href}>
+    <Link ref={linkRef} className={styles.journeyNavLink} href={href}>
       {children}
     </Link>
   );
@@ -204,13 +198,11 @@ const JourneyNav = ({
     currentJourneyIndex >= 0 && currentJourneyIndex < journeys.length - 1
       ? journeys[currentJourneyIndex + 1]
       : null;
-  const previousIcon = (
-    <CaretLeftIcon className={styles["journey-nav__icon"]} />
-  );
-  const nextIcon = <CaretRightIcon className={styles["journey-nav__icon"]} />;
+  const previousIcon = <CaretLeftIcon className={styles.journeyNavIcon} />;
+  const nextIcon = <CaretRightIcon className={styles.journeyNavIcon} />;
 
   return (
-    <div className={styles["journey-nav"]}>
+    <div className={styles.journeyNav}>
       <span>Journey</span>
       {previous ? (
         <JourneyNavLink
@@ -229,10 +221,7 @@ const JourneyNav = ({
         </JourneyNavLink>
       ) : (
         <span
-          className={clsx(
-            styles["journey-nav__link"],
-            styles["journey-nav__link--disabled"],
-          )}
+          className={clsx(styles.journeyNavLink, styles.journeyNavLinkDisabled)}
         >
           {previousIcon}
         </span>
@@ -254,10 +243,7 @@ const JourneyNav = ({
         </JourneyNavLink>
       ) : (
         <span
-          className={clsx(
-            styles["journey-nav__link"],
-            styles["journey-nav__link--disabled"],
-          )}
+          className={clsx(styles.journeyNavLink, styles.journeyNavLinkDisabled)}
         >
           {nextIcon}
         </span>
@@ -289,24 +275,24 @@ const OtpStats = ({
       {stats.incomplete.length > 0 ? (
         <>
           <p>Of these, there are:</p>
-          <ul className={tooltipListStyles.tooltipList}>
+          <TooltipList>
             {stats.incomplete.map((item) => (
               <li key={item.reason}>
                 <strong>{item.count.toLocaleString("en-GB")}</strong> stop
                 {item.count > 1 ? "s" : ""} with {item.reason}
               </li>
             ))}
-          </ul>
+          </TooltipList>
         </>
       ) : null}
     </>
   );
 
   return (
-    <div className={styles["vehicle-journeys__otp-stats"]}>
+    <div className={styles.vehicleJourneysOtpStats}>
       <Stat
         id="vehicle-journeys-on-time"
-        className={styles["vehicle-journeys__otp-stat"]}
+        className={styles.vehicleJourneysOtpStat}
         label="On-time"
         value={formatPercent(stats.onTime, stats.completed)}
         loading={loading}
@@ -314,7 +300,7 @@ const OtpStats = ({
       />
       <Stat
         id="vehicle-journeys-late"
-        className={styles["vehicle-journeys__otp-stat"]}
+        className={styles.vehicleJourneysOtpStat}
         label="Late"
         value={formatPercent(stats.late, stats.completed)}
         loading={loading}
@@ -322,7 +308,7 @@ const OtpStats = ({
       />
       <Stat
         id="vehicle-journeys-early"
-        className={styles["vehicle-journeys__otp-stat"]}
+        className={styles.vehicleJourneysOtpStat}
         label="Early"
         value={formatPercent(stats.early, stats.completed)}
         loading={loading}
@@ -330,7 +316,7 @@ const OtpStats = ({
       />
       <Stat
         id="vehicle-journeys-incomplete"
-        className={styles["vehicle-journeys__otp-stat"]}
+        className={styles.vehicleJourneysOtpStat}
         label="Incomplete data"
         value={formatPercent(stats.noData, stats.total)}
         loading={loading}
@@ -349,21 +335,15 @@ const StopTime = ({
 }) => {
   const formatted = formatStopTime(dateTime, includeSeconds);
   if (!includeSeconds || formatted === "-" || formatted.length < 8) {
-    return (
-      <span className={styles["stop-list-item__scheduled"]}>{formatted}</span>
-    );
+    return <span className={styles.scheduled}>{formatted}</span>;
   }
 
   const [hoursMinutes, seconds] = [formatted.slice(0, 5), formatted.slice(5)];
 
   return (
-    <span className={styles["stop-list-item__time-container"]}>
-      <span className={styles["stop-list-item__scheduled"]}>
-        {hoursMinutes}
-      </span>
-      <span className={styles["stop-list-item__time-container--seconds"]}>
-        {seconds}
-      </span>
+    <span className={styles.timeContainer}>
+      <span className={styles.scheduled}>{hoursMinutes}</span>
+      <span className={styles.timeContainerSeconds}>{seconds}</span>
     </span>
   );
 };
@@ -388,20 +368,18 @@ const StopList = ({
 
   return (
     <div
-      className={styles["vehicle-journeys__stop-list"]}
+      className={styles.vehicleJourneysStopList}
       aria-label="Scheduled and actual stops"
     >
-      <div
-        className={clsx(styles["stop-list-item"], styles["stop-list-header"])}
-      >
+      <div className={clsx(styles.stopListItem, styles.stopListHeader)}>
         <div></div>
         <div></div>
-        <div className={styles["stop-list-item__heading"]}>Scheduled</div>
-        <div className={styles["stop-list-item__heading"]}>Actual</div>
+        <div className={styles.heading}>Scheduled</div>
+        <div className={styles.heading}>Actual</div>
       </div>
       {loading ? (
         <div
-          className={styles["vehicle-journeys__stop-list-loading"]}
+          className={styles.vehicleJourneysStopListLoading}
           aria-live="polite"
         >
           <Spinner size="x-small" />
@@ -409,21 +387,15 @@ const StopList = ({
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className={clsx(
-                styles["stop-list-item"],
-                styles["stop-list-item--skeleton"],
-              )}
+              className={clsx(styles.stopListItem, styles.skeleton)}
               aria-hidden="true"
             >
-              <div className={styles["stop-list-item__skeleton-block"]} />
+              <div className={styles.skeletonBlock} />
               <div
-                className={clsx(
-                  styles["stop-list-item__skeleton-block"],
-                  styles["stop-list-item__skeleton-block--wide"],
-                )}
+                className={clsx(styles.skeletonBlock, styles.skeletonBlockWide)}
               />
-              <div className={styles["stop-list-item__skeleton-block"]} />
-              <div className={styles["stop-list-item__skeleton-block"]} />
+              <div className={styles.skeletonBlock} />
+              <div className={styles.skeletonBlock} />
             </div>
           ))}
         </div>
@@ -444,7 +416,7 @@ const StopList = ({
             const stopIcon = displayTimingDetails ? (
               <span
                 className={clsx(
-                  styles["stop-list-item__icon"],
+                  styles.icon,
                   styles[
                     `stop-list-item__icon--${
                       otp === "OnTime"
@@ -456,7 +428,7 @@ const StopList = ({
                             : "no-data"
                     }`
                   ],
-                  !stop.isTimingPoint && styles["stop-list-item__icon--stop"],
+                  !stop.isTimingPoint && styles.iconStop,
                 )}
               >
                 {stop.isTimingPoint ? <TimingIcon /> : <StopIcon />}
@@ -470,27 +442,22 @@ const StopList = ({
               <div
                 key={`${stop.stopId}-${stop.stopIndex}`}
                 className={clsx(
-                  styles["stop-list-item"],
-                  stop.isTimingPoint && styles["stop-list-item--timing-point"],
-                  stop.isTimingPoint &&
-                    index === 0 &&
-                    styles["stop-list-item--timing-point--first"],
+                  styles.stopListItem,
+                  stop.isTimingPoint && styles.timingPoint,
+                  stop.isTimingPoint && index === 0 && styles.timingPointFirst,
                 )}
               >
-                <div className={styles["stop-list-item__value-container"]}>
+                <div className={styles.valueContainer}>
                   {stop.isTimingPoint && stopIcon ? (
                     <Tooltip message="Timing point">{stopIcon}</Tooltip>
                   ) : (
                     stopIcon
                   )}
                 </div>
-                <div className={styles["stop-list-item__value-container"]}>
+                <div className={styles.valueContainer}>
                   <button
                     type="button"
-                    className={clsx(
-                      styles["stop-list-item__name"],
-                      "unbuttoned",
-                    )}
+                    className={clsx(styles.name, "unbuttoned")}
                     onClick={() => onStopSelect(stop)}
                     onMouseEnter={() => onStopHover(stop)}
                     onMouseLeave={() => onStopHover(null)}
@@ -502,8 +469,8 @@ const StopList = ({
                 </div>
                 <div
                   className={clsx(
-                    styles["stop-list-item__value-container"],
-                    styles["stop-list-item__value-container__align-right"],
+                    styles.valueContainer,
+                    styles.valueContainerAlignRight,
                   )}
                 >
                   {displayTimingDetails ? (
@@ -515,8 +482,8 @@ const StopList = ({
                 </div>
                 <div
                   className={clsx(
-                    styles["stop-list-item__value-container"],
-                    styles["stop-list-item__value-container__align-right"],
+                    styles.valueContainer,
+                    styles.valueContainerAlignRight,
                   )}
                 >
                   {displayTimingDetails ? (
@@ -524,7 +491,7 @@ const StopList = ({
                       <Tooltip
                         message={`Calculated delay ${formatDelay(stop.scheduledDepartureUtc, actualDeparture)}`}
                       >
-                        <span className={styles["stop-list-item__actual"]}>
+                        <span className={styles.actual}>
                           <StopTime
                             dateTime={actualDeparture}
                             includeSeconds={includeSeconds}
@@ -595,7 +562,7 @@ export const VehicleJourneyDetail = ({
     !journeysLoading && !journeyInfoLoading && journeyInfo === null;
 
   return (
-    <div className={styles["vehicle-journeys__detail"]}>
+    <div className={styles.vehicleJourneysDetail}>
       <span className="govuk-caption-xl">Vehicle journeys</span>
       <h1 className="govuk-heading-xl">{heading}</h1>
 
@@ -673,13 +640,13 @@ export const VehicleJourneyDetail = ({
 
       {!showNotFound ? (
         <>
-          <div className={styles["vehicle-journeys__header-container"]}>
+          <div className={styles.vehicleJourneysHeaderContainer}>
             <JourneySummaryList
               journey={currentJourney}
               vehicleRef={vehicleRef}
               distance={routeGeometry?.distance}
             />
-            <div className={styles["vehicle-journeys__controls"]}>
+            <div className={styles.vehicleJourneysControls}>
               <SegmentedToggle
                 legend="Show performance using"
                 hideLegend
@@ -722,7 +689,7 @@ export const VehicleJourneyDetail = ({
                   stopType={stopType}
                 />
               ) : journeysLoading ? (
-                <div className={styles["vehicle-journeys__nav-loading"]}>
+                <div className={styles.vehicleJourneysNavLoading}>
                   <Spinner size="x-small" />
                   <span className="govuk-visually-hidden">
                     Loading journeys
@@ -732,7 +699,7 @@ export const VehicleJourneyDetail = ({
             </div>
           </div>
 
-          <div className={styles["vehicle-journeys__stop-map-grid"]}>
+          <div className={styles.vehicleJourneysStopMapGrid}>
             <StopList
               stops={journeyInfo?.stops ?? []}
               matchType={matchType}
@@ -741,7 +708,7 @@ export const VehicleJourneyDetail = ({
               onStopSelect={setSelectedStop}
               onStopHover={setHoveredStop}
             />
-            <div className={styles["vehicle-journeys__sticky-container"]}>
+            <div className={styles.vehicleJourneysStickyContainer}>
               <OtpStats
                 stops={journeyInfo?.stops ?? []}
                 matchType={matchType}

@@ -1,12 +1,13 @@
 @use "../../styles/govuk-module" as *;
-.vehicle-journeys__header-container {
+
+.vehicleJourneysHeaderContainer {
   display: grid;
   grid-template-columns: minmax(20rem, 1fr) minmax(18rem, auto);
   gap: govuk-spacing(5);
   align-items: start;
   margin-bottom: govuk-spacing(5);
 }
-.vehicle-journeys__summary-list {
+.vehicleJourneysSummaryList {
   display: grid;
   grid-template-columns: 220px 1fr;
   row-gap: govuk-spacing(2);
@@ -14,34 +15,34 @@
   margin-bottom: 0;
   @include govuk-font(19);
 }
-.vehicle-journeys__summary-list :global(.govuk-summary-list__row) {
+.vehicleJourneysSummaryList :global(.govuk-summary-list__row) {
   display: contents;
   border-bottom: 0;
 }
-.vehicle-journeys__summary-list :global(.govuk-summary-list__key) {
+.vehicleJourneysSummaryList :global(.govuk-summary-list__key) {
   display: block;
   width: auto;
   padding: 0;
   margin: 0;
   font-weight: $govuk-font-weight-regular;
 }
-.vehicle-journeys__summary-list :global(.govuk-summary-list__value) {
+.vehicleJourneysSummaryList :global(.govuk-summary-list__value) {
   display: block;
   padding: 0;
   margin: 0;
   font-weight: $govuk-font-weight-bold;
 }
-.vehicle-journeys__controls {
+.vehicleJourneysControls {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: govuk-spacing(3);
 }
-.vehicle-journeys__nav-loading {
+.vehicleJourneysNavLoading {
   display: inline-flex;
   align-items: center;
 }
-.journey-nav {
+.journeyNav {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -49,64 +50,64 @@
   margin-bottom: govuk-spacing(3);
   @include govuk-font(19);
 }
-.journey-nav__link {
+.journeyNavLink {
   display: inline-flex;
   align-items: center;
   margin-left: govuk-spacing(2);
   color: govuk-functional-colour(link);
   text-decoration: underline;
 }
-.journey-nav__link:hover {
+.journeyNavLink:hover {
   color: govuk-functional-colour(link-hover);
 }
-.journey-nav__icon {
+.journeyNavIcon {
   display: inline-flex;
   flex-shrink: 0;
   width: 15px;
   height: 13px;
 }
-.journey-nav__link--disabled {
+.journeyNavLinkDisabled {
   color: govuk-functional-colour(link);
   opacity: 0.6;
   pointer-events: none;
   text-decoration: none;
 }
-.vehicle-journeys__stop-map-grid {
+.vehicleJourneysStopMapGrid {
   display: grid;
   grid-template-columns: 2fr 3fr;
   column-gap: govuk-spacing(8);
   row-gap: govuk-spacing(6);
   align-items: start;
 }
-.vehicle-journeys__sticky-container {
+.vehicleJourneysStickyContainer {
   position: sticky;
   top: govuk-spacing(4);
 }
-.vehicle-journeys__otp-stats {
+.vehicleJourneysOtpStats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: govuk-spacing(2);
   margin-top: govuk-spacing(8);
   margin-bottom: govuk-spacing(4);
 }
-.vehicle-journeys__otp-stat {
+.vehicleJourneysOtpStat {
   min-width: 0;
   border-top: 1px solid govuk-functional-colour(border);
   padding-top: govuk-spacing(3);
   white-space: nowrap;
 }
 @media (min-width: 64em) {
-  .vehicle-journeys__otp-stats {
+  .vehicleJourneysOtpStats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
-.vehicle-journeys__stop-list {
+.vehicleJourneysStopList {
   border-top: 0;
 }
-.vehicle-journeys__stop-list-loading {
+.vehicleJourneysStopListLoading {
   padding-top: govuk-spacing(2);
 }
-.stop-list-item {
+.stopListItem {
   display: grid;
   grid-template-columns: 2rem minmax(0, 2fr) minmax(4.5rem, 1fr) minmax(
       4.5rem,
@@ -116,43 +117,43 @@
   align-items: center;
   min-height: 2.75rem;
 }
-.stop-list-item--timing-point {
+.timingPoint {
   @include govuk-font(19, $weight: bold);
   border-top: 1px solid govuk-colour("black", $variant: "tint-80");
   border-bottom: 1px solid govuk-colour("black", $variant: "tint-80");
   padding-top: govuk-spacing(2);
   padding-bottom: govuk-spacing(2);
 }
-.stop-list-item--timing-point--first {
+.timingPointFirst {
   border-top: none;
 }
-.stop-list-item--skeleton {
+.skeleton {
   border-bottom: none;
   min-height: 2.25rem;
 }
-.stop-list-item__skeleton-block {
+.skeletonBlock {
   height: 1rem;
   background: govuk-colour("black", $variant: "tint-95");
 }
-.stop-list-item__skeleton-block--wide {
+.skeletonBlockWide {
   width: 80%;
 }
-.stop-list-header {
+.stopListHeader {
   @include govuk-font(16, $weight: bold);
   border-bottom: 1px solid govuk-functional-colour(border);
   min-height: govuk-spacing(8);
 }
-.stop-list-item__value-container {
+.valueContainer {
   display: flex;
   align-items: center;
   min-width: 0;
 }
-.stop-list-item__heading,
-.stop-list-item__value-container__align-right {
+.heading,
+.valueContainerAlignRight {
   text-align: right;
   justify-content: flex-end;
 }
-.stop-list-item__name {
+.name {
   @include govuk-font(16);
   max-width: 100%;
   font-weight: $font-weight-normal;
@@ -164,12 +165,12 @@
     text-decoration: none;
   }
 }
-.stop-list-item--timing-point .stop-list-item__name {
+.timingPoint .name {
   font-size: $font-size-body;
   line-height: $line-height-body;
   font-weight: $font-weight-normal;
 }
-.stop-list-item__icon {
+.icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -178,54 +179,54 @@
   color: currentColor;
   flex-shrink: 0;
 }
-.stop-list-item__icon svg {
+.icon svg {
   width: 1.625rem;
   height: 1.625rem;
 }
-.stop-list-item__icon--on-time {
+.iconOnTime {
   color: govuk-colour("purple");
 }
-.stop-list-item__icon--early {
+.iconEarly {
   color: govuk-colour("magenta");
 }
-.stop-list-item__icon--late {
+.iconLate {
   color: raas-colour("late");
 }
-.stop-list-item__icon--no-data {
+.iconNoData {
   color: govuk-colour("black", $variant: "tint-80");
 }
-.stop-list-item__icon--stop {
+.iconStop {
   width: 1.25rem;
   margin-left: 3px;
   svg {
     stroke-width: 2px;
   }
 }
-.stop-list-item__scheduled,
-.stop-list-item__actual {
+.scheduled,
+.actual {
   font-variant-numeric: tabular-nums;
 }
-.stop-list-item__time-container {
+.timeContainer {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.stop-list-item__time-container--seconds {
+.timeContainerSeconds {
   font-size: calc(100% - 4px);
 }
 @media (max-width: 58.75em) {
-  .vehicle-journeys__header-container,
-  .vehicle-journeys__stop-map-grid {
+  .vehicleJourneysHeaderContainer,
+  .vehicleJourneysStopMapGrid {
     grid-template-columns: 1fr;
   }
-  .vehicle-journeys__sticky-container {
+  .vehicleJourneysStickyContainer {
     position: static;
   }
 }
 @media (min-width: 64em) {
-  .vehicle-journeys__detail {
+  .vehicleJourneysDetail {
     min-width: 75rem;
   }
-  .vehicle-journeys__detail .vehicle-journeys__otp-stats {
+  .vehicleJourneysDetail .vehicleJourneysOtpStats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

@@ -20,7 +20,7 @@ interface BaseLayoutProps {
   description?: string;
   children: ReactNode;
   errors?: ErrorInfo[];
-  mainClassName?: "contentPage";
+  noContentPadding?: boolean;
   backLink?: ReactNode;
 }
 
@@ -29,7 +29,7 @@ export const BaseLayout = ({
   description,
   children,
   errors,
-  mainClassName,
+  noContentPadding = false,
   backLink,
 }: BaseLayoutProps) => {
   const router = useRouter();
@@ -54,7 +54,7 @@ export const BaseLayout = ({
             className={clsx(
               styles.content,
               !showAuthenticatedLayout && styles.contentNarrow,
-              mainClassName && styles[mainClassName],
+              noContentPadding && styles.noContentPadding,
             )}
           >
             <Page backLink={backLink}>{children}</Page>

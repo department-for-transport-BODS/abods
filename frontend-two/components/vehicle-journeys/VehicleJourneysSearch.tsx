@@ -105,7 +105,7 @@ export const VehicleJourneysSearch = ({
   return (
     <>
       <h1 className="govuk-heading-xl">Vehicle journeys</h1>
-      <div className={styles["vehicle-journeys-search__controls"]}>
+      <div className={styles.controls}>
         <DateSelect
           label="Date"
           inputId="vehicle-journeys-date"
@@ -120,7 +120,7 @@ export const VehicleJourneysSearch = ({
           }}
         />
 
-        <div className={styles["vehicle-journeys-search__operator"]}>
+        <div className={styles.operator}>
           <MultiselectCheckbox
             id="vehicle-journeys-operator"
             label="Operator"
@@ -138,7 +138,7 @@ export const VehicleJourneysSearch = ({
           />
         </div>
 
-        <div className={styles["vehicle-journeys-search__service"]}>
+        <div className={styles.service}>
           <MultiselectCheckbox
             id="vehicle-journeys-service"
             label="Service name"
@@ -156,7 +156,7 @@ export const VehicleJourneysSearch = ({
 
       {selectedServiceId && !dateError ? (
         <nav
-          className={clsx("govuk-pagination", styles["journey-search-nav"])}
+          className={clsx("govuk-pagination", styles.journeySearchNav)}
           role="navigation"
           aria-label="results"
         >
@@ -172,7 +172,7 @@ export const VehicleJourneysSearch = ({
               </button>
             ) : null}
           </div>
-          <span className={styles["journey-search-nav__date"]}>
+          <span className={styles.journeySearchNavDate}>
             {formatDate(selectedDate)}
           </span>
           <div className="govuk-pagination__next">
@@ -191,23 +191,20 @@ export const VehicleJourneysSearch = ({
       ) : null}
 
       {journeysLoading && !dateError ? (
-        <div
-          className={styles["vehicle-journeys-search__loading"]}
-          aria-live="polite"
-        >
+        <div className={styles.loading} aria-live="polite">
           <Spinner size="small" />
           <span className="govuk-visually-hidden">Loading journeys</span>
           <div
             className={clsx(
-              styles["journey-search-grid"],
-              styles["journey-search-grid--skeleton"],
+              styles.journeySearchGrid,
+              styles.journeySearchGridSkeleton,
             )}
             aria-hidden="true"
           >
             {Array.from({ length: 12 }).map((_, index) => (
               <div
                 key={index}
-                className={styles["journey-search-grid__skeleton-item"]}
+                className={styles.journeySearchGridSkeletonItem}
               />
             ))}
           </div>
@@ -220,7 +217,7 @@ export const VehicleJourneysSearch = ({
               <h2 className="govuk-heading-m govuk-!-margin-top-6">
                 {pattern[0].serviceNumber}: {pattern[0].serviceName}
               </h2>
-              <div className={styles["journey-search-grid"]}>
+              <div className={styles.journeySearchGrid}>
                 {pattern.map((journey) => (
                   <div
                     key={`${journey.groupId}-${journey.directionRef ?? ""}-${journey.startTime}`}
@@ -229,7 +226,7 @@ export const VehicleJourneysSearch = ({
                       className={clsx(
                         "govuk-link",
                         "govuk-body",
-                        styles["journey-search-grid__time"],
+                        styles.journeySearchGridTime,
                       )}
                       href={{
                         pathname: "/vehicle-journeys/[journeyId]",
@@ -262,15 +259,11 @@ export const VehicleJourneysSearch = ({
 
       {journeysErrored ? (
         <div
-          className={clsx(
-            "govuk-body",
-            "govuk-!-margin-top-8",
-            styles["vehicle-journeys-search__error"],
-          )}
+          className={clsx("govuk-body", "govuk-!-margin-top-8", styles.error)}
           role="alert"
         >
           <ExclamationInCircleIcon
-            className={styles["vehicle-journeys-search__error-icon"]}
+            className={styles.errorIcon}
             aria-hidden="true"
             focusable="false"
           />

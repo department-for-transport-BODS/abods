@@ -34,7 +34,7 @@
   padding-left: govuk-spacing(7);
 }
 
-.contentPage {
+.noContentPadding {
   padding: 0;
 }
 
@@ -53,10 +53,6 @@
   .content {
     padding-left: govuk-spacing(0);
     padding-right: govuk-spacing(0);
-  }
-
-  .contentPage {
-    padding: 0;
   }
 }
 

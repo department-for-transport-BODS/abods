@@ -2,14 +2,14 @@
 
 $day-width: 46px;
 
-.date-range-controls__calendar-day-names {
+.calendarDayNames {
   display: flex;
   align-items: center;
   width: 100%;
 }
 
-.date-range-controls__day-name,
-.date-range-controls__day {
+.dayName,
+.day {
   width: $day-width;
   height: $day-width;
   display: inline-flex;
@@ -24,49 +24,49 @@ $day-width: 46px;
   box-sizing: border-box;
 }
 
-.date-range-controls__table {
+.table {
   width: 100%;
   table-layout: fixed;
   border-spacing: 0;
   border-collapse: collapse;
 }
 
-.date-range-controls__table-cell {
+.tableCell {
   width: $day-width;
   height: $day-width;
   padding: 0;
   position: relative;
+}
 
-  &--included {
+.tableCellIncluded {
+  background-color: govuk-colour("black", $variant: "tint-95");
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -$day-width;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background-color: govuk-colour("black", $variant: "tint-95");
-
-    &::before {
-      content: "";
-      position: absolute;
-      top: -$day-width;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: govuk-colour("black", $variant: "tint-95");
-      z-index: 0;
-      pointer-events: none;
-    }
-  }
-
-  &--start {
-    background-color: govuk-colour("black", $variant: "tint-95");
-    border-top-left-radius: 999em;
-    border-bottom-left-radius: 999em;
-  }
-
-  &--end {
-    background-color: govuk-colour("black", $variant: "tint-95");
-    border-top-right-radius: 999em;
-    border-bottom-right-radius: 999em;
+    z-index: 0;
+    pointer-events: none;
   }
 }
 
-.date-range-controls__day {
+.tableCellStart {
+  background-color: govuk-colour("black", $variant: "tint-95");
+  border-top-left-radius: 999em;
+  border-bottom-left-radius: 999em;
+}
+
+.tableCellEnd {
+  background-color: govuk-colour("black", $variant: "tint-95");
+  border-top-right-radius: 999em;
+  border-bottom-right-radius: 999em;
+}
+
+.day {
   background: none;
   border: none;
   cursor: pointer;
@@ -81,44 +81,41 @@ $day-width: 46px;
     border-radius: 100%;
     pointer-events: none;
   }
+}
 
-  &--today {
-    font-weight: 700;
+.dayToday {
+  font-weight: 700;
+}
+
+.dayDisabled {
+  color: govuk-colour("black", $variant: "tint-80");
+  pointer-events: none;
+}
+
+.dayStart,
+.dayEnd {
+  color: govuk-colour("white");
+  border-radius: 100%;
+  background-color: govuk-functional-colour(brand);
+}
+
+.dayIncluded:not(.dayStart, .dayEnd) {
+  background-color: govuk-colour("black", $variant: "tint-95");
+
+  &:hover::after {
+    background-color: rgba(0, 0, 0, 0.06);
   }
+}
 
-  &--disabled {
-    color: govuk-colour("black", $variant: "tint-80");
-    pointer-events: none;
-  }
+.dayInvisible {
+  visibility: hidden;
+}
 
-  &--start,
-  &--end {
-    color: govuk-colour("white");
-    border-radius: 100%;
-    background-color: govuk-functional-colour(brand);
-  }
-
-  &--included:not(
-      .date-range-controls__day--start,
-      .date-range-controls__day--end
-    ) {
-    background-color: govuk-colour("black", $variant: "tint-95");
-
-    &:hover::after {
-      background-color: rgba(0, 0, 0, 0.06);
-    }
-  }
-
-  &--invisible {
-    visibility: hidden;
-  }
-
-  &--saturday::before {
-    content: "";
-    position: absolute;
-    border-left: 1px solid govuk-colour("black", $variant: "tint-80");
-    top: 0;
-    bottom: 0;
-    left: -1px;
-  }
+.daySaturday::before {
+  content: "";
+  position: absolute;
+  border-left: 1px solid govuk-colour("black", $variant: "tint-80");
+  top: 0;
+  bottom: 0;
+  left: -1px;
 }

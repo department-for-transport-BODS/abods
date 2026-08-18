@@ -1,20 +1,20 @@
 @use "../../styles/govuk-module" as *;
-.stop-analysis-table__display-modal {
+.displayModal {
   display: flex;
   flex-direction: column;
   gap: govuk-spacing(4);
 }
-.stop-analysis-table__display-columns {
+.displayColumns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: govuk-spacing(6);
 }
-.stop-analysis-table__display-column {
+.displayColumn {
   display: flex;
   flex-direction: column;
   gap: govuk-spacing(3);
 }
-.stop-analysis-table__show-all-link {
+.showAllLink {
   align-self: flex-start;
   padding: 0;
   border: 0;
@@ -23,7 +23,7 @@
   text-decoration: underline;
   @include govuk-font(16);
 }
-.stop-analysis-table__display-footer {
+.displayFooter {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,16 +31,16 @@
   margin-top: govuk-spacing(2);
 }
 @media (max-width: 640px) {
-  .stop-analysis-table__display-columns {
+  .displayColumns {
     grid-template-columns: 1fr;
     gap: govuk-spacing(4);
   }
-  .stop-analysis-table__display-footer {
+  .displayFooter {
     flex-direction: column-reverse;
     align-items: stretch;
   }
 }
-.stop-analysis-table {
+.stopAnalysisTable {
   :global(.govuk-table__cell) {
     @include govuk-font(16);
     vertical-align: middle;
@@ -63,7 +63,7 @@
     text-overflow: ellipsis;
   }
 }
-.stop-analysis-table__display-toolbar {
+.displayToolbar {
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
@@ -71,7 +71,7 @@
   flex-wrap: wrap;
   margin-bottom: govuk-spacing(3);
 }
-.stop-analysis-table__display-actions {
+.displayActions {
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
@@ -79,10 +79,10 @@
   margin-left: auto;
   flex-wrap: wrap;
 }
-.stop-analysis-table__display-mode {
+.displayMode {
   margin-bottom: 0;
 }
-.stop-analysis-table__display-options-link {
+.displayOptionsLink {
   align-self: center;
   padding: 0;
   border: 0;
@@ -91,34 +91,34 @@
   text-decoration: underline;
   @include govuk-font(16);
 }
-.stop-analysis-table__controls {
+.controls {
   display: flex;
   flex-wrap: wrap;
   gap: govuk-spacing(3);
   align-items: flex-end;
   margin-bottom: govuk-spacing(3);
 }
-.stop-analysis-table__direction-filters {
+.directionFilters {
   flex-shrink: 0;
   width: 20rem;
 }
-.stop-analysis-table__search {
+.search {
   flex: 1;
   min-width: 200px;
 }
-.stop-analysis-table__grid {
+.grid {
   overflow-x: auto;
 }
-.stop-analysis-table__table--with-totals {
+.tableWithTotals {
   table tbody tr:first-child > * {
     border-top: 0.125rem solid govuk-functional-colour(border);
     border-bottom: 0.125rem solid govuk-functional-colour(border);
   }
 }
-.stop-analysis-table__summary-row > * {
+.summaryRow > * {
   font-weight: $govuk-font-weight-bold;
 }
-.stop-analysis-table__stop-link {
+.stopLink {
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
@@ -126,10 +126,10 @@
   white-space: nowrap;
   vertical-align: bottom;
 }
-.stop-analysis-table__cell--numeric {
+.cellNumeric {
   text-align: right;
 }
-.stop-analysis-table__timing-icon {
+.timingIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;

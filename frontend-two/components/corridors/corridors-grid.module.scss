@@ -1,9 +1,9 @@
 @use "../../styles/govuk-module" as *;
-.corridors-grid-search {
+.corridorsGridSearch {
   position: relative;
   display: inline-block;
 }
-.corridors-grid-search__icon {
+.icon {
   position: absolute;
   left: govuk-spacing(2);
   top: 50%;
@@ -13,6 +13,6 @@
   pointer-events: none;
   color: govuk-colour("black", $variant: "tint-25");
 }
-.corridors-grid-search__input {
+.input {
   padding-left: govuk-spacing(5);
 }

@@ -49,19 +49,17 @@ export const OtpThresholdSlider = ({
   const rightPct = 100 - (latePos / AXIS) * 100;
 
   return (
-    <div className={styles["otp-threshold-slider"]}>
-      <div className={styles["otp-threshold-slider__labels"]}>
-        <span className={styles["otp-threshold-slider__label"]}>Early</span>
-        <span className={styles["otp-threshold-slider__scheduled"]}>
+    <div>
+      <div className={styles.labels}>
+        <span className={styles.label}>Early</span>
+        <span className={styles.scheduled}>
           <span>Scheduled departure</span>
-          <span className={styles["otp-threshold-slider__scheduled-value"]}>
-            0:00
-          </span>
+          <span className={styles.scheduledValue}>0:00</span>
         </span>
-        <span className={styles["otp-threshold-slider__label"]}>Late</span>
+        <span className={styles.label}>Late</span>
       </div>
       <RangeSlider
-        className={styles["otp-threshold-slider__slider"]}
+        className={styles.slider}
         thumbs={[
           {
             min: 0,
@@ -87,21 +85,15 @@ export const OtpThresholdSlider = ({
           },
         ]}
       >
-        <div className={styles["otp-threshold-slider__fill"]}>
+        <div className={styles.fill}>
+          <div className={styles.early} style={{ width: `${leftPct}%` }} />
           <div
-            className={styles["otp-threshold-slider__early"]}
-            style={{ width: `${leftPct}%` }}
-          />
-          <div
-            className={styles["otp-threshold-slider__on-time"]}
+            className={styles.onTime}
             style={{ left: `${leftPct}%`, right: `${rightPct}%` }}
           />
-          <div
-            className={styles["otp-threshold-slider__late"]}
-            style={{ width: `${rightPct}%` }}
-          />
+          <div className={styles.late} style={{ width: `${rightPct}%` }} />
         </div>
-        <div className={styles["otp-threshold-slider__center"]} />
+        <div className={styles.center} />
       </RangeSlider>
     </div>
   );

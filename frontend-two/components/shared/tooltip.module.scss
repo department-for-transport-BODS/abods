@@ -21,3 +21,16 @@
 .selectable {
   user-select: text;
 }
+
+.list {
+  margin: 0;
+  padding-left: govuk-spacing(4);
+
+  li {
+    margin-bottom: govuk-spacing(1);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

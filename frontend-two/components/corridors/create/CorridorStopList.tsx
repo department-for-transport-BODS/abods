@@ -18,7 +18,7 @@ export const CorridorStopList = ({
   if (!corridorStops.length) return null;
 
   return (
-    <div className={styles["corridor-stop-list"]}>
+    <div className={styles.corridorStopList}>
       {corridorStops.map((stop, index) => {
         const isLast = index === corridorStops.length - 1;
         const canRemove = isLast && !loading && (isEdit ? index > 0 : true);
@@ -27,18 +27,14 @@ export const CorridorStopList = ({
           <div
             key={`${stop.stopId}-${index}`}
             className={clsx(
-              styles["corridor-stop-list__stop"],
-              styles["corridor-stop-list__stop--added"],
-              !isLast && styles["corridor-stop-list__stop--connected"],
+              styles.stop,
+              styles.stopAdded,
+              !isLast && styles.stopConnected,
             )}
           >
-            <div className={styles["corridor-stop-list__stop-details"]}>
-              <div className={styles["corridor-stop-list__stop-label"]}>
-                {stop.stopName}
-              </div>
-              <div className={styles["corridor-stop-list__naptan"]}>
-                {stop.naptan}
-              </div>
+            <div className={styles.stopDetails}>
+              <div className={styles.stopLabel}>{stop.stopName}</div>
+              <div className={styles.naptan}>{stop.naptan}</div>
             </div>
             {canRemove ? (
               <button

@@ -1,11 +1,11 @@
 @use "../../styles/govuk-module" as *;
-.live-vehicle-stats__container {
+.container {
   display: flex;
   flex-flow: row wrap;
   gap: 8px;
   justify-content: space-between;
 }
-.live-vehicle-stats__item {
+.item {
   flex: 1;
   min-width: 500px;
 }

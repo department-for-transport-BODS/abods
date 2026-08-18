@@ -1,12 +1,12 @@
 @use "../../../styles/govuk-module" as *;
-.otp-threshold-form__inputs {
+.inputs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
   column-gap: govuk-spacing(6);
 }
-.otp-threshold-form__control {
+.control {
   min-width: 0;
 }
-.otp-threshold-form__control :global(.govuk-hint) {
+.control :global(.govuk-hint) {
   white-space: normal;
 }

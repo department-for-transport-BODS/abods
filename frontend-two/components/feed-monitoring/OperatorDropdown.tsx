@@ -41,14 +41,12 @@ export const OperatorDropdown = ({
   }, []);
 
   return (
-    <div ref={ref} className={styles["operator-dropdown"]}>
+    <div ref={ref} className={styles.operatorDropdown}>
       <button
         onClick={() => setOpenDropdown((o) => !o)}
-        className={styles["operator-dropdown__button"]}
+        className={styles.button}
       >
-        <span
-          className={clsx("govuk-body", styles["operator-dropdown__label"])}
-        >
+        <span className={clsx("govuk-body", styles.label)}>
           {current ? `${current.name} (${current.nocCode})` : "Select operator"}
         </span>
         <svg
@@ -56,10 +54,7 @@ export const OperatorDropdown = ({
           height="16"
           viewBox="0 0 16 16"
           fill="none"
-          className={clsx(
-            styles["operator-dropdown__chevron"],
-            openDropdown && styles["operator-dropdown__chevron--open"],
-          )}
+          className={clsx(styles.chevron, openDropdown && styles.chevronOpen)}
         >
           <path
             d="M2 5l6 6 6-6"
@@ -72,7 +67,7 @@ export const OperatorDropdown = ({
       </button>
 
       {openDropdown && (
-        <ul className={styles["operator-dropdown__list"]}>
+        <ul className={styles.list}>
           {operators.map((op) => (
             <li
               key={op.nocCode}
@@ -80,17 +75,11 @@ export const OperatorDropdown = ({
               onMouseEnter={() => setHovered(op.nocCode)}
               onMouseLeave={() => setHovered(null)}
               className={clsx(
-                styles["operator-dropdown__item"],
-                hovered === op.nocCode &&
-                  styles["operator-dropdown__item--hovered"],
+                styles.item,
+                hovered === op.nocCode && styles.itemHovered,
               )}
             >
-              <span
-                className={clsx(
-                  "govuk-body",
-                  styles["operator-dropdown__item-text"],
-                )}
-              >
+              <span className={clsx("govuk-body", styles.itemText)}>
                 {op.name} ({op.nocCode})
               </span>
             </li>

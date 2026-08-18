@@ -90,13 +90,13 @@ export const PerformanceRankingTable = ({
         : null;
 
   return (
-    <div className={styles["app-performance-ranking"]}>
+    <div className={styles.appPerformanceRanking}>
       <div className="tabs">
-        <ul className={styles.tabs__list}>
+        <ul className={styles.tabsList}>
           <li
             className={clsx(
-              styles["tabs__list-item"],
-              order === "descending" && styles["tabs__list-item--selected"],
+              styles.tabsListItem,
+              order === "descending" && styles.tabsListItemSelected,
             )}
             tabIndex={0}
             onClick={() => onChangeOrder(RankingOrder.Descending)}
@@ -111,8 +111,8 @@ export const PerformanceRankingTable = ({
           </li>
           <li
             className={clsx(
-              styles["tabs__list-item"],
-              order === "ascending" && styles["tabs__list-item--selected"],
+              styles.tabsListItem,
+              order === "ascending" && styles.tabsListItemSelected,
             )}
             tabIndex={0}
             onClick={() => onChangeOrder(RankingOrder.Ascending)}
@@ -129,20 +129,15 @@ export const PerformanceRankingTable = ({
       </div>
 
       <div
-        className={clsx(
-          styles["ranking-table__content"],
-          !loaded && styles["ranking-table__content--loading"],
-        )}
+        className={clsx(styles.content, !loaded && styles.contentLoading)}
         aria-busy={!loaded}
       >
-        <table className={styles["ranking-table__data"]}>
+        <table className={styles.data}>
           <colgroup>
-            <col className={styles["ranking-table__col-service"]} />
-            {nocCode === null ? (
-              <col className={styles["ranking-table__col-operator"]} />
-            ) : null}
-            <col className={styles["ranking-table__col-stat"]} />
-            <col className={styles["ranking-table__col-trend"]} />
+            <col className={styles.colService} />
+            {nocCode === null ? <col className={styles.colOperator} /> : null}
+            <col className={styles.colStat} />
+            <col className={styles.colTrend} />
           </colgroup>
           <thead>
             <tr>
@@ -162,37 +157,27 @@ export const PerformanceRankingTable = ({
               const noc = service.nocCode ?? "";
               return (
                 <tr key={`${noc}-${lineId}`}>
-                  <td className={styles["ranking-table__service"]}>
+                  <td className={styles.service}>
                     <Link
-                      className={clsx(
-                        "govuk-link",
-                        styles["ranking-table__link"],
-                      )}
+                      className={clsx("govuk-link", styles.link)}
                       href={noc ? `/on-time/${noc}/${lineId}` : "/on-time"}
                     >
                       {buildServiceName(service)}
                     </Link>
                   </td>
                   {nocCode === null ? (
-                    <td className={styles["ranking-table__operator"]}>
+                    <td className={styles.operator}>
                       <Tooltip message={noc} selectable>
-                        <span
-                          className={styles["ranking-table__operator-text"]}
-                        >
+                        <span className={styles.operatorText}>
                           {getOperatorName(operators, noc)}
                         </span>
                       </Tooltip>
                     </td>
                   ) : null}
-                  <td
-                    className={clsx(
-                      "govuk-!-font-weight-bold",
-                      styles["ranking-table__stat"],
-                    )}
-                  >
+                  <td className={clsx("govuk-!-font-weight-bold", styles.stat)}>
                     {pct.toFixed(2)}%
                   </td>
-                  <td className={styles["ranking-table__trend"]}>
+                  <td className={styles.trend}>
                     {trend ? (
                       <Change direction={trend.direction}>
                         <Tooltip message={tooltip} underline>
@@ -209,15 +194,11 @@ export const PerformanceRankingTable = ({
 
         {stateMessage ? (
           !loaded ? (
-            <div
-              className={styles["ranking-table__loading"]}
-              role="status"
-              aria-live="polite"
-            >
+            <div className={styles.loading} role="status" aria-live="polite">
               <LoadingDots />
             </div>
           ) : (
-            <div className={styles["ranking-table__no-data"]}>
+            <div className={styles.noData}>
               <span className="govuk-body">{stateMessage}</span>
             </div>
           )

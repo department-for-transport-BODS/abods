@@ -1,19 +1,19 @@
 @use "../../styles/govuk-module" as *;
-.corridor__date-wrapper {
+.dateWrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
   gap: govuk-spacing(3);
 }
-.corridor__date-range-picker {
+.dateRangePicker {
   position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: govuk-spacing(2);
 }
-.corridor__date-range-input-wrapper {
+.dateRangeInputWrapper {
   display: inline-flex;
   align-items: center;
   border: 2px solid govuk-colour("black");
@@ -22,11 +22,11 @@
   padding: 0 govuk-spacing(1) 0 govuk-spacing(2);
   gap: govuk-spacing(1);
 }
-.corridor__date-range-text {
+.dateRangeText {
   @include govuk-font(19);
   white-space: nowrap;
 }
-.corridor__date-range-calendar-btn {
+.dateRangeCalendarBtn {
   display: inline-flex;
   align-items: center;
   color: govuk-colour("black");
@@ -37,7 +37,7 @@
     outline-offset: 0;
   }
 }
-.corridor__date-range-panel {
+.dateRangePanel {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -48,19 +48,19 @@
   display: flex;
   gap: govuk-spacing(3);
 }
-.corridor__summary {
+.summary {
   display: flex;
   margin-left: -(govuk-spacing(3));
   margin-right: -(govuk-spacing(3));
 }
-.corridor__summary-stat {
+.summaryStat {
   border-top: 1px solid govuk-functional-colour(border);
   padding-top: govuk-spacing(3);
   flex: 1;
   margin-left: govuk-spacing(3);
   margin-right: govuk-spacing(3);
 }
-.corridor__analysis-selector {
+.analysisSelector {
   display: flex;
   justify-content: space-between;
   align-items: baseline;

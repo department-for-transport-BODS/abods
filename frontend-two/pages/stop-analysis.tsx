@@ -690,10 +690,10 @@ const StopAnalysisPage = () => {
 
   return (
     <BaseLayout title="Stop analysis - Analyse Bus Open Data">
-      <div className={styles["stop-analysis-page"]}>
-        <div className={styles["stop-analysis-page__header"]}>
+      <div>
+        <div className={styles.header}>
           <h1 className="govuk-heading-xl">Stop Analysis</h1>
-          <div className={styles["stop-analysis-page__extra-filter"]}>
+          <div className={styles.extraFilter}>
             <RefineResultsButton
               isLoading={stopsLoading}
               showPerformanceFilters={false}
@@ -799,12 +799,7 @@ const StopAnalysisPage = () => {
           />
         )}
         {stopsLoading ? (
-          <div
-            className={clsx(
-              styles["stop-analysis-page__loading-state"],
-              "govuk-!-margin-top-4",
-            )}
-          >
+          <div className={clsx(styles.loadingState, "govuk-!-margin-top-4")}>
             <LoadingDots />
           </div>
         ) : (

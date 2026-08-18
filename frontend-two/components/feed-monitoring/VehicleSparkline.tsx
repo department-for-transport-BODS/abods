@@ -95,7 +95,7 @@ export const VehicleSparkline = ({ data }: VehicleSparklineProps) => {
     <div
       id={idRef.current}
       ref={chartRef}
-      className={styles["sparkline-wrapper"]}
+      className={styles.sparklineWrapper}
       style={{ minWidth: 200, height: 40 }}
       title="Last 24 hours vehicle counts"
     />

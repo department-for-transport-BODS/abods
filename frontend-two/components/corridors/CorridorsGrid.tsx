@@ -72,9 +72,9 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
             <label className="govuk-label" htmlFor="corridors-grid-filter">
               Search for a corridor
             </label>
-            <div className={styles["corridors-grid-search"]}>
+            <div className={styles.corridorsGridSearch}>
               <Image
-                className={styles["corridors-grid-search__icon"]}
+                className={styles.icon}
                 src="/assets/icons/search.svg"
                 alt=""
                 aria-hidden="true"
@@ -88,7 +88,7 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
                 className={clsx(
                   "govuk-input",
                   "govuk-input--width-20",
-                  styles["corridors-grid-search__input"],
+                  styles.input,
                 )}
                 value={filter}
                 onChange={(e) => onFilterChange(e.target.value)}

@@ -1,6 +1,6 @@
 @use "../../styles/govuk-module" as *;
 
-.distance-grid__filters {
+.filters {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 8fr) minmax(0, 9fr);
   gap: govuk-spacing(1);
@@ -8,11 +8,11 @@
   margin-bottom: govuk-spacing(2);
 }
 
-.distance-grid__filtersLast {
+.filtersLast {
   margin-bottom: govuk-spacing(4);
 }
 
-.distance-grid__filter {
+.filter {
   min-width: 0;
 
   :global(.govuk-form-group) {

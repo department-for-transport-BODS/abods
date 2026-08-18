@@ -91,15 +91,15 @@
 .options {
   padding: 0;
 
-  :global(.govuk-checkboxes__label) {
+  :global(.label) {
     @include govuk-font($size: 19, $line-height: 1.25);
   }
 
-  :global(.govuk-checkboxes--small .govuk-checkboxes__label:before) {
+  :global(.govuk-checkboxes--small .label:before) {
     top: 10px;
   }
 
-  :global(.govuk-checkboxes--small .govuk-checkboxes__label:after) {
+  :global(.govuk-checkboxes--small .label:after) {
     top: 17px;
   }
 }
@@ -115,10 +115,7 @@
 
   &:hover,
   &:focus-within {
-    :global(
-        .govuk-checkboxes__input:not(:disabled)
-          + .govuk-checkboxes__label:before
-      ) {
+    :global(.govuk-checkboxes__input:not(:disabled) + .label:before) {
       box-shadow: 0 0 0 10px govuk-colour("black", $variant: "tint-80");
     }
   }
