@@ -43,6 +43,7 @@ interface ServiceTableColumnDefinition {
   modalLabel?: string;
   alwaysVisible?: boolean;
   sortable?: boolean;
+  cellClassName?: string;
   csvColumns: CsvExportColumn<FrequentServicePerformance>[];
 }
 
@@ -57,6 +58,7 @@ const ALL_COLUMNS: ServiceTableColumnDefinition[] = [
     ),
     modalLabel: "Frequent service",
     sortable: true,
+    cellClassName: styles.frequentCell,
     csvColumns: [
       {
         header: "Frequent service",
@@ -70,6 +72,7 @@ const ALL_COLUMNS: ServiceTableColumnDefinition[] = [
     modalLabel: "Service",
     alwaysVisible: true,
     sortable: false,
+    cellClassName: styles.serviceCell,
     csvColumns: [
       {
         header: "Service",
@@ -336,12 +339,7 @@ export const OnTimeServicesTable = ({
         alignment: SERVICE_NUMERIC_COLUMN_KEYS.has(column.key)
           ? ("right" as const)
           : undefined,
-        cellClassName:
-          column.key === "service"
-            ? styles.serviceCell
-            : column.key === "frequent"
-              ? styles.frequentCell
-              : undefined,
+        cellClassName: column.cellClassName,
       })),
     [visibleColumns],
   );

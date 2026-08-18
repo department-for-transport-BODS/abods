@@ -47,6 +47,7 @@ interface StopsTableColumnDefinition {
   modalLabel?: string;
   alwaysVisible?: boolean;
   sortable?: boolean;
+  cellClassName?: string;
   csvColumns: CsvExportColumn<StopPerformance>[];
 }
 
@@ -57,6 +58,7 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     modalLabel: "NAPTAN",
     alwaysVisible: true,
     sortable: false,
+    cellClassName: styles.naptanCell,
     csvColumns: [
       {
         header: "NAPTAN",
@@ -76,6 +78,7 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     ),
     modalLabel: "Timing point",
     sortable: false,
+    cellClassName: styles.timingCell,
     csvColumns: [
       {
         header: "Timing point",
@@ -88,6 +91,7 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     label: "Name",
     modalLabel: "Name",
     sortable: false,
+    cellClassName: styles.nameCell,
     csvColumns: [
       {
         header: "Name",
@@ -100,6 +104,7 @@ const STOPS_TABLE_COLUMN_OPTIONS: StopsTableColumnDefinition[] = [
     label: "Direction",
     modalLabel: "Direction",
     sortable: true,
+    cellClassName: styles.directionCell,
     csvColumns: [
       {
         header: "Direction",
@@ -415,16 +420,7 @@ export const OnTimeStopsTable = ({
         alignment: STOP_NUMERIC_COLUMN_KEYS.has(column.key)
           ? ("right" as const)
           : undefined,
-        cellClassName:
-          column.key === "stopName"
-            ? styles.nameCell
-            : column.key === "stopId"
-              ? styles.naptanCell
-              : column.key === "timingPoint"
-                ? styles.timingCell
-                : column.key === "direction"
-                  ? styles.directionCell
-                  : undefined,
+        cellClassName: column.cellClassName,
       })),
     [visibleColumns],
   );
