@@ -89,17 +89,17 @@
 }
 
 .options {
-  padding: 0;
+  padding: 0 govuk-spacing(1) govuk-spacing(1);
 
-  :global(.label) {
+  :global(.govuk-checkboxes__label) {
     @include govuk-font($size: 19, $line-height: 1.25);
   }
 
-  :global(.govuk-checkboxes--small .label:before) {
+  :global(.govuk-checkboxes--small .govuk-checkboxes__label:before) {
     top: 10px;
   }
 
-  :global(.govuk-checkboxes--small .label:after) {
+  :global(.govuk-checkboxes--small .govuk-checkboxes__label:after) {
     top: 17px;
   }
 }
@@ -115,7 +115,10 @@
 
   &:hover,
   &:focus-within {
-    :global(.govuk-checkboxes__input:not(:disabled) + .label:before) {
+    :global(
+        .govuk-checkboxes__input:not(:disabled)
+          + .govuk-checkboxes__label:before
+      ) {
       box-shadow: 0 0 0 10px govuk-colour("black", $variant: "tint-80");
     }
   }

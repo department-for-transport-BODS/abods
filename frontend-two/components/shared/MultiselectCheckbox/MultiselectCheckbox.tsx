@@ -1,6 +1,7 @@
 import styles from "./multiselect-checkbox.module.scss";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import { clsx } from "clsx";
 
 interface MultiselectOption {
   label: string;
@@ -100,14 +101,10 @@ export const MultiselectCheckbox = ({
 
     if (onShowAll) {
       onShowAll();
-      if (!allowMultiselect) {
-        setIsOpen(false);
-        setSearchText("");
-      }
-      return;
+    } else {
+      onChange([]);
     }
 
-    onChange([]);
     if (!allowMultiselect) {
       setIsOpen(false);
       setSearchText("");
@@ -134,7 +131,7 @@ export const MultiselectCheckbox = ({
   return (
     <div
       ref={containerRef}
-      className={`${styles.container}${disabled ? ` ${styles.disabled}` : ""}`}
+      className={clsx(styles.container, disabled && styles.disabled)}
       onBlur={(event) => {
         if (!containerRef.current?.contains(event.relatedTarget)) {
           setIsOpen(false);
@@ -142,10 +139,7 @@ export const MultiselectCheckbox = ({
         }
       }}
     >
-      <label
-        className={`govuk-label${labelClassName ? ` ${labelClassName}` : ""}`}
-        htmlFor={id}
-      >
+      <label className={clsx("govuk-label", labelClassName)} htmlFor={id}>
         {label}
       </label>
 
@@ -166,9 +160,11 @@ export const MultiselectCheckbox = ({
           ref={inputRef}
           id={id}
           type="text"
-          className={`govuk-input ${styles.trigger}${
-            !hasSelection && !isOpen ? ` ${styles.triggerPlaceholder}` : ""
-          }`}
+          className={clsx(
+            "govuk-input",
+            styles.trigger,
+            !hasSelection && !isOpen && styles.triggerPlaceholder,
+          )}
           style={
             showSelectionSummary && summaryRef.current
               ? {
@@ -211,9 +207,7 @@ export const MultiselectCheckbox = ({
         />
 
         <span
-          className={`${styles.chevron}${
-            isOpen ? ` ${styles.chevronOpen}` : ""
-          }`}
+          className={clsx(styles.chevron, isOpen && styles.chevronOpen)}
           aria-hidden="true"
         />
 
@@ -231,9 +225,12 @@ export const MultiselectCheckbox = ({
 
                 <button
                   type="button"
-                  className={`button-link govuk-link ${styles.headerAction}${
-                    hasSelection || onShowAll ? "" : " button-link--disabled"
-                  }`}
+                  className={clsx(
+                    "button-link",
+                    "govuk-link",
+                    styles.headerAction,
+                    !hasSelection && !onShowAll && "button-link--disabled",
+                  )}
                   onClick={handleSelectAll}
                   disabled={disabled || (!hasSelection && !onShowAll)}
                 >
@@ -243,11 +240,15 @@ export const MultiselectCheckbox = ({
             ) : null}
 
             <div
-              className={
+              className={clsx(
                 allowMultiselect
-                  ? `govuk-checkboxes govuk-checkboxes--small ${styles.options}`
-                  : styles.optionsSingle
-              }
+                  ? [
+                      "govuk-checkboxes",
+                      "govuk-checkboxes--small",
+                      styles.options,
+                    ]
+                  : styles.optionsSingle,
+              )}
             >
               {filteredOptions.length === 0 ? (
                 <p className="govuk-body govuk-!-margin-bottom-0">
@@ -258,7 +259,7 @@ export const MultiselectCheckbox = ({
                   allowMultiselect ? (
                     <div
                       key={option.value}
-                      className={`govuk-checkboxes__item ${styles.option}`}
+                      className={clsx("govuk-checkboxes__item", styles.option)}
                     >
                       <input
                         id={getOptionId(option.value)}

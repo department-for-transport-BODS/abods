@@ -1,7 +1,7 @@
 @use "../../../styles/govuk-module" as *;
 
-// Matches original noUiSlider appearance:
-// square track, black border, tall narrow square thumbs
+// Reproduces the appearance of the Angular app's noUiSlider:
+// square track, black border, tall narrow square thumbs.
 
 $_track-height: govuk-spacing(4);
 $_thumb-width: 15px;
@@ -12,62 +12,6 @@ $_thumb-height: 40px;
   height: $_thumb-height;
   margin-top: govuk-spacing(2);
   margin-bottom: govuk-spacing(4);
-
-  :global(.ng2-nouislider) {
-    margin-top: govuk-spacing(2);
-    margin-bottom: govuk-spacing(4);
-  }
-
-  :global(.noUi-horizontal) {
-    height: govuk-spacing(4);
-
-    :global(.noUi-handle) {
-      cursor: pointer;
-      border-radius: 0;
-      border: 2px solid govuk-colour("black");
-      box-shadow: none;
-      height: $_thumb-height;
-      width: $_thumb-width;
-      top: -13px;
-
-      &:before,
-      &:after {
-        content: none;
-      }
-
-      &:focus {
-        box-shadow:
-          0 0 0 1.5px govuk-functional-colour(input-border),
-          0 0 0 4px govuk-functional-colour(focus);
-        outline: none;
-      }
-
-      &:global(.noUi-handle-lower) {
-        right: -12px;
-      }
-
-      &:global(.noUi-handle-upper) {
-        right: -1px;
-      }
-    }
-  }
-
-  :global(.noUi-target) {
-    border: 2px solid govuk-colour("black");
-    border-radius: 0;
-    cursor: pointer;
-    box-shadow: none;
-    background: govuk-colour("white");
-  }
-
-  :global(.noUi-connects) {
-    border-radius: 0;
-  }
-
-  :global(.noUi-connect) {
-    background: govuk-colour("black");
-    border: 3px solid govuk-colour("white");
-  }
 }
 
 .track {
