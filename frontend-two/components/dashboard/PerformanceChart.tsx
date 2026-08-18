@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./performance-chart.module.scss";
 import {
   memo,
   useEffect,
@@ -207,31 +209,33 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
 
   if (loadFailed) {
     return (
-      <div className="performance-chart app-performance-chart performance-chart--fallback">
-        <div className="performance-chart__fallback-bars" aria-hidden="true">
+      <div className={clsx(styles.performanceChart, styles.fallback)}>
+        <div className={styles.fallbackBars} aria-hidden="true">
           {chartData.map((item) => (
-            <div
-              key={item.category}
-              className="performance-chart__fallback-bar"
-            >
-              <span className="performance-chart__fallback-value">
-                {item.value}%
-              </span>
+            <div key={item.category} className={styles.fallbackBar}>
+              <span className={styles.fallbackValue}>{item.value}%</span>
               <div
-                className={`performance-chart__fallback-fill performance-chart__fallback-fill--${item.category.toLowerCase()}`}
+                className={clsx(
+                  styles.fallbackFill,
+                  styles[
+                    `performance-chart__fallback-fill--${item.category.toLowerCase()}`
+                  ],
+                )}
                 style={{ height: `${item.value}%` }}
               />
             </div>
           ))}
         </div>
-        <div className="performance-chart__fallback-legend">
+        <div className={styles.fallbackLegend}>
           {orderedCategories.map((category) => (
-            <div
-              key={category}
-              className="performance-chart__fallback-legend-item"
-            >
+            <div key={category} className={styles.fallbackLegendItem}>
               <span
-                className={`performance-chart__fallback-swatch performance-chart__fallback-swatch--${category.toLowerCase()}`}
+                className={clsx(
+                  styles.fallbackSwatch,
+                  styles[
+                    `performance-chart__fallback-swatch--${category.toLowerCase()}`
+                  ],
+                )}
               />
               <span>
                 <strong>{legendLabels[category]}</strong>{" "}
@@ -246,7 +250,7 @@ const PerformanceChart = ({ data, chartId }: PerformanceChartProps) => {
 
   return (
     <div
-      className="performance-chart app-performance-chart"
+      className={styles.performanceChart}
       id={resolvedChartId}
       ref={chartContainerRef}
     />

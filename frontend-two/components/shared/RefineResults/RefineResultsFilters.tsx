@@ -1,7 +1,9 @@
+import styles from "./refine-results-filters.module.scss";
+
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { DayKey, DaySelect } from "@/components/shared/DaySelect";
-import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
-import { TimeRangeSlider } from "@/components/shared/TimeRangeSlider";
+import { DayKey, DaySelect } from "@/components/shared/DaySelect/DaySelect";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
+import { TimeRangeSlider } from "@/components/shared/TimeRangeSlider/TimeRangeSlider";
 import { PerformanceFiltersInputType } from "@/src/generated/graphql";
 
 const DELAY_OPTIONS = ["none", "10", "20", "30", "40", "50", "60"] as const;
@@ -91,10 +93,10 @@ export const RefineResultsFilters = ({
   };
 
   return (
-    <form onSubmit={onSubmit} className="refine-results-filters">
-      <div className="refine-results-filters__scrollbox">
-        <div className="refine-results-filters__scrollbox-content">
-          <div className="refine-results-filters__sections">
+    <form onSubmit={onSubmit} className={styles.container}>
+      <div className={styles.scrollbox}>
+        <div className={styles.scrollboxContent}>
+          <div className={styles.sections}>
             <DaySelect
               selectedDays={values.dayOfWeekFlags}
               onDayChange={(day, checked) => {
@@ -128,14 +130,14 @@ export const RefineResultsFilters = ({
                 <legend className="govuk-fieldset__legend govuk-fieldset__legend--s">
                   Performance
                 </legend>
-                <div className="refine-results-filters__delay-selects">
+                <div className={styles.delaySelects}>
                   <div className="govuk-form-group">
                     <label className="govuk-label" htmlFor="max-early">
                       Maximum early
                     </label>
                     <select
                       id="max-early"
-                      className="govuk-select refine-results-filters__select-width"
+                      className={`govuk-select ${styles.selectWidth}`}
                       value={values.minDelayStr}
                       onChange={(event) =>
                         setValues((prev) => ({
@@ -159,7 +161,7 @@ export const RefineResultsFilters = ({
                     </label>
                     <select
                       id="max-late"
-                      className="govuk-select refine-results-filters__select-width"
+                      className={`govuk-select ${styles.selectWidth}`}
                       value={values.maxDelayStr}
                       onChange={(event) =>
                         setValues((prev) => ({
@@ -182,15 +184,15 @@ export const RefineResultsFilters = ({
               <fieldset className="govuk-fieldset">
                 <div className="govuk-form-group">
                   <MultiselectCheckbox
-                    id="refine-results-admin-areas"
+                    id="refine-results-area"
                     label="Area"
                     labelClassName="govuk-label--s"
+                    showAllLabel="Area"
                     options={adminAreaOptions}
                     selectedValues={values.adminAreaIds}
                     onChange={(adminAreaIds) =>
                       setValues((prev) => ({ ...prev, adminAreaIds }))
                     }
-                    showAllLabel="Area"
                     placeholder="All areas"
                     disabled={adminAreaOptions.length === 0}
                   />
@@ -199,7 +201,7 @@ export const RefineResultsFilters = ({
             )}
           </div>
 
-          <div className="refine-results-filters__reset">
+          <div className={styles.reset}>
             <button
               type="button"
               className="button-link govuk-link"
@@ -211,7 +213,7 @@ export const RefineResultsFilters = ({
         </div>
       </div>
 
-      <div className="refine-results-filters__actions">
+      <div className={styles.actions}>
         <button
           type="button"
           className="govuk-button govuk-button--secondary govuk-!-margin-bottom-0"

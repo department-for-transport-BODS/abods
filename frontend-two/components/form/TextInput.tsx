@@ -1,10 +1,12 @@
 import { ChangeEvent } from "react";
+import styles from "./text-input.module.scss";
 import { ErrorInfo } from "@/types";
+import { clsx } from "clsx";
 
 interface TextInputProps<T> {
   display: string;
   inputName: keyof T;
-  widthClass?: string;
+  width?: 10 | 20;
   value?: string;
   initialErrors?: ErrorInfo[];
   stateUpdater: (value: string, field: keyof T) => void;
@@ -17,7 +19,7 @@ interface TextInputProps<T> {
 export const TextInput = <T,>({
   display,
   inputName,
-  widthClass,
+  width,
   value,
   initialErrors,
   stateUpdater,
@@ -38,7 +40,7 @@ export const TextInput = <T,>({
       className={`govuk-form-group${error ? " govuk-form-group--error" : ""}`}
     >
       <label
-        className={`govuk-label${required ? " text-input__label--required" : ""}`}
+        className={clsx("govuk-label", required && styles.labelRequired)}
         htmlFor={inputId}
       >
         {display}
@@ -50,7 +52,11 @@ export const TextInput = <T,>({
         </p>
       ) : null}
       <input
-        className={`govuk-input ${widthClass ?? ""} ${error ? "govuk-input--error" : ""}`.trim()}
+        className={clsx(
+          "govuk-input",
+          width && `govuk-input--width-${width}`,
+          error && "govuk-input--error",
+        )}
         id={inputId}
         name={inputId}
         type={isPassword ? "password" : "text"}

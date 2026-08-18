@@ -29,7 +29,7 @@ vi.mock("@/components/layout/BaseLayout", () => ({
   ),
 }));
 
-vi.mock("@/components/on-time/OnTimeServiceMap", () => ({
+vi.mock("@/components/on-time/OnTimeServiceMap/OnTimeServiceMap", () => ({
   OnTimeServiceMap: () => <div data-testid="on-time-service-map" />,
 }));
 

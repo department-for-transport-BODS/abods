@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./corridors-grid.module.scss";
 import { useMemo } from "react";
 import Link from "next/link";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
@@ -70,9 +72,9 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
             <label className="govuk-label" htmlFor="corridors-grid-filter">
               Search for a corridor
             </label>
-            <div className="corridors-grid-search">
+            <div className={styles.corridorsGridSearch}>
               <Image
-                className="corridors-grid-search__icon"
+                className={styles.icon}
                 src="/assets/icons/search.svg"
                 alt=""
                 aria-hidden="true"
@@ -83,7 +85,11 @@ export const CorridorsGrid = ({ data, filter, onFilterChange }: Props) => {
                 id="corridors-grid-filter"
                 name="filter"
                 type="search"
-                className="govuk-input govuk-input--width-20 corridors-grid-search__input"
+                className={clsx(
+                  "govuk-input",
+                  "govuk-input--width-20",
+                  styles.input,
+                )}
                 value={filter}
                 onChange={(e) => onFilterChange(e.target.value)}
               />

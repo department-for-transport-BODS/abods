@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "@/components/feed-monitoring/live-vehicle-stats.module.scss";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -65,10 +67,7 @@ const LiveStatusPage = () => {
 
   if (isLoading) {
     return (
-      <BaseLayout
-        title="Live status - Analyse Bus Open Data"
-        mainClassName="app__content--page"
-      >
+      <BaseLayout title="Live status - Analyse Bus Open Data" noContentPadding>
         <p className="govuk-body">Loading...</p>
       </BaseLayout>
     );
@@ -77,7 +76,7 @@ const LiveStatusPage = () => {
   return (
     <BaseLayout
       title="Live status - Analyse Bus Open Data"
-      mainClassName="app__content--page"
+      noContentPadding
       backLink={
         <Link
           href="/feed-monitoring"
@@ -104,10 +103,10 @@ const LiveStatusPage = () => {
           </div>
         </div>
       )}
-      <span className="govuk-caption-xl">NOC feed monitoring</span>
-      <h1 className="app-page-header font-bold" style={{ fontSize: "48px" }}>
-        Live status
-      </h1>
+      <header className="govuk-!-margin-bottom-2">
+        <span className="govuk-caption-xl">NOC feed monitoring</span>
+        <h1 className="govuk-heading-xl app-page-header">Live status</h1>
+      </header>
       <div className="flex items-baseline gap-4">
         <span
           className="govuk-body"
@@ -189,8 +188,8 @@ const LiveStatusPage = () => {
       )}
       <div className="mt-8">
         <Box>
-          <div className="live-vehicle-stats__container">
-            <div className="live-vehicle-stats__item">
+          <div className={styles.container}>
+            <div className={styles.item}>
               <LiveVehicleStats
                 data={operator?.feedMonitoring?.liveStats?.last24Hours ?? []}
                 granularity="hour"
@@ -202,7 +201,7 @@ const LiveStatusPage = () => {
                 xAxisMax={new Date()}
               />
             </div>
-            <div className="live-vehicle-stats__item mt-8">
+            <div className={clsx(styles.item, "mt-8")}>
               <LiveVehicleStats
                 data={operator?.feedMonitoring?.liveStats?.last20Minutes ?? []}
                 granularity="minute"

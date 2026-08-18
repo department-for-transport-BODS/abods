@@ -21,7 +21,7 @@ vi.mock("@/components/shared/DateRangeSelect/DateRangeSelect", () => ({
   ),
 }));
 
-vi.mock("@/components/shared/MultiselectCheckbox", () => ({
+vi.mock("@/components/shared/MultiselectCheckbox/MultiselectCheckbox", () => ({
   MultiselectCheckbox: ({ label }: { label: string }) => (
     <div
       data-testid={`multiselect-${label.toLowerCase().replace(/\s+/g, "-")}`}

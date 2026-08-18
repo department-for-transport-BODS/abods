@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./corridor-view-map.module.scss";
 import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
@@ -335,10 +337,10 @@ export const CorridorViewMap = ({
   };
 
   return (
-    <div className="corridor__map-wrapper govuk-!-margin-bottom-7">
+    <div className={clsx(styles.mapWrapper, "govuk-!-margin-bottom-7")}>
       <div
         ref={containerRef}
-        className="corridor__map"
+        className={styles.map}
         aria-label="Corridor map"
       />
       <MapDisplayOptions
@@ -351,10 +353,10 @@ export const CorridorViewMap = ({
         createPortal(
           <button
             type="button"
-            className="corridor__map-recentre"
+            className={styles.mapRecentre}
             onClick={recentre}
           >
-            <ReCentreIcon className="corridor__map-recentre-icon" />
+            <ReCentreIcon className={styles.mapRecentreIcon} />
             Re-centre
           </button>,
           recentrePortal,

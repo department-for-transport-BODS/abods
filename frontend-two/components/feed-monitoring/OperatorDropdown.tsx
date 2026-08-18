@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FeedMonitoringListQuery } from "../../src/generated/graphql";
+import { clsx } from "clsx";
+import styles from "./operator-dropdown.module.scss";
 
 type FeedMonitoringOperatorData =
   FeedMonitoringListQuery["operatorsFeedMonitoring"][number];
@@ -39,12 +41,12 @@ export const OperatorDropdown = ({
   }, []);
 
   return (
-    <div ref={ref} className="operator-dropdown">
+    <div ref={ref} className={styles.operatorDropdown}>
       <button
         onClick={() => setOpenDropdown((o) => !o)}
-        className="operator-dropdown__button"
+        className={styles.button}
       >
-        <span className="govuk-body operator-dropdown__label">
+        <span className={clsx("govuk-body", styles.label)}>
           {current ? `${current.name} (${current.nocCode})` : "Select operator"}
         </span>
         <svg
@@ -52,7 +54,7 @@ export const OperatorDropdown = ({
           height="16"
           viewBox="0 0 16 16"
           fill="none"
-          className={`operator-dropdown__chevron${openDropdown ? " operator-dropdown__chevron--open" : ""}`}
+          className={clsx(styles.chevron, openDropdown && styles.chevronOpen)}
         >
           <path
             d="M2 5l6 6 6-6"
@@ -65,16 +67,19 @@ export const OperatorDropdown = ({
       </button>
 
       {openDropdown && (
-        <ul className="operator-dropdown__list">
+        <ul className={styles.list}>
           {operators.map((op) => (
             <li
               key={op.nocCode}
               onClick={() => handleSelect(op)}
               onMouseEnter={() => setHovered(op.nocCode)}
               onMouseLeave={() => setHovered(null)}
-              className={`operator-dropdown__item${hovered === op.nocCode ? " operator-dropdown__item--hovered" : ""}`}
+              className={clsx(
+                styles.item,
+                hovered === op.nocCode && styles.itemHovered,
+              )}
             >
-              <span className="govuk-body operator-dropdown__item-text">
+              <span className={clsx("govuk-body", styles.itemText)}>
                 {op.name} ({op.nocCode})
               </span>
             </li>

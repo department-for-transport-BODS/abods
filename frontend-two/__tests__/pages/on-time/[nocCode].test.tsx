@@ -10,6 +10,7 @@ import OnTimeOperatorPage from "@/pages/on-time/[nocCode]";
 import { Direction } from "../../../src/generated/graphql";
 import type { FrequentServicePerformance } from "@/services/on-time/performance.service";
 import { Settings } from "luxon";
+import boxStyles from "@/components/shared/Box/box.module.scss";
 
 vi.mock("@/hooks/useAuth", () => ({
   useRequireAuth: vi.fn(),
@@ -301,8 +302,8 @@ describe("OnTimeOperatorPage", () => {
       "We have not received any vehicle location data for the time period and filters selected.",
     );
 
-    expect(message.closest(".app-box")).not.toBeNull();
-    expect(message.closest(".charts-section__no-data")).not.toBeNull();
+    expect(message.closest(`.${boxStyles.box}`)).not.toBeNull();
+    expect(message.closest('[class*="noData"]')).not.toBeNull();
   });
 
   it("shows the service export button below the empty table message", async () => {
@@ -570,11 +571,8 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      const directionsButton = document.querySelector(
-        ".on-time-service-filters__directions .multiselect-dropdown__button",
-      );
-      expect(directionsButton).toBeTruthy();
-      await user.click(directionsButton as HTMLButtonElement);
+      const directionsControl = screen.getByLabelText("Directions");
+      await user.click(directionsControl);
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
 
       expect(
@@ -595,11 +593,8 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      const directionsButton = document.querySelector(
-        ".on-time-service-filters__directions .multiselect-dropdown__button",
-      );
-      expect(directionsButton).toBeTruthy();
-      await user.click(directionsButton as HTMLButtonElement);
+      const directionsControl = screen.getByLabelText("Directions");
+      await user.click(directionsControl);
       await user.click(screen.getByRole("checkbox", { name: "Outbound" }));
 
       expect(
@@ -620,17 +615,14 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      const directionsButton = document.querySelector(
-        ".on-time-service-filters__directions .multiselect-dropdown__button",
-      );
-      expect(directionsButton).toBeTruthy();
-      await user.click(directionsButton as HTMLButtonElement);
+      const directionsControl = screen.getByLabelText("Directions");
+      await user.click(directionsControl);
       await user.click(screen.getByRole("checkbox", { name: "Inbound" }));
       expect(
         screen.queryByRole("link", { name: "202: Night Bus" }),
       ).not.toBeInTheDocument();
 
-      await user.click(screen.getByRole("button", { name: "Clear all" }));
+      await user.click(screen.getByRole("button", { name: "Show all" }));
 
       await waitFor(() => {
         expect(
@@ -921,10 +913,10 @@ describe("OnTimeOperatorPage", () => {
         ).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText("Refine results"));
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      await user.click(screen.getByRole("button", { name: "Refine results" }));
+      const panel = screen.getByRole("dialog", {
+        name: "Refine results",
+      });
       const areasInput = within(panel).getByRole("textbox", { name: "Area" });
 
       await waitFor(() => {
@@ -951,13 +943,8 @@ describe("OnTimeOperatorPage", () => {
       expect(
         screen.queryByText("Loading on-time data..."),
       ).not.toBeInTheDocument();
-      const filterChips = document.querySelector(
-        ".filter-chips-container",
-      ) as HTMLElement;
-      expect(within(filterChips).getByText("Area:")).toBeInTheDocument();
-      expect(
-        within(filterChips).getByText("Nottinghamshire"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Area:")).toBeInTheDocument();
+      expect(screen.getByText("Nottinghamshire")).toBeInTheDocument();
     });
   });
 

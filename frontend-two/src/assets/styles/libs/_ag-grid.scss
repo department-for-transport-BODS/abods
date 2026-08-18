@@ -1,7 +1,4 @@
-@import "../settings/settings.scss";
-@import "../helpers/helpers.scss";
-@import "ag-grid-community/styles/ag-grid.css";
-// @import 'ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine.scss';
+@use "../settings/settings" as *;
 
 // adds space above 'no rows' display so it doesn't overlap the header
 
@@ -15,7 +12,7 @@
 //////////////
 
 .ag-header {
-  border-bottom: 1px solid $govuk-border-colour;
+  border-bottom: 1px solid govuk-functional-colour(border);
 }
 
 .ag-header-row {
@@ -53,17 +50,17 @@
 
 // sorting controls
 .ag-header-cell-sortable {
-  color: $govuk-link-colour;
+  color: govuk-functional-colour(link);
   &.ag-header-active {
-    color: $govuk-focus-text-colour;
-    background-color: $govuk-focus-colour;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
     box-shadow:
-      0 -2px $govuk-focus-colour,
-      0 0 2px $govuk-focus-colour,
-      0 4px $govuk-focus-text-colour;
+      0 -2px govuk-functional-colour(focus),
+      0 0 2px govuk-functional-colour(focus),
+      0 4px govuk-functional-colour(focus-text);
   }
   &:hover:not(:focus-visible) {
-    color: $govuk-link-colour;
+    color: govuk-functional-colour(link);
     box-shadow: none;
     background-color: transparent;
     .ag-header-cell-text {
@@ -85,7 +82,7 @@
   position: relative;
   margin-left: 8px;
   width: 10px;
-  color: govuk-colour("mid-grey");
+  color: govuk-colour("black", $variant: "tint-80");
   &:before,
   &:after {
     position: absolute;
@@ -102,7 +99,7 @@
     transform: translateY(-2px);
   }
   .ag-header-active & {
-    color: $govuk-focus-text-colour;
+    color: govuk-functional-colour(focus-text);
   }
 }
 
@@ -127,10 +124,10 @@
   display: flex;
   align-items: center;
 
-  border-bottom: 1px solid $govuk-border-colour;
+  border-bottom: 1px solid govuk-functional-colour(border);
   &.ag-row-pinned {
-    border-top: 1px solid $govuk-border-colour;
-    border-bottom: 2px solid $govuk-border-colour;
+    border-top: 1px solid govuk-functional-colour(border);
+    border-bottom: 2px solid govuk-functional-colour(border);
     .ag-cell {
       font-weight: $govuk-font-weight-bold;
     }
@@ -170,18 +167,18 @@
 
 .ag-cell {
   &:focus-visible .govuk-link {
-    color: $govuk-focus-text-colour;
-    background-color: $govuk-focus-colour;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
     box-shadow:
-      0 -2px $govuk-focus-colour,
-      0 0 2px $govuk-focus-colour,
-      0 4px $govuk-focus-text-colour;
+      0 -2px govuk-functional-colour(focus),
+      0 0 2px govuk-functional-colour(focus),
+      0 4px govuk-functional-colour(focus-text);
   }
   &:focus-visible .button-link {
     outline: 0;
-    color: $govuk-focus-text-colour;
-    background-color: $govuk-focus-colour;
-    box-shadow: 0 4px $govuk-focus-text-colour;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
+    box-shadow: 0 4px govuk-functional-colour(focus-text);
   }
 }
 .ag-cell-last {
@@ -218,7 +215,7 @@
     height: 6px;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: govuk-colour("mid-grey");
+    background-color: govuk-colour("black", $variant: "tint-80");
     border-radius: 3px;
     border: none;
   }
@@ -226,7 +223,7 @@
     background: transparent;
   }
   scrollbar-width: thin;
-  scrollbar-color: govuk-colour("mid-grey") transparent;
+  scrollbar-color: govuk-colour("black", $variant: "tint-80") transparent;
 }
 
 .ag-center-cols-clipper {

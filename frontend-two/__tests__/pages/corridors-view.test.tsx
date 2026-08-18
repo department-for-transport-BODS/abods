@@ -238,13 +238,6 @@ describe("CorridorsViewPage", () => {
 
     expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
     expect(screen.getAllByRole("status").length).toBeGreaterThan(0);
-    expect(
-      document.querySelector(".corridor__summary-stat .stat__value--loading"),
-    ).toBeTruthy();
-    expect(
-      document.querySelector(".corridor__summary-stat .stat__value--tooltip"),
-    ).toBeNull();
-    expect(document.querySelector(".corridor__summary-stat button")).toBeNull();
   });
 
   it("shows loading dots while stats are fetching", async () => {
@@ -259,12 +252,8 @@ describe("CorridorsViewPage", () => {
     expect(screen.getAllByRole("status").length).toBeGreaterThan(0);
     expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
     expect(
-      document.querySelector(".corridor__summary-stat .stat__value--loading"),
-    ).toBeTruthy();
-    expect(
-      document.querySelector(".corridor__summary-stat .stat__value--tooltip"),
-    ).toBeNull();
-    expect(document.querySelector(".corridor__summary-stat button")).toBeNull();
+      screen.queryByRole("button", { name: /details/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows not found when corridor is missing", async () => {

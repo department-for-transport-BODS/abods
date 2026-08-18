@@ -1,3 +1,5 @@
+import styles from "./on-time-noccode.module.scss";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
@@ -8,15 +10,15 @@ import {
   SERVICE_TABLE_COLUMN_KEYS,
   SERVICE_TABLE_COLUMN_LABELS,
   SERVICE_TABLE_ALWAYS_VISIBLE_KEYS,
-} from "@/components/on-time/OnTimeServicesTable";
-import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
+} from "@/components/on-time/OnTimeServicesTable/OnTimeServicesTable";
+import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal/DisplayOptionsModal";
 import {
   OnTimeFilterPanel,
   DATE_PRESET_OPTIONS,
   MATCH_TYPE_OPTIONS,
   STOP_TYPE_OPTIONS,
   calculateDateRange,
-} from "@/components/on-time/OnTimeFilterPanel";
+} from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import {
   type OnTimeDisplayMode,
   normaliseDirection,
@@ -60,12 +62,12 @@ import {
   MatchType,
   PerformanceFiltersInputType,
 } from "../../src/generated/graphql";
-import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
+import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid/SummaryStatsGrid";
 import { OperatorSelector } from "@/components/shared/OperatorSelector";
 import { OnTimePageHeader } from "@/components/on-time/OnTimePageHeader";
 import { OnTimeHelpdeskRow } from "@/components/on-time/OnTimeHelpdeskRow";
-import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls";
-import { FilterChips } from "@/components/on-time/FilterChips";
+import { OnTimeDisplayControls } from "@/components/on-time/OnTimeDisplayControls/OnTimeDisplayControls";
+import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
 
 const aggregateServicesByLine = (
   services: FrequentServicePerformance[],
@@ -627,17 +629,17 @@ const OnTimeOperatorPage = () => {
                   />
                 </div>
                 <OnTimeDisplayControls
-                  className="on-time-service-filters govuk-body govuk-!-margin-top-6"
+                  className="govuk-body"
                   groupInputs
                   beforeDirections={
-                    <div className="on-time-service-filters__search">
+                    <div className={styles.searchContainer}>
                       <SearchInput
                         id="service-search"
                         label="Search for a service"
                         testId=""
                         value={serviceSearch}
                         onChange={setServiceSearch}
-                        widthClassName="on-time-service-filters__search-input"
+                        widthClassName={styles.searchContainerInput}
                       />
                     </div>
                   }

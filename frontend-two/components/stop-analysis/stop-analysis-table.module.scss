@@ -1,0 +1,140 @@
+@use "../../styles/govuk-module" as *;
+.displayModal {
+  display: flex;
+  flex-direction: column;
+  gap: govuk-spacing(4);
+}
+.displayColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: govuk-spacing(6);
+}
+.displayColumn {
+  display: flex;
+  flex-direction: column;
+  gap: govuk-spacing(3);
+}
+.showAllLink {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+  @include govuk-font(16);
+}
+.displayFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: govuk-spacing(3);
+  margin-top: govuk-spacing(2);
+}
+@media (max-width: 640px) {
+  .displayColumns {
+    grid-template-columns: 1fr;
+    gap: govuk-spacing(4);
+  }
+  .displayFooter {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+.stopAnalysisTable {
+  :global(.govuk-table__cell) {
+    @include govuk-font(16);
+    vertical-align: middle;
+  }
+
+  :global(.govuk-table__header) {
+    @include govuk-font(16, $weight: bold);
+    vertical-align: middle;
+  }
+  thead button {
+    min-width: 0;
+    align-items: flex-start;
+    gap: govuk-spacing(1);
+  }
+  thead button span:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: normal;
+    text-overflow: ellipsis;
+  }
+}
+.displayToolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: govuk-spacing(4);
+  flex-wrap: wrap;
+  margin-bottom: govuk-spacing(3);
+}
+.displayActions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: govuk-spacing(4);
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.displayMode {
+  margin-bottom: 0;
+}
+.displayOptionsLink {
+  align-self: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+  @include govuk-font(16);
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(3);
+  align-items: flex-end;
+  margin-bottom: govuk-spacing(3);
+}
+.directionFilters {
+  flex-shrink: 0;
+  width: 20rem;
+}
+.search {
+  flex: 1;
+  min-width: 200px;
+}
+.grid {
+  overflow-x: auto;
+}
+.tableWithTotals {
+  table tbody tr:first-child > * {
+    border-top: 0.125rem solid govuk-functional-colour(border);
+    border-bottom: 0.125rem solid govuk-functional-colour(border);
+  }
+}
+.summaryRow > * {
+  font-weight: $govuk-font-weight-bold;
+}
+.stopLink {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+.cellNumeric {
+  text-align: right;
+}
+.timingIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: govuk-functional-colour(text);
+  vertical-align: middle;
+}

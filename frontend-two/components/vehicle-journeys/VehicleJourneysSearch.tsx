@@ -1,11 +1,13 @@
+import { clsx } from "clsx";
+import styles from "./vehicle-journeys-search.module.scss";
 import Link from "next/link";
 import { NextRouter } from "next/router";
 import { Interval } from "luxon";
 import ExclamationInCircleIcon from "@/assets/icons/exclamation-in-circle.svg";
 import { ArrowLeftIcon } from "../icons/ArrowLeftIcon";
 import { ArrowRightIcon } from "../icons/ArrowRightIcon";
-import { DateSelect } from "@/components/shared/DateSelect";
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { DateSelect } from "@/components/shared/DateSelect/DateSelect";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { Spinner } from "@/components/shared/Spinner";
 import {
   VehicleJourneyLine,
@@ -82,24 +84,14 @@ export const VehicleJourneysSearch = ({
   validDateRange,
   dateError,
 }: VehicleJourneysSearchProps) => {
-  const operatorOptions = operators.map(
-    (operator) => `${operator.name} (${operator.operatorId})`,
-  );
-  const selectedOperator = selectedOperatorId
-    ? operators.find((operator) => operator.operatorId === selectedOperatorId)
-    : null;
-  const selectedOperatorOption = selectedOperator
-    ? `${selectedOperator.name} (${selectedOperator.operatorId})`
-    : null;
-  const serviceOptions = services.map(
-    (service) => `${service.number}: ${service.name}`,
-  );
-  const selectedService = selectedServiceId
-    ? services.find((service) => service.id === selectedServiceId)
-    : null;
-  const selectedServiceOption = selectedService
-    ? `${selectedService.number}: ${selectedService.name}`
-    : null;
+  const operatorOptions = operators.map((operator) => ({
+    label: `${operator.name} (${operator.operatorId})`,
+    value: operator.operatorId,
+  }));
+  const serviceOptions = services.map((service) => ({
+    label: `${service.number}: ${service.name}`,
+    value: service.id,
+  }));
   const patterns = Object.values(groupedJourneys(journeys ?? []));
   const noJourneysFound =
     !journeysLoading &&
@@ -113,7 +105,7 @@ export const VehicleJourneysSearch = ({
   return (
     <>
       <h1 className="govuk-heading-xl">Vehicle journeys</h1>
-      <div className="vehicle-journeys-search__controls">
+      <div className={styles.controls}>
         <DateSelect
           label="Date"
           inputId="vehicle-journeys-date"
@@ -128,47 +120,43 @@ export const VehicleJourneysSearch = ({
           }}
         />
 
-        <div className="vehicle-journeys-search__operator">
-          <MultiselectDropdown
-            multiSelect={false}
+        <div className={styles.operator}>
+          <MultiselectCheckbox
+            id="vehicle-journeys-operator"
             label="Operator"
             options={operatorOptions}
-            selected={selectedOperatorOption ? [selectedOperatorOption] : []}
+            selectedValues={selectedOperatorId ? [selectedOperatorId] : []}
+            allowMultiselect={false}
             onChange={([selected]) => {
-              const operator = operators.find(
-                (item) => `${item.name} (${item.operatorId})` === selected,
-              );
               updateQuery(router, {
-                operator: operator?.operatorId ?? null,
+                operator: selected ?? null,
                 service: null,
               });
             }}
-            placeholderText={operatorsLoading ? "Loading..." : "Select"}
+            placeholder={operatorsLoading ? "Loading..." : "Select"}
+            showAll={false}
           />
         </div>
 
-        <div className="vehicle-journeys-search__service">
-          <MultiselectDropdown
-            multiSelect={false}
+        <div className={styles.service}>
+          <MultiselectCheckbox
+            id="vehicle-journeys-service"
             label="Service name"
             options={serviceOptions}
-            selected={selectedServiceOption ? [selectedServiceOption] : []}
+            selectedValues={selectedServiceId ? [selectedServiceId] : []}
+            allowMultiselect={false}
             disabled={!selectedOperatorId || servicesLoading}
-            clearable
             onChange={([selected]) => {
-              const service = services.find(
-                (item) => `${item.number}: ${item.name}` === selected,
-              );
-              updateQuery(router, { service: service?.id ?? null });
+              updateQuery(router, { service: selected ?? null });
             }}
-            placeholderText={servicesLoading ? "Loading..." : "Select"}
+            placeholder={servicesLoading ? "Loading..." : "Select"}
           />
         </div>
       </div>
 
       {selectedServiceId && !dateError ? (
         <nav
-          className="govuk-pagination journey-search-nav"
+          className={clsx("govuk-pagination", styles.journeySearchNav)}
           role="navigation"
           aria-label="results"
         >
@@ -184,7 +172,7 @@ export const VehicleJourneysSearch = ({
               </button>
             ) : null}
           </div>
-          <span className="journey-search-nav__date">
+          <span className={styles.journeySearchNavDate}>
             {formatDate(selectedDate)}
           </span>
           <div className="govuk-pagination__next">
@@ -203,15 +191,21 @@ export const VehicleJourneysSearch = ({
       ) : null}
 
       {journeysLoading && !dateError ? (
-        <div className="vehicle-journeys-search__loading" aria-live="polite">
+        <div className={styles.loading} aria-live="polite">
           <Spinner size="small" />
           <span className="govuk-visually-hidden">Loading journeys</span>
           <div
-            className="journey-search-grid journey-search-grid--skeleton"
+            className={clsx(
+              styles.journeySearchGrid,
+              styles.journeySearchGridSkeleton,
+            )}
             aria-hidden="true"
           >
             {Array.from({ length: 12 }).map((_, index) => (
-              <div key={index} className="journey-search-grid__skeleton-item" />
+              <div
+                key={index}
+                className={styles.journeySearchGridSkeletonItem}
+              />
             ))}
           </div>
         </div>
@@ -223,13 +217,17 @@ export const VehicleJourneysSearch = ({
               <h2 className="govuk-heading-m govuk-!-margin-top-6">
                 {pattern[0].serviceNumber}: {pattern[0].serviceName}
               </h2>
-              <div className="journey-search-grid">
+              <div className={styles.journeySearchGrid}>
                 {pattern.map((journey) => (
                   <div
                     key={`${journey.groupId}-${journey.directionRef ?? ""}-${journey.startTime}`}
                   >
                     <Link
-                      className="govuk-link govuk-body journey-search-grid__time"
+                      className={clsx(
+                        "govuk-link",
+                        "govuk-body",
+                        styles.journeySearchGridTime,
+                      )}
                       href={{
                         pathname: "/vehicle-journeys/[journeyId]",
                         query: {
@@ -261,11 +259,11 @@ export const VehicleJourneysSearch = ({
 
       {journeysErrored ? (
         <div
-          className="govuk-body govuk-!-margin-top-8 vehicle-journeys-search__error"
+          className={clsx("govuk-body", "govuk-!-margin-top-8", styles.error)}
           role="alert"
         >
           <ExclamationInCircleIcon
-            className="vehicle-journeys-search__error-icon"
+            className={styles.errorIcon}
             aria-hidden="true"
             focusable="false"
           />

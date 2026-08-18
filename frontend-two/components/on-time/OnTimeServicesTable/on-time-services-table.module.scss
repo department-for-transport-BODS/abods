@@ -1,0 +1,37 @@
+@use "../../../styles/govuk-module" as *;
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.container .sortableTable {
+  width: 100%;
+}
+
+.container {
+  .sortableHeader {
+    width: 100%;
+    min-width: 0;
+    align-items: flex-start;
+  }
+}
+
+.frequentCell {
+  white-space: nowrap;
+}
+
+.serviceCell {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  :global(.govuk-link) {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}

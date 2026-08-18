@@ -1,0 +1,12 @@
+@use "../../styles/govuk-module" as *;
+
+.searchContainer {
+  flex: 0 1 30%;
+  min-width: 200px;
+  width: 30%;
+}
+
+.searchContainerInput {
+  width: 100%;
+  max-width: none;
+}

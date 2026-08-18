@@ -1,3 +1,6 @@
+import { clsx } from "clsx";
+import styles from "./sortable-table.module.scss";
+
 interface PagingPanelProps {
   currentPage: number;
   totalPages: number;
@@ -69,7 +72,11 @@ export const PagingPanel = ({
 
   return (
     <div
-      className={`paging-panel flex w-full items-baseline gap-6 ${alignment === "left" ? "justify-start" : "justify-end"}`}
+      className={clsx(
+        styles.pagingPanel,
+        "flex w-full items-baseline gap-6",
+        alignment === "left" ? "justify-start" : "justify-end",
+      )}
     >
       <span className="govuk-body govuk-!-margin-bottom-0">
         Showing {firstRow} - {lastRow} of {rowCount} {pluralNoun}

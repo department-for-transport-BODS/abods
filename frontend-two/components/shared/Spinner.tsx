@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+
 interface SpinnerProps {
   size?: "default" | "small" | "x-small";
   message?: string;
@@ -10,7 +12,11 @@ export const Spinner = ({
   vCentre = false,
 }: SpinnerProps) => (
   <div
-    className={`spinner spinner--${size}${vCentre ? " spinner--vcentre" : ""}`}
+    className={clsx(
+      "spinner",
+      `spinner--${size}`,
+      vCentre && "spinner--vcentre",
+    )}
     {...(message
       ? { role: "alert", "aria-busy": true }
       : { "aria-hidden": true })}

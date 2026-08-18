@@ -1,3 +1,4 @@
+import styles from "./feed-table.module.scss";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
@@ -79,7 +80,7 @@ export const FeedTable = ({
       icon: active ? (
         <Image
           src="/assets/icons/check-in-circle-solid.svg"
-          className="feed-table__check"
+          className={styles.check}
           alt="Active Feed"
           width={36}
           height={36}
@@ -87,7 +88,7 @@ export const FeedTable = ({
       ) : (
         <Image
           src="/assets/icons/cross-in-circle-solid.svg"
-          className="feed-table__cross"
+          className={styles.cross}
           alt="Inactive Feed"
           width={36}
           height={36}

@@ -51,29 +51,6 @@ vi.mock("next/router", () => ({
   }),
 }));
 
-vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
-  SortableTable: ({ head, rows }: any) => (
-    <table>
-      <thead>
-        <tr>
-          {head.map((h: any) => (
-            <th key={h.key}>{h.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r: any) => (
-          <tr key={r.key}>
-            {head.map((h: any) => (
-              <td key={`${r.key}-${h.key}`}>{r[h.key]}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ),
-}));
-
 // Mock data
 const feedMonitoringListMockData = [
   {
@@ -199,14 +176,24 @@ it("Renders inactive feeds tables with correct headers", async () => {
 
   await waitFor(() => {
     const tables = screen.getAllByRole("table");
-    expect(within(tables[0]).getByText("NOC")).toBeInTheDocument();
-    expect(within(tables[0]).getByText("Operator")).toBeInTheDocument();
     expect(
-      within(tables[0]).getByText("Feed availability"),
+      within(tables[0]).getByRole("columnheader", { name: "NOC" }),
     ).toBeInTheDocument();
-    expect(within(tables[0]).getByText("Update frequency")).toBeInTheDocument();
     expect(
-      within(tables[0]).getByText("Unavailable since"),
+      within(tables[0]).getByRole("columnheader", { name: "Operator" }),
+    ).toBeInTheDocument();
+    expect(
+      within(tables[0]).getByRole("columnheader", {
+        name: "Feed availability",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(tables[0]).getByRole("columnheader", { name: "Update frequency" }),
+    ).toBeInTheDocument();
+    expect(
+      within(tables[0]).getByRole("columnheader", {
+        name: "Unavailable since",
+      }),
     ).toBeInTheDocument();
   });
 });
@@ -219,13 +206,23 @@ it("Renders active feeds tables with correct headers", async () => {
 
   await waitFor(() => {
     const tables = screen.getAllByRole("table");
-    expect(within(tables[1]).getByText("NOC")).toBeInTheDocument();
-    expect(within(tables[1]).getByText("Operator")).toBeInTheDocument();
     expect(
-      within(tables[1]).getByText("Feed availability"),
+      within(tables[1]).getByRole("columnheader", { name: "NOC" }),
     ).toBeInTheDocument();
-    expect(within(tables[1]).getByText("Update frequency")).toBeInTheDocument();
-    expect(within(tables[1]).getByText("Last outage")).toBeInTheDocument();
+    expect(
+      within(tables[1]).getByRole("columnheader", { name: "Operator" }),
+    ).toBeInTheDocument();
+    expect(
+      within(tables[1]).getByRole("columnheader", {
+        name: "Feed availability",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(tables[1]).getByRole("columnheader", { name: "Update frequency" }),
+    ).toBeInTheDocument();
+    expect(
+      within(tables[1]).getByRole("columnheader", { name: "Last outage" }),
+    ).toBeInTheDocument();
   });
 });
 

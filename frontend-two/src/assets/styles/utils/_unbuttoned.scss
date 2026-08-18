@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .unbuttoned {
   // undoes the default <button> styling
   border: 0 none;

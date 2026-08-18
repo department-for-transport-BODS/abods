@@ -1,0 +1,35 @@
+@use "../../../styles/govuk-module" as *;
+
+.withArrows {
+  &::after {
+    margin-left: govuk-spacing(1);
+    content: "\00BB";
+  }
+}
+
+.noUnderline {
+  text-decoration: none;
+  display: inline-flex;
+
+  &:focus,
+  &:hover,
+  &:active {
+    text-decoration: none;
+  }
+
+  &:hover {
+    .text {
+      text-decoration: underline;
+    }
+  }
+
+  &:focus {
+    .text {
+      text-decoration: none;
+    }
+  }
+}
+
+.linkWithArrow {
+  font-weight: $govuk-font-weight-bold;
+}

@@ -1,4 +1,6 @@
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { clsx } from "clsx";
+import styles from "./distance-filters.module.scss";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 
 interface DistanceFiltersProps {
@@ -46,12 +48,16 @@ export const DistanceFilters = ({
   selectedServices,
   onServicesChange,
 }: DistanceFiltersProps) => {
+  const toOptions = (values: string[]) =>
+    values.map((value) => ({ label: value, value }));
+
   return (
     <>
-      <div className="distance-grid__filters">
-        <div className="distance-grid__filter">
+      <div className={styles.filters}>
+        <div className={styles.filter}>
           <DateRangeSelect
             label="Date Range"
+            fullWidth
             value={{ from: fromDate, to: toDate }}
             onChange={({ from, to }) => {
               onFromDateChange(from);
@@ -59,52 +65,68 @@ export const DistanceFilters = ({
             }}
           />
         </div>
-        <div className="distance-grid__filter">
-          <MultiselectDropdown
+        <div className={styles.filter}>
+          <MultiselectCheckbox
+            id="distance-admin-area"
             label="Admin Area"
-            options={adminAreaOptions}
-            selected={selectedAdminAreas}
+            showAllLabel="Admin area"
+            options={toOptions(adminAreaOptions)}
+            selectedValues={selectedAdminAreas}
             onChange={onAdminAreasChange}
-            placeholderText={isLoading ? "Loading..." : "All areas"}
+            placeholder={isLoading ? "Loading..." : "All areas"}
           />
         </div>
-        <div className="distance-grid__filter">
-          <MultiselectDropdown
-            multiSelect={false}
+        <div className={styles.filter}>
+          <MultiselectCheckbox
+            id="distance-organisations"
             label="Organisations"
-            options={orgOptions}
-            selected={selectedOrgs}
-            onChange={onOrgsChange}
-            placeholderText={isLoading ? "Loading..." : "All organisations"}
+            options={toOptions(orgOptions)}
+            selectedValues={selectedOrgs}
+            onChange={(selected) => {
+              onOrgsChange(
+                selected.length > 1
+                  ? [selected[selected.length - 1]]
+                  : selected,
+              );
+            }}
+            showAll={false}
+            placeholder={isLoading ? "Loading..." : "All organisations"}
+            allowMultiselect={false}
           />
         </div>
       </div>
-      <div className="distance-grid__filters">
-        <div className="distance-grid__filter">
-          <MultiselectDropdown
+      <div className={clsx(styles.filters, styles.filtersLast)}>
+        <div className={styles.filter}>
+          <MultiselectCheckbox
+            id="distance-operators"
             label="Operators"
-            options={operatorOptions}
-            selected={selectedOperators}
+            showAllLabel="All Operators"
+            options={toOptions(operatorOptions)}
+            selectedValues={selectedOperators}
             onChange={onOperatorsChange}
-            placeholderText={isLoading ? "Loading..." : "All operators"}
+            placeholder={isLoading ? "Loading..." : "All operators"}
           />
         </div>
-        <div className="distance-grid__filter">
-          <MultiselectDropdown
+        <div className={styles.filter}>
+          <MultiselectCheckbox
+            id="distance-licenses"
             label="Licenses"
-            options={licenseOptions}
-            selected={selectedLicenses}
+            showAllLabel="All Licenses"
+            options={toOptions(licenseOptions)}
+            selectedValues={selectedLicenses}
             onChange={onLicensesChange}
-            placeholderText={isLoading ? "Loading..." : "All licenses"}
+            placeholder={isLoading ? "Loading..." : "All licenses"}
           />
         </div>
-        <div className="distance-grid__filter">
-          <MultiselectDropdown
+        <div className={styles.filter}>
+          <MultiselectCheckbox
+            id="distance-services"
             label="Services"
-            options={serviceOptions}
-            selected={selectedServices}
+            showAllLabel="All Services"
+            options={toOptions(serviceOptions)}
+            selectedValues={selectedServices}
             onChange={onServicesChange}
-            placeholderText={isLoading ? "Loading..." : "All services"}
+            placeholder={isLoading ? "Loading..." : "All services"}
           />
         </div>
       </div>

@@ -1,3 +1,4 @@
+import styles from "./service-monitoring.module.scss";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ErrorSummary } from "@/components/form/ErrorSummary";
 import { Spinner } from "@/components/shared/Spinner";
@@ -79,7 +80,7 @@ const ServiceMonitoringPage = () => {
           <Spinner size="default" message="Loading..." vCentre />
         ) : (
           embedUrl && (
-            <div className="service-monitoring__iframe-container">
+            <div className={styles.iframeContainer}>
               <iframe
                 src={embedUrl}
                 width="100%"

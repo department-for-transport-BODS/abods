@@ -1,0 +1,103 @@
+@use "../../../styles/govuk-module" as *;
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5px, 1fr));
+  justify-content: space-between;
+  padding: govuk-spacing(1) 8px;
+  grid-gap: 3px;
+  position: relative;
+  margin-bottom: 25px;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: 1px solid govuk-functional-colour(border);
+    z-index: -1;
+  }
+}
+
+.itemWrapper {
+  display: block;
+  position: relative;
+  padding-bottom: 25px;
+}
+
+.item {
+  display: block;
+  height: 32px;
+  width: 100%;
+  background-color: govuk-colour("black", $variant: "tint-95");
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease-in-out;
+  position: relative;
+
+  &:hover {
+    z-index: 1;
+    position: relative;
+  }
+
+  &:focus:not(.itemActive) {
+    outline: none;
+    box-shadow: 0 0 0 3px govuk-functional-colour(focus);
+  }
+}
+
+.itemActive {
+  transform: scale(1.05, 1.4);
+  position: relative;
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 1.5px govuk-functional-colour(input-border),
+    0 0 0 4px govuk-functional-colour(focus);
+  z-index: 1;
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: govuk-functional-colour(focus-text);
+  color: govuk-colour("white");
+  font-size: 14px;
+  font-family: "GDS Transport", arial, sans-serif;
+  white-space: nowrap;
+  padding: 4px 8px;
+  pointer-events: none;
+  z-index: 10;
+
+  // Arrow
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: govuk-functional-colour(input-border);
+  }
+}
+
+.itemWrapper:hover .tooltip,
+.itemWrapper:focus-within .tooltip {
+  display: block;
+}
+
+.monthLabel {
+  color: govuk-functional-colour(secondary-text);
+  font-size: 13px;
+  line-height: 1.538;
+  transform: translateX(-50%);
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+}

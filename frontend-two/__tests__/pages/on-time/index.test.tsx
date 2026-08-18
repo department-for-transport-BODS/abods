@@ -65,50 +65,6 @@ vi.mock("next/router", () => ({
   }),
 }));
 
-vi.mock("kainossoftwareltd-govuk-react-kainos", () => ({
-  Select: ({
-    items,
-    onChange,
-    name,
-  }: {
-    items: any[];
-    onChange: (e: any) => void;
-    name: string;
-  }) => (
-    <select name={name} onChange={onChange} data-testid={`select-${name}`}>
-      {items.map((item) => (
-        <option key={item.value} value={item.value} selected={item.selected}>
-          {item.text}
-        </option>
-      ))}
-    </select>
-  ),
-  // TODO: This will need to change once we implement the table properly
-  Table: ({ head, rows }: any) => (
-    <table>
-      <thead>
-        <tr>
-          {head.map((h: any, i: number) => (
-            <th key={i}>{h.content}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row: any[], i: number) => (
-          <tr key={i}>
-            {row.map((cell: any, j: number) => (
-              <td key={j}>{cell?.content || cell}</td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ),
-  Button: ({ children, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
-}));
-
 // Mock data
 const mockOperatorData = [
   {
@@ -413,8 +369,11 @@ describe("OnTimeIndexPage", () => {
       fireEvent.click(screen.getByText("Refine results"));
     };
 
+    const refinePanel = () =>
+      screen.getByRole("dialog", { name: "Refine results" });
+
     const filterChips = () =>
-      document.querySelector(".filter-chips-container") as HTMLElement;
+      screen.getByRole("list", { name: "Active filters" });
 
     const applyFilters = () => {
       fireEvent.click(screen.getByRole("button", { name: "Apply" }));
@@ -428,9 +387,7 @@ describe("OnTimeIndexPage", () => {
       );
 
       openRefinePanel();
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      const panel = refinePanel();
 
       expect(
         within(panel).queryByRole("textbox", { name: "Area" }),
@@ -502,9 +459,7 @@ describe("OnTimeIndexPage", () => {
       );
 
       openRefinePanel();
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      const panel = refinePanel();
       fireEvent.change(
         within(panel).getByRole("spinbutton", { name: "Start time" }),
         { target: { value: "8" } },
@@ -538,9 +493,7 @@ describe("OnTimeIndexPage", () => {
       );
 
       openRefinePanel();
-      const panel = screen
-        .getByRole("heading", { name: "Refine results" })
-        .closest("div.refine-results-panel") as HTMLElement;
+      const panel = refinePanel();
       fireEvent.change(
         within(panel).getByRole("spinbutton", { name: "End time" }),
         { target: { value: "18" } },
@@ -647,7 +600,7 @@ describe("OnTimeIndexPage", () => {
 
       await waitFor(() => {
         expect(
-          within(filterChips()).queryByText("Day of the week:"),
+          screen.queryByRole("list", { name: "Active filters" }),
         ).not.toBeInTheDocument();
         expect(screen.getByText("First Operator")).toBeInTheDocument();
         expect(

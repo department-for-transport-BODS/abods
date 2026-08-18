@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./sortable-table.module.scss";
 import React, { ReactNode } from "react";
 import { PagingPanel } from "@/components/table/PagingPanel";
 
@@ -45,24 +47,56 @@ export interface SortableTableProps {
 const ascIcon = (
   <span
     aria-hidden="true"
-    className="sortable-table-sort-icon sortable-table-sort-icon--asc"
+    className={clsx(
+      styles.sortableTableSortIcon,
+      styles.sortableTableSortIconAsc,
+    )}
   />
 );
 const descIcon = (
   <span
     aria-hidden="true"
-    className="sortable-table-sort-icon sortable-table-sort-icon--desc"
+    className={clsx(
+      styles.sortableTableSortIcon,
+      styles.sortableTableSortIconDesc,
+    )}
   />
 );
 const unsortedIcon = (
   <span
     aria-hidden="true"
-    className="sortable-table-sort-icon sortable-table-sort-icon--none"
+    className={clsx(
+      styles.sortableTableSortIcon,
+      styles.sortableTableSortIconNone,
+    )}
   />
 );
 
+const alignmentClassNames = {
+  left: styles.alignLeft,
+  right: styles.alignRight,
+  center: styles.alignCenter,
+};
+
 const getAlignmentClassName = (alignment?: "left" | "right" | "center") =>
-  alignment ? `sortable-table__align--${alignment}` : "";
+  alignment ? alignmentClassNames[alignment] : undefined;
+
+const renderHeaderLabel = (label: ReactNode): ReactNode => {
+  if (typeof label !== "string") {
+    return label;
+  }
+
+  const words = label.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) {
+    return label;
+  }
+
+  return words.map((word, index) => (
+    <span key={`${word}-${index}`} className={styles.sortableHeaderLabelWord}>
+      {word}
+    </span>
+  ));
+};
 
 export const SortableTable = ({
   head,
@@ -98,8 +132,12 @@ export const SortableTable = ({
     <>
       {title ? <h2 className="govuk-heading-m">{title}</h2> : null}
       <table
-        className="govuk-table sortable-table"
-        style={{ tableLayout: colWidths ? "fixed" : undefined, width: "100%" }}
+        className={clsx(
+          "govuk-table",
+          styles.sortableTable,
+          colWidths && styles.fixed,
+        )}
+        style={{ width: "100%" }}
       >
         {colWidths && (
           <colgroup>
@@ -118,23 +156,42 @@ export const SortableTable = ({
             {head.map((item) => (
               <th
                 key={item.key}
-                className={`govuk-table__header ${getAlignmentClassName(item.alignment)} ${item.headerClassName ?? ""}`.trim()}
+                className={clsx(
+                  "govuk-table__header",
+                  getAlignmentClassName(item.alignment),
+                  item.headerClassName,
+                )}
+                style={
+                  colWidths?.[item.key]
+                    ? { width: colWidths[item.key] }
+                    : undefined
+                }
                 {...(item?.sortable && { "aria-sort": getAriaSort(item) })}
               >
-                {item.sortable ? (
-                  <button
-                    type="button"
-                    className={`sortable-header ${getAlignmentClassName(item.alignment)} ${item.headerClassName ?? ""}`.trim()}
-                    onClick={() => handleSort(item.key)}
-                    aria-label={`Sort by ${item.ariaLabel ?? (typeof item.label === "string" ? item.label : item.key)} ${getAriaSort(item)}`}
-                    data-testid={`sortable-header-${item.key}`}
-                  >
-                    <span className="sortable-header__label">{item.label}</span>
-                    {getSortIcon(item)}
-                  </button>
-                ) : (
-                  <span className="sortable-header__label">{item.label}</span>
-                )}
+                <div className={styles.clip}>
+                  {item.sortable ? (
+                    <button
+                      type="button"
+                      className={clsx(
+                        styles.sortableHeader,
+                        getAlignmentClassName(item.alignment),
+                        item.headerClassName,
+                      )}
+                      onClick={() => handleSort(item.key)}
+                      aria-label={`Sort by ${item.ariaLabel ?? (typeof item.label === "string" ? item.label : item.key)} ${getAriaSort(item)}`}
+                      data-testid={`sortable-header-${item.key}`}
+                    >
+                      <span className={styles.sortableHeaderLabel}>
+                        {renderHeaderLabel(item.label)}
+                      </span>
+                      {getSortIcon(item)}
+                    </button>
+                  ) : (
+                    <span className={styles.sortableHeaderLabel}>
+                      {renderHeaderLabel(item.label)}
+                    </span>
+                  )}
+                </div>
               </th>
             ))}
           </tr>
@@ -143,19 +200,29 @@ export const SortableTable = ({
           {rows.map((row) => (
             <tr
               key={row.key}
-              className={`govuk-table__row ${row.rowClassName ?? ""}`.trim()}
+              className={clsx("govuk-table__row", row.rowClassName)}
             >
               {head.map((column) => (
                 <td
                   key={column.key}
-                  className={`govuk-table__cell ${getAlignmentClassName(column.alignment)} ${column.cellClassName ?? ""} ${fontSize ? fontSize : undefined}`.trim()}
+                  className={clsx(
+                    "govuk-table__cell",
+                    getAlignmentClassName(column.alignment),
+                    column.cellClassName,
+                    fontSize,
+                  )}
+                  style={
+                    colWidths?.[column.key]
+                      ? { width: colWidths[column.key] }
+                      : undefined
+                  }
                   data-label={
                     typeof column.label === "string"
                       ? column.label
                       : column.ariaLabel ?? column.key
                   }
                 >
-                  {row[column.key]}
+                  <div className={styles.clip}>{row[column.key]}</div>
                 </td>
               ))}
             </tr>
@@ -163,7 +230,7 @@ export const SortableTable = ({
         </tbody>
       </table>
       {pagination || footerAction ? (
-        <div className="sortable-table__footer-row">
+        <div className={styles.footerRow}>
           <div>{footerAction ?? null}</div>
           <div>
             {pagination ? (

@@ -1,3 +1,5 @@
+import styles from "./on-time-helpdesk-button.module.scss";
+
 import { useState } from "react";
 import QuestionInCircleIcon from "@/assets/icons/question-in-circle.svg";
 import { OnTimeHelpdeskPanel } from "./OnTimeHelpdeskPanel";
@@ -8,7 +10,7 @@ export const OnTimeHelpdeskButton = () => {
   return (
     <>
       <button
-        className="helpdesk-link govuk-body govuk-link button-link"
+        className={`${styles.helpdeskLink} govuk-body govuk-link button-link`}
         style={{ textDecoration: "underline", textDecorationThickness: "1px" }}
         onClick={() => setIsHelpdeskOpen(true)}
         type="button"

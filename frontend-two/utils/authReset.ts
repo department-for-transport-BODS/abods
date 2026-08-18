@@ -1,5 +1,5 @@
 import { sessionStore, userStore } from "@/utils/storage";
-import { resetOtpThresholdDefaults } from "@/components/on-time/otp-threshold/otpThresholdDefaults";
+import { resetOtpThresholdDefaults } from "@/components/on-time/OtpThreshold/otpThresholdDefaults";
 import { clearCorridorHideOutliersStorage } from "@/hooks/useCorridorHideOutliers";
 
 export const clearUserScopedStorage = (): void => {

@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 
 describe("MultiselectCheckbox", () => {
   const options = [
@@ -165,5 +165,30 @@ describe("MultiselectCheckbox", () => {
     expect(screen.getByText("No items found")).toBeInTheDocument();
     const dropdown = screen.getByRole("listbox");
     expect(within(dropdown).queryAllByRole("checkbox")).toHaveLength(0);
+  });
+
+  it("omits the show-all header when showAllLabel is not provided", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MultiselectCheckbox
+        id="admin-areas"
+        label="Admin Areas"
+        options={options}
+        selectedValues={[]}
+        onChange={vi.fn()}
+        placeholder="Admin Areas"
+      />,
+    );
+
+    await user.click(screen.getByRole("textbox", { name: "Admin Areas" }));
+
+    const dropdown = screen.getByRole("listbox");
+    expect(
+      within(dropdown).queryByText("All Admin Areas"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(dropdown).queryByRole("button", { name: "Show all" }),
+    ).not.toBeInTheDocument();
   });
 });

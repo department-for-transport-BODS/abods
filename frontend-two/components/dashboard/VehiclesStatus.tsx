@@ -1,3 +1,4 @@
+import styles from "./vehicles-status.module.scss";
 import { Box } from "@/components/shared/Box";
 import { Stat } from "@/components/shared/SummaryStat/Stat";
 import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
@@ -20,7 +21,7 @@ export const VehiclesStatus = ({
   return (
     <Box className="app-vehicles-status">
       <h2 className="govuk-heading-m">Vehicle count</h2>
-      <div className="vehicles-status__stats">
+      <div className={styles.stats}>
         <Stat
           label="Current"
           value={actual}
@@ -36,7 +37,7 @@ export const VehiclesStatus = ({
           tooltip="The number of vehicles that should be running now according to the timetables provided"
         />
       </div>
-      <div className="vehicles-status__footer">
+      <div className={styles.footer}>
         <LinkWithArrow href={liveStatusHref}>Live status</LinkWithArrow>
       </div>
     </Box>

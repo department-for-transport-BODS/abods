@@ -1,5 +1,8 @@
 @charset "UTF-8";
 @use "sass:math";
+@use "../settings/rem-base" as *;
+@use "strip-unit" as *;
+
 // -----------------------------------------------------------------------------
 // REM
 // -----------------------------------------------------------------------------
@@ -20,7 +23,7 @@
 //  }
 
 @function rem($pxval) {
-  @if not unitless($pxval) {
+  @if not math.is-unitless($pxval) {
     $pxval: strip-unit($pxval);
   }
   @return math.div($pxval, $rem-base) * 1rem;

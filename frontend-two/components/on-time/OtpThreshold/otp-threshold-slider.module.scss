@@ -1,0 +1,61 @@
+@use "../../../styles/govuk-module" as *;
+.labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: govuk-spacing(1);
+}
+.label {
+  display: flex;
+  flex-direction: column-reverse;
+  @include govuk-font(19);
+}
+.scheduled {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  line-height: 1.2;
+  @include govuk-font(16);
+}
+.scheduledValue {
+  color: govuk-functional-colour(secondary-text);
+  font-feature-settings: normal;
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
+}
+.slider {
+  margin-top: govuk-spacing(1);
+  margin-bottom: govuk-spacing(2);
+}
+.fill {
+  position: absolute;
+  inset: 4px;
+}
+.early,
+.onTime,
+.late {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.early {
+  left: 0;
+  background-color: govuk-colour("magenta");
+}
+.late {
+  right: 0;
+  background-color: govuk-colour("yellow");
+}
+.onTime {
+  background-color: govuk-colour("purple");
+}
+.center {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  z-index: 1;
+  width: 2px;
+  transform: translateX(-50%);
+  background-color: govuk-colour("black");
+}

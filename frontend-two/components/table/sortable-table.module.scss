@@ -1,0 +1,145 @@
+@use "../../styles/govuk-module" as *;
+.sortableTable :global(.govuk-table__header) {
+  font-weight: $govuk-font-weight-bold;
+  min-width: 0;
+  overflow: hidden;
+}
+.fixed {
+  table-layout: fixed;
+  width: 100%;
+
+  :global(.govuk-table__cell),
+  :global(.govuk-table__header) {
+    overflow: hidden;
+    vertical-align: middle;
+    box-sizing: border-box;
+  }
+}
+.clip {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.sortableTable .sortableHeader {
+  display: flex;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding-right: govuk-spacing(4);
+  font-size: 17px;
+  font-weight: $govuk-font-weight-bold;
+  text-decoration: none;
+  cursor: pointer;
+  color: govuk-functional-colour(link);
+  text-align: left;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+.sortableTable .sortableHeaderLabel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  column-gap: 0.25em;
+  min-width: 0;
+  max-width: 100%;
+  font-weight: $govuk-font-weight-bold;
+}
+.sortableTable .sortableHeaderLabelWord {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.sortableTable .sortableHeader:hover {
+  color: govuk-functional-colour(link-hover);
+}
+.footerRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: govuk-spacing(3);
+  margin-top: govuk-spacing(3);
+  margin-bottom: govuk-spacing(3);
+}
+.footerRow > :last-child {
+  margin-left: auto;
+}
+.footerRowEmpty {
+  justify-content: flex-start;
+}
+.footerRowEmpty > :last-child {
+  margin-left: 0;
+}
+@media (max-width: 640px) {
+  .footerRow {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+  .footerRow > :last-child {
+    margin-left: 0;
+  }
+  .pagingPanel,
+  .pagingPanel > nav {
+    flex-wrap: wrap;
+  }
+  .pagingPanel {
+    justify-content: flex-start;
+  }
+}
+.alignRight {
+  justify-content: flex-end;
+  width: 100%;
+  text-align: right;
+
+  .sortableHeaderLabel {
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+.alignCenter {
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+.sortableTable .sortableHeader.alignLeft {
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+}
+.sortableTableSortIcon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: govuk-functional-colour(link);
+  line-height: 1;
+  vertical-align: middle;
+  min-height: 16px;
+}
+.sortableTableSortIconAsc::before {
+  content: "\25b2";
+  font-size: 14px;
+}
+.sortableTableSortIconDesc::before {
+  content: "\25bc";
+  font-size: 14px;
+}
+.sortableTableSortIconNone {
+  color: govuk-colour("black", $variant: "tint-80");
+  font-size: 8px;
+  &::before {
+    content: "\25b2\a\25bc";
+    white-space: pre;
+    display: block;
+    text-align: center;
+    line-height: 1;
+  }
+}

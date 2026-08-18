@@ -7,6 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import FeedHistoryPage from "@/pages/feed-monitoring/[nocCode]/feed-history";
+import dateNavStyles from "@/components/shared/DateNavigationDayBlocks/date-navigation-day-blocks.module.scss";
 import { useConfig } from "@/contexts/ConfigContext";
 import { feedMonitoringService } from "@/services/feed-monitoring/feed-monitoring.services";
 import { DateTime } from "luxon";
@@ -278,7 +279,9 @@ it("Displays the DateNavigation active date and pushes a new URL when a differen
       screen.getByText(yesterday.toFormat("d MMMM yyyy")),
     ).toBeInTheDocument(),
   );
-  expect(container.querySelector(".datenav__item--active")).toBeInTheDocument();
+  expect(
+    container.querySelector(`.${dateNavStyles.itemActive}`),
+  ).toBeInTheDocument();
 
   const lastMonthButton = screen.getByRole("button", {
     name: lastMonth.toFormat("d MMMM"),

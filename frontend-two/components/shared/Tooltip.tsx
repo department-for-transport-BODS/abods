@@ -1,6 +1,8 @@
 import { type ReactNode, type RefObject, useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import tippy from "tippy.js";
+import styles from "./tooltip.module.scss";
+import { clsx } from "clsx";
 
 interface TooltipProps {
   message?: ReactNode;
@@ -19,6 +21,11 @@ const getTooltipContent = (message: ReactNode) => {
 
   return renderToStaticMarkup(<>{message}</>);
 };
+
+// Bulleted list for use inside a Tooltip `message`
+export const TooltipList = ({ children }: { children: ReactNode }) => (
+  <ul className={styles.list}>{children}</ul>
+);
 
 export const Tooltip = ({
   message,
@@ -43,6 +50,19 @@ export const Tooltip = ({
       zIndex: 100,
       placement: "top",
       trigger: "mouseenter focus click",
+      appendTo: () => document.body,
+      popperOptions: {
+        modifiers: [
+          {
+            name: "preventOverflow",
+            options: {
+              padding: 8,
+              altAxis: true,
+              boundary: "viewport",
+            },
+          },
+        ],
+      },
     });
 
     return () => {
@@ -50,8 +70,13 @@ export const Tooltip = ({
     };
   }, [message]);
 
-  const classNames =
-    `tooltip ${as === "button" ? "unbuttoned " : ""}${underline ? "tooltip--underline " : ""}${selectable ? "tooltip--selectable " : ""}${className ?? ""}`.trim();
+  const classNames = clsx(
+    styles.tooltip,
+    as === "button" && "unbuttoned",
+    underline && styles.underline,
+    selectable && styles.selectable,
+    className,
+  );
 
   if (as === "span") {
     return (

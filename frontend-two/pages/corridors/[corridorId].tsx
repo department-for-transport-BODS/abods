@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./corridor-id.module.scss";
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -16,6 +18,7 @@ import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnaly
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
 import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
+import { LoadingDots } from "@/components/shared/LoadingDots";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 import { SegmentedToggle } from "@/components/shared/SegmentedToggle";
 import { ErrorInfo } from "@/types";
@@ -29,17 +32,6 @@ const NOT_FOUND_MESSAGE =
 
 type AnalysisMode = "time" | "speed";
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
-
-const LoadingDots = () => (
-  <span role="status" aria-live="polite">
-    <span className="govuk-visually-hidden">Loading...</span>
-    <span className="ranking-table__loading-dots" aria-hidden="true">
-      <span className="ranking-table__loading-dot" />
-      <span className="ranking-table__loading-dot" />
-      <span className="ranking-table__loading-dot" />
-    </span>
-  </span>
-);
 
 const PRESET_DATE_RANGES: Record<
   string,
@@ -236,16 +228,16 @@ const CorridorsViewPage = () => {
             </div>
           </div>
 
-          <div className="corridor__date-wrapper govuk-!-margin-bottom-5">
-            <div className="corridor__date-range-picker">
-              <div className="stop-analysis-filters__date-range">
+          <div className={clsx(styles.dateWrapper, "govuk-!-margin-bottom-5")}>
+            <div className={styles.dateRangePicker}>
+              <div className={styles.dateRange}>
                 <DateRangeSelect
                   value={{ from: fromDate.toISO()!, to: toDate.toISO()! }}
                   onChange={({ from, to }) => handleDateRangeChange(from, to)}
                   hideLabel
                 />
                 <select
-                  className="govuk-select stop-analysis-filters__preset-select"
+                  className={clsx("govuk-select", styles.presetSelect)}
                   value={preset}
                   onChange={(e) => handlePresetChange(e.target.value)}
                   aria-label="Preset date range"
@@ -297,11 +289,11 @@ const CorridorsViewPage = () => {
             />
           ) : null}
 
-          <div className="corridor__summary govuk-!-margin-bottom-7">
+          <div className={clsx(styles.summary, "govuk-!-margin-bottom-7")}>
             <Stat
               id="corridor-total-transits"
               label="Recorded transits"
-              className="corridor__summary-stat"
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -315,7 +307,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-missing-transits"
               label="Missing transits"
-              className="corridor__summary-stat"
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -335,7 +327,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-average-journey-time"
               label="Average journey time"
-              className="corridor__summary-stat"
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -349,7 +341,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-average-speed"
               label="Average speed"
-              className="corridor__summary-stat"
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -366,7 +358,7 @@ const CorridorsViewPage = () => {
             <Stat
               id="corridor-services"
               label="Services"
-              className="corridor__summary-stat"
+              className={styles.summaryStat}
               loading={isStatsLoading}
               value={
                 isStatsLoading ? (
@@ -379,7 +371,9 @@ const CorridorsViewPage = () => {
             />
           </div>
 
-          <div className="corridor__analysis-selector govuk-!-margin-bottom-4">
+          <div
+            className={clsx(styles.analysisSelector, "govuk-!-margin-bottom-4")}
+          >
             <h2 className="govuk-heading-m govuk-!-margin-top-0 govuk-!-margin-bottom-0">
               Analysis
             </h2>

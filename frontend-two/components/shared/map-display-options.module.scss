@@ -1,0 +1,58 @@
+@use "../../styles/govuk-module" as *;
+
+.root {
+  position: absolute;
+  top: govuk-spacing(2);
+  left: govuk-spacing(2);
+  display: inline-grid;
+  grid-template-columns: max-content;
+  width: fit-content;
+  z-index: 1;
+}
+
+.summary {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid govuk-colour("black");
+  background: govuk-colour("white");
+  padding: govuk-spacing(1) govuk-spacing(5) govuk-spacing(1) govuk-spacing(2);
+  cursor: pointer;
+  @include govuk-font(16);
+  position: relative;
+  text-align: left;
+  &::after {
+    content: "▼";
+    position: absolute;
+    right: govuk-spacing(2);
+    top: 50%;
+    transform: translateY(-50%);
+    @include govuk-font(16);
+  }
+}
+
+.summaryOpen {
+  border-bottom: 0;
+}
+
+.panel {
+  position: relative;
+  margin-top: -1px;
+  width: 100%;
+  display: grid;
+  gap: govuk-spacing(2);
+  background: govuk-colour("white");
+  border: 1px solid govuk-colour("black");
+  border-top: 0;
+  padding: govuk-spacing(3);
+  box-sizing: border-box;
+  visibility: hidden;
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.panelOpen {
+  visibility: visible;
+  max-height: none;
+  pointer-events: auto;
+}

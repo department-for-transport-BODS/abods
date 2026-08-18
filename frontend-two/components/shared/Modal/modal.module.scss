@@ -1,0 +1,84 @@
+@use "../../../styles/govuk-module" as *;
+
+:global(body.modal-open) {
+  overflow: hidden;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  width: 640px;
+  max-width: 95%;
+  margin-top: 40px;
+  margin-left: 5px;
+  margin-right: 5px;
+  max-height: calc(100vh - 40px);
+  overflow: hidden;
+  background: govuk-colour("white");
+  border: 0;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 8px 20px rgba(0, 0, 0, 0.08);
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: govuk-spacing(3);
+  background-color: govuk-colour("blue");
+  padding: 10px 15px;
+}
+
+.logo {
+  color: govuk-colour("white");
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.logoIcon {
+  display: block;
+}
+
+.body {
+  overflow-y: auto;
+  padding: 15px 15px 45px;
+}
+
+.close {
+  border: 0;
+  background: none;
+  padding: 0;
+  flex-shrink: 0;
+  color: govuk-colour("white");
+
+  &:focus {
+    background: govuk-functional-colour(focus);
+
+    .closeIcon {
+      color: govuk-colour("black");
+    }
+  }
+}
+
+.closeIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  color: govuk-colour("white");
+}

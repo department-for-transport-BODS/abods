@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./performance-widget.module.scss";
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { LinkWithArrow } from "@/components/shared/LinkWithArrow";
@@ -132,23 +134,23 @@ export const PerformanceWidget = ({
   return (
     <div className="performance app-performance">
       {!loaded ? (
-        <div className="performance__no-data performance__no-data--loading">
+        <div className={clsx(styles.noData, styles.noDataLoading)}>
           <Spinner size="default" message="Loading..." />
         </div>
       ) : !stats && !errored ? (
-        <div className="performance__no-data">
+        <div className={styles.noData}>
           <span className="govuk-body">
             No punctuality data for the selected time period
           </span>
         </div>
       ) : !stats && errored ? (
-        <div className="performance__no-data">
+        <div className={styles.noData}>
           <span className="govuk-body">
             There was an error fetching the punctuality data
           </span>
         </div>
       ) : (
-        <div className="performance__chart">
+        <div className={styles.chart}>
           <PerformanceChart
             data={stats ?? { onTime: 0, early: 0, late: 0 }}
             chartId="performance-chart"
@@ -169,7 +171,7 @@ export const PerformanceWidget = ({
         periodLabel={periodLabelMap[period]}
       />
 
-      <div className="performance__footer">
+      <div className={styles.footer}>
         <select
           value={period}
           className="govuk-select"
@@ -184,7 +186,7 @@ export const PerformanceWidget = ({
             </option>
           ))}
         </select>
-        <div className="performance__link">
+        <div className={styles.link}>
           <LinkWithArrow href={nocCode ? `/on-time/${nocCode}` : "/on-time"}>
             On-time performance
           </LinkWithArrow>

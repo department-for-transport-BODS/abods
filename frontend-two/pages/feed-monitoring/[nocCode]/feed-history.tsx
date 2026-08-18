@@ -11,11 +11,14 @@ import {
   OperatorHistoricStatsQuery,
 } from "../../../src/generated/graphql";
 import { Box } from "@/components/shared/Box";
+import { Spinner } from "@/components/shared/Spinner";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 import { OperatorDropdown } from "@/components/feed-monitoring/OperatorDropdown";
-import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks";
+import { DateNavigationDayBlocks } from "@/components/shared/DateNavigationDayBlocks/DateNavigationDayBlocks";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useRequireAuth } from "@/hooks/useAuth";
+import ExclamationInCircleIcon from "@/assets/icons/exclamation-in-circle.svg";
+import styles from "@/components/feed-monitoring/feed-history.module.scss";
 
 const HistoricVehicleStats = dynamic(
   () => import("@/components/feed-monitoring/HistoricVehicleStats"),
@@ -42,6 +45,21 @@ function formatAvailability(f?: number | null): string {
 
 function formatUpdateFrequency(f?: number | null): string {
   return f ? `${f}s` : "-";
+}
+
+function FeedHistoryEmptyState({ message }: { message: string }) {
+  return (
+    <Box minHeight="385px" className={styles.emptyStateBox}>
+      <div className={styles.emptyState}>
+        <ExclamationInCircleIcon
+          className={styles.emptyStateIcon}
+          aria-hidden="true"
+          focusable="false"
+        />
+        <p className="govuk-body">{message}</p>
+      </div>
+    </Box>
+  );
 }
 
 const FeedHistoryPage = () => {
@@ -194,13 +212,10 @@ const FeedHistoryPage = () => {
               </div>
             </div>
           )}
-          <span className="govuk-caption-xl">NOC feed monitoring</span>
-          <h1
-            className="app-page-header font-bold"
-            style={{ fontSize: "48px" }}
-          >
-            Feed history
-          </h1>
+          <header className="govuk-!-margin-bottom-2">
+            <span className="govuk-caption-xl">NOC feed monitoring</span>
+            <h1 className="govuk-heading-xl app-page-header">Feed history</h1>
+          </header>
           <div className="flex items-baseline gap-4">
             <span
               className="govuk-body"
@@ -261,20 +276,14 @@ const FeedHistoryPage = () => {
         <div className="mt-4">
           {historicalDataLoading && (
             <Box minHeight="385px">
-              <p className="govuk-body">Loading...</p>
+              <Spinner size="default" message="Loading..." vCentre />
             </Box>
           )}
           {!historicalDataLoading && chartErrored && (
-            <Box minHeight="385px">
-              <p className="govuk-body">
-                There was an error loading the chart data, please try again.
-              </p>
-            </Box>
+            <FeedHistoryEmptyState message="There was an error loading the chart data, please try again." />
           )}
           {!historicalDataLoading && noData && (
-            <Box minHeight="385px">
-              <p className="govuk-body">No data found for the date selected.</p>
-            </Box>
+            <FeedHistoryEmptyState message="No data found for the date selected." />
           )}
           {!historicalDataLoading &&
             !chartErrored &&

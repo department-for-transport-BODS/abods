@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import styles from "./on-time-boundaries-map.module.scss";
 import mapboxgl from "mapbox-gl";
 import bbox from "@turf/bbox";
 import bboxClip from "@turf/bbox-clip";
@@ -303,7 +304,7 @@ export const OnTimeBoundariesMap = ({
       />
       {!mapLoaded && (
         <div
-          className="stop-analysis-map__loading-overlay"
+          className={styles.loadingOverlay}
           role="status"
           aria-live="polite"
           aria-label="Loading boundaries map"

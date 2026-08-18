@@ -1,0 +1,78 @@
+@use "../../../styles/govuk-module" as *;
+
+.filterRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: end;
+  column-gap: govuk-spacing(2);
+  row-gap: govuk-spacing(1);
+  margin-bottom: govuk-spacing(4);
+}
+
+.datePicker {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(2);
+  min-width: 0;
+
+  :global(.govuk-form-group) {
+    margin-bottom: 0;
+  }
+
+  :global(.govuk-label) {
+    @include govuk-visually-hidden;
+  }
+
+  :global(.govuk-select) {
+    height: 40px;
+  }
+}
+
+.refineResultsButtonContainer {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 40px;
+
+  :global(button) {
+    margin-bottom: 0;
+  }
+}
+
+.toggleContainer {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: govuk-spacing(1);
+  min-width: 0;
+}
+
+@media (max-width: 47.99em) {
+  .filterRow {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .datePicker {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .toggleContainer {
+    width: 100%;
+    overflow: hidden;
+  }
+}
+
+.filterChipsContainer {
+  width: 100%;
+}

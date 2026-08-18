@@ -1,0 +1,37 @@
+@use "../../../styles/govuk-module" as *;
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(1);
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  @include govuk-font(19);
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: govuk-functional-colour(link);
+  margin-bottom: govuk-spacing(4);
+  text-decoration: underline;
+
+  &:global(.button-link),
+  &:global(.govuk-link) {
+    text-decoration: underline;
+
+    &:hover,
+    &:hover:not(:focus) {
+      text-decoration: underline;
+    }
+  }
+
+  :global(.govuk-link--no-visited-state) {
+    text-decoration: underline;
+  }
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  color: govuk-functional-colour(link);
+}

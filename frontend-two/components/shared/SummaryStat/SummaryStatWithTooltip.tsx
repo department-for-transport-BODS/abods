@@ -1,4 +1,7 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
+import { Tooltip } from "@/components/shared/Tooltip";
+import { clsx } from "clsx";
+import styles from "./summary-stat-with-tooltip.module.scss";
 
 interface SummaryStatWithTooltipProps {
   title: string;
@@ -11,40 +14,19 @@ export const SummaryStatWithTooltip = ({
   value,
   tooltip,
 }: SummaryStatWithTooltipProps) => {
-  const [visible, setVisible] = useState(false);
   const displayValue = value === "-" ? "Unavailable" : value;
 
   return (
-    <div
-      className="bg-white flex flex-col"
-      style={{ borderTop: "2px solid #cecece" }}
-    >
-      <span className="govuk-body mt-4" style={{ color: "#484949" }}>
-        {title}
-      </span>
+    <div className={styles.stat}>
+      <span className={clsx("govuk-body", styles.title)}>{title}</span>
       {tooltip ? (
-        <div className="font-bold govuk-!-font-size-36">
-          <div
-            className="summary-stat"
-            style={{ position: "relative", display: "inline-block" }}
-            onMouseEnter={() => setVisible(true)}
-            onMouseLeave={() => setVisible(false)}
-          >
-            <span
-              style={{ borderBottom: "4px dotted #000000", cursor: "help" }}
-            >
-              {displayValue}
-            </span>
-            {visible && (
-              <div className="govuk-body tooltip">
-                {tooltip}
-                <span className="triangle" />
-              </div>
-            )}
-          </div>
+        <div className={styles.figure}>
+          <Tooltip message={tooltip}>
+            <span className={styles.value}>{displayValue}</span>
+          </Tooltip>
         </div>
       ) : (
-        <div className="font-bold govuk-!-font-size-36">{displayValue}</div>
+        <div className={styles.figure}>{displayValue}</div>
       )}
     </div>
   );

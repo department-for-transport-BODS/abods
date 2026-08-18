@@ -1,0 +1,20 @@
+@use "../../../styles/govuk-module" as *;
+.otpThresholdModalButton {
+  text-align: right;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-left: 0;
+  @include govuk-font(19);
+  text-decoration: underline;
+
+  &:global(.govuk-link),
+  &:global(.button-link) {
+    color: govuk-functional-colour(link);
+    text-decoration: underline;
+
+    &:hover:not(:focus) {
+      color: govuk-functional-colour(link-hover);
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./stop-analysis-filters.module.scss";
 import { useMemo, useState } from "react";
 import { DateTime } from "luxon";
 import { Period } from "@/utils/date-range";
@@ -5,7 +7,7 @@ import { StopTypeOption } from "@/types/stop-analysis";
 import { DateRangeSelect } from "@/components/shared/DateRangeSelect/DateRangeSelect";
 import { LocationLookupField } from "@/components/shared/LocationLookupField";
 import { MatchTypeToggle, StopTypeToggle } from "./Toggles";
-import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import {
   AdminAreasType,
   LineType,
@@ -161,18 +163,19 @@ export const StopAnalysisFilters = ({
   };
 
   return (
-    <div className="stop-analysis-filters">
-      <div className="filters stop-analysis-filters__grid govuk-!-margin-bottom-2">
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--date">
+    <div className={styles.stopAnalysisFilters}>
+      <div className={clsx(styles.grid, "govuk-!-margin-bottom-2")}>
+        <div className={clsx(styles.item, styles.itemDate)}>
           <label className="govuk-label">Date Range</label>
-          <div className="stop-analysis-filters__date-range">
+          <div className={styles.dateRange}>
             <DateRangeSelect
               value={{ from: fromTimestamp, to: toTimestamp }}
               onChange={({ from, to }) => onDateRangeChange(from, to)}
               hideLabel
+              fullWidth
             />
             <select
-              className="govuk-select stop-analysis-filters__preset-select"
+              className={clsx("govuk-select", styles.presetSelect)}
               value={activePreset}
               onChange={(event) =>
                 handlePresetChange(event.target.value as Period)
@@ -191,24 +194,24 @@ export const StopAnalysisFilters = ({
           </div>
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--admin">
+        <div className={clsx(styles.item, styles.itemAdmin)}>
           <MultiselectCheckbox
-            id="sa-admin-areas"
+            id="stop-analysis-admin-areas"
             label="Admin Areas"
+            showAllLabel="All Areas"
             options={adminAreaOptions}
             selectedValues={adminAreaIds}
             onChange={onAdminAreasChange}
-            showAllLabel="All Areas"
             placeholder="Admin Areas"
           />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--toggles stop-analysis-filters__toggles">
+        <div className={clsx(styles.item, styles.itemToggles, styles.toggles)}>
           <MatchTypeToggle matchType={matchType} onChange={onMatchTypeChange} />
           <StopTypeToggle stopType={stopType} onChange={onStopTypeChange} />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--location">
+        <div className={clsx(styles.item, styles.itemLocation)}>
           <LocationLookupField
             id="sa-location-search"
             label="Location name or postcode"
@@ -225,26 +228,26 @@ export const StopAnalysisFilters = ({
           />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--operators">
+        <div className={clsx(styles.item, styles.itemOperators)}>
           <MultiselectCheckbox
-            id="sa-operators"
+            id="stop-analysis-operators"
             label="Operators"
+            showAllLabel="All Operators"
             options={operatorOptions}
             selectedValues={operatorIds}
             onChange={onOperatorsChange}
-            showAllLabel="All Operators"
             placeholder="Operators"
           />
         </div>
 
-        <div className="stop-analysis-filters__item stop-analysis-filters__item--services">
+        <div className={clsx(styles.item, styles.itemServices)}>
           <MultiselectCheckbox
-            id="sa-services"
+            id="stop-analysis-services"
             label="Services"
+            showAllLabel="All Services"
             options={lineOptions}
             selectedValues={lineIds}
             onChange={onLinesChange}
-            showAllLabel="All Services"
             placeholder="Services"
             disabled={operatorIds.length === 0}
           />

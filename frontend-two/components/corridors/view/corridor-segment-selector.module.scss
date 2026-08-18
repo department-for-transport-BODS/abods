@@ -1,0 +1,112 @@
+@use "../../../styles/govuk-module" as *;
+$segment-stop-size: 30px;
+$segment-stop-surround: 3px;
+$segment-min-width: 75px;
+$segment-half-height: calc(($segment-stop-size - 2px) / 2);
+.segmentSelectorWrapper {
+  overflow: hidden;
+}
+.segmentSelector {
+  position: relative;
+  flex-grow: 1;
+}
+.stopsWrapper {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $segment-stop-size;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 10;
+  align-items: center;
+}
+.stop {
+  background-color: govuk-colour("white");
+  border-radius: 50%;
+  width: $segment-stop-size;
+  height: $segment-stop-size;
+  border: 5px solid govuk-functional-colour(border);
+  flex-shrink: 0;
+  &:hover {
+    border-color: govuk-colour("black");
+  }
+}
+.segment {
+  background-color: govuk-colour("black", $variant: "tint-95");
+  width: 100%;
+  min-width: $segment-min-width;
+  height: $segment-half-height;
+  cursor: pointer;
+  &:hover {
+    background-color: govuk-colour("blue", $variant: "tint-25");
+  }
+  &:focus-visible {
+    background-color: govuk-colour("blue", $variant: "tint-25");
+    outline: 3px solid govuk-functional-colour(focus);
+  }
+}
+.segmentActive,
+.segment:active {
+  background-color: govuk-colour("blue");
+}
+.segmentAll {
+  display: block;
+  margin: 0 ($segment-stop-size + $segment-stop-surround) 2px;
+  width: calc(100% - #{(2 * ($segment-stop-size + $segment-stop-surround))});
+}
+.segmentInvalidServiceLink {
+  background: repeating-linear-gradient(
+    to right,
+    govuk-colour("black", $variant: "tint-95"),
+    govuk-colour("black", $variant: "tint-95") 10px,
+    govuk-colour("white") 4px,
+    govuk-colour("white") 14px
+  );
+  &:hover {
+    background: repeating-linear-gradient(
+      to right,
+      govuk-colour("blue", $variant: "tint-25"),
+      govuk-colour("blue", $variant: "tint-25") 10px,
+      govuk-colour("white") 4px,
+      govuk-colour("white") 14px
+    );
+  }
+}
+.segmentInvalidServiceLink:active,
+.segmentInvalidServiceLinkActive {
+  background: repeating-linear-gradient(
+    to right,
+    govuk-colour("blue"),
+    govuk-colour("blue") 10px,
+    govuk-colour("white") 4px,
+    govuk-colour("white") 14px
+  );
+}
+.segmentsWrapper {
+  display: flex;
+  padding: 0 ($segment-stop-size + $segment-stop-surround);
+}
+.segmentsWrapper > button + button {
+  margin-left: ($segment-stop-size + $segment-stop-surround * 2);
+}
+.distancesWrapper {
+  display: flex;
+  padding: govuk-spacing(1) ($segment-stop-size + $segment-stop-surround) 0;
+}
+.distance {
+  width: 100%;
+  text-align: center;
+  @include govuk-font(16);
+  color: govuk-functional-colour(secondary-text);
+}
+.distance ~ .distance {
+  margin-left: ($segment-stop-size + $segment-stop-surround * 2);
+}
+.segmentSelectorHint {
+  margin-top: govuk-spacing(3);
+}
+.segmentSelectorHintText {
+  color: govuk-colour("black", $variant: "tint-25");
+}

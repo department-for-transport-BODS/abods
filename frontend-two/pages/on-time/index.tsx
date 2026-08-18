@@ -1,19 +1,22 @@
+import styles from "./on-time.module.scss";
+import helpdeskStyles from "../../components/on-time/OnTimeHelpdesk/on-time-helpdesk-panel.module.scss";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
-import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper";
+import { ChartNoDataWrapper } from "@/components/on-time/ChartNoDataWrapper/ChartNoDataWrapper";
 import {
   OnTimeFilterPanel,
   DATE_PRESET_OPTIONS,
   MATCH_TYPE_OPTIONS,
   STOP_TYPE_OPTIONS,
   calculateDateRange,
-} from "@/components/on-time/OnTimeFilterPanel";
+} from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import { operatorsService } from "@/services/operator.service";
 import { OnTimeBoundariesMap } from "@/components/on-time/OnTimeBoundariesMap";
-import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable";
-import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid";
-import { MultiselectDropdown } from "@/components/shared/MultiselectDropdown";
+import { OnTimeOperatorTable } from "@/components/on-time/OnTimeOperatorTable/OnTimeOperatorTable";
+import { SummaryStatsGrid } from "@/components/on-time/SummaryStatsGrid/SummaryStatsGrid";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
 import {
   refineResultsToPerformanceFilters,
   performanceFiltersToRefineResults,
@@ -37,7 +40,7 @@ import {
 import { buildDefaultParams } from "@/services/on-time/params";
 import { SearchInput } from "@/components/shared/SearchInput";
 import { distanceService } from "@/services/distances/distance.services";
-import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
+import { OtpThresholdModalLink } from "@/components/on-time/OtpThreshold/OtpThresholdModalLink";
 
 type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 type AdminArea = NonNullable<GetAdminAreasQuery["adminAreas"]>[number];
@@ -308,18 +311,23 @@ const OnTimeIndexPage = () => {
         onRefineResultsFilterChange={setRefineResultsFilters}
       />
 
-      <div className="summary-container">
-        <div className="summary-header-container">
+      <div className={styles.container}>
+        <div className={styles.header}>
           <h2 className="govuk-heading-l">Summary</h2>
 
-          <div className="summary-admin-area-select-container">
-            <MultiselectDropdown
+          <div className={styles.adminAreaSelect}>
+            <MultiselectCheckbox
+              id="on-time-summary-area"
               label={"Area"}
-              hideLabel={true}
-              options={adminAreaOptions}
-              selected={selectedAdminAreas}
+              showAllLabel="Area"
+              labelClassName="govuk-visually-hidden"
+              options={adminAreaOptions.map((area) => ({
+                label: area,
+                value: area,
+              }))}
+              selectedValues={selectedAdminAreas}
               onChange={handleAdminAreaChange}
-              placeholderText={isLoadingAdminAreas ? "Loading..." : "All areas"}
+              placeholder={isLoadingAdminAreas ? "Loading..." : "All areas"}
             />
           </div>
         </div>
@@ -333,13 +341,13 @@ const OnTimeIndexPage = () => {
             timingPointsNotSupported={wrapperTimingPointsNotSupported}
             minMaxDelayNotSupported={wrapperMinMaxDelayNotSupported}
           >
-            <div className="summary-content-wrapper">
-              <div className="summary-stat-container">
+            <div className={styles.content}>
+              <div className={styles.summaryStat}>
                 <p className="govuk-body-l">
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
 
-                <div className="helpdesk-container">
+                <div className={helpdeskStyles.container}>
                   <OnTimeHelpdeskButton />
                   <OtpThresholdModalLink
                     params={operatorTableParams}
@@ -348,6 +356,7 @@ const OnTimeIndexPage = () => {
                 </div>
 
                 <SummaryStatsGrid
+                  compact
                   onTimeCount={summaryStats?.onTime ?? null}
                   lateCount={summaryStats?.late ?? null}
                   earlyCount={summaryStats?.early ?? null}
@@ -363,7 +372,7 @@ const OnTimeIndexPage = () => {
                 />
               </div>
 
-              <div className="summary-map-container">
+              <div className={styles.summaryMap}>
                 {config?.mapboxToken && config?.mapboxStyle ? (
                   <OnTimeBoundariesMap
                     mapboxToken={config.mapboxToken}
@@ -380,7 +389,7 @@ const OnTimeIndexPage = () => {
         )}
       </div>
 
-      <div className="operator-container">
+      <div className={styles.operator}>
         <h2 className="govuk-heading-m">Operators</h2>
 
         {isLoading ? (

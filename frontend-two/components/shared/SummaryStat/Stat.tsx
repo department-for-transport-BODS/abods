@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
+import styles from "./stat.module.scss";
 import { Tooltip } from "@/components/shared/Tooltip";
+import { clsx } from "clsx";
 
 interface StatProps {
   label: string;
@@ -18,16 +20,14 @@ export const Stat = ({
   className,
   loading = false,
 }: StatProps) => (
-  <div className={`stat ${className ?? ""}`.trim()} id={id}>
-    <span className="stat__label">{label}</span>
+  <div className={clsx(styles.stat, className)} id={id}>
+    <span className={styles.label}>{label}</span>
     {tooltip && !loading ? (
       <Tooltip message={tooltip}>
-        <span className="stat__value stat__value--tooltip">{value}</span>
+        <span className={clsx(styles.value, styles.valueTooltip)}>{value}</span>
       </Tooltip>
     ) : (
-      <span
-        className={`stat__value ${loading ? "stat__value--loading" : ""}`.trim()}
-      >
+      <span className={clsx(styles.value, loading && styles.valueLoading)}>
         {value}
       </span>
     )}

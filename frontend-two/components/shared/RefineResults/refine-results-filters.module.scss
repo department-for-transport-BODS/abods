@@ -1,0 +1,85 @@
+@use "../../../styles/govuk-module" as *;
+
+.container {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.scrollbox {
+  overflow-y: auto;
+  height: calc(100vh - 180px);
+  visibility: hidden;
+
+  &::-webkit-scrollbar {
+    width: 20px;
+    background-color: govuk-colour("white");
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border: 6px solid transparent;
+    border-radius: 999em;
+    background-color: govuk-colour("black", $variant: "tint-80");
+    background-clip: padding-box;
+  }
+
+  &:hover,
+  &:focus {
+    visibility: visible;
+  }
+}
+
+.scrollboxContent {
+  visibility: visible;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+
+  > :global(.govuk-fieldset),
+  > :global(.govuk-form-group) {
+    margin-bottom: govuk-spacing(6);
+  }
+}
+
+.delaySelects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: govuk-spacing(6);
+  width: 100%;
+
+  :global(.govuk-select),
+  .selectWidth {
+    width: 100%;
+    min-width: 9.375rem;
+  }
+}
+
+.actions {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  margin-top: govuk-spacing(2);
+
+  > *:first-child {
+    margin-right: govuk-spacing(2);
+  }
+
+  :global(.govuk-button) {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+.reset {
+  margin-bottom: govuk-spacing(4);
+  margin-left: -(govuk-spacing(1));
+  @include govuk-font(19);
+}
+
+.selectWidth {
+  width: 100%;
+  min-width: 9.375rem;
+}

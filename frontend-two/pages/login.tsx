@@ -133,7 +133,7 @@ const LoginPage = () => {
               <TextInput<LoginSchema>
                 display="Email"
                 inputName="username"
-                widthClass="govuk-input--width-20"
+                width={20}
                 value={formData.username}
                 initialErrors={errors}
                 stateUpdater={updateField}
@@ -145,7 +145,7 @@ const LoginPage = () => {
               <PasswordInput<LoginSchema>
                 display="Password"
                 inputName="password"
-                widthClass="password-input__width--20"
+                width={20}
                 value={formData.password}
                 initialErrors={errors}
                 stateUpdater={updateField}

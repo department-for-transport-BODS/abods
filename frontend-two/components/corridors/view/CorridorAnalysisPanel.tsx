@@ -1,3 +1,6 @@
+import { clsx } from "clsx";
+import styles from "./corridor-analysis-panel.module.scss";
+import tabStyles from "@/components/shared/analysis-tabs.module.scss";
 import dynamic from "next/dynamic";
 import {
   BoxPlotChartDataItem,
@@ -102,12 +105,15 @@ export const CorridorAnalysisPanel = ({
 
   return (
     <div className="govuk-!-margin-bottom-6">
-      <div className="analysis-tabs govuk-!-margin-bottom-4">
+      <div className={clsx(tabStyles.analysisTabs, "govuk-!-margin-bottom-4")}>
         {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
-            className={`analysis-tabs__tab${tab === item.id ? " analysis-tabs__tab--active" : ""}`}
+            className={clsx(
+              tabStyles.tab,
+              tab === item.id && tabStyles.tabActive,
+            )}
             onClick={() => onChangeTab(item.id)}
           >
             {item.label}
@@ -116,7 +122,7 @@ export const CorridorAnalysisPanel = ({
       </div>
 
       {tab === "timeline" ? (
-        <div className="corridor__chart-wrapper">
+        <div className={styles.chartWrapper}>
           <CorridorBoxPlotChart
             data={stats.transitTimeStats}
             xAxisType="date"
@@ -127,7 +133,13 @@ export const CorridorAnalysisPanel = ({
             whiskerColor={JOURNEY_TIME_WHISKER}
             boxColor={JOURNEY_TIME_BOX}
           />
-          <div className="govuk-checkboxes govuk-checkboxes--small corridor__hide-outliers">
+          <div
+            className={clsx(
+              "govuk-checkboxes",
+              "govuk-checkboxes--small",
+              styles.hideOutliers,
+            )}
+          >
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"
@@ -150,7 +162,7 @@ export const CorridorAnalysisPanel = ({
       ) : null}
 
       {tab === "timeOfDay" ? (
-        <div className="corridor__chart-wrapper">
+        <div className={styles.chartWrapper}>
           <CorridorBoxPlotChart
             data={stats.transitTimeTimeOfDayStats}
             xAxisType="category"
@@ -161,7 +173,13 @@ export const CorridorAnalysisPanel = ({
             whiskerColor={JOURNEY_TIME_WHISKER}
             boxColor={JOURNEY_TIME_BOX}
           />
-          <div className="govuk-checkboxes govuk-checkboxes--small corridor__hide-outliers">
+          <div
+            className={clsx(
+              "govuk-checkboxes",
+              "govuk-checkboxes--small",
+              styles.hideOutliers,
+            )}
+          >
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"
@@ -184,7 +202,7 @@ export const CorridorAnalysisPanel = ({
       ) : null}
 
       {tab === "dayOfWeek" ? (
-        <div className="corridor__chart-wrapper">
+        <div className={styles.chartWrapper}>
           <CorridorBoxPlotChart
             data={stats.transitTimeDayOfWeekStats}
             xAxisType="category"
@@ -195,7 +213,13 @@ export const CorridorAnalysisPanel = ({
             whiskerColor={JOURNEY_TIME_WHISKER}
             boxColor={JOURNEY_TIME_BOX}
           />
-          <div className="govuk-checkboxes govuk-checkboxes--small corridor__hide-outliers">
+          <div
+            className={clsx(
+              "govuk-checkboxes",
+              "govuk-checkboxes--small",
+              styles.hideOutliers,
+            )}
+          >
             <div className="govuk-checkboxes__item">
               <input
                 className="govuk-checkboxes__input"

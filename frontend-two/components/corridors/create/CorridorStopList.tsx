@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./corridor-stop-list.module.scss";
 import { CorridorStop } from "@/types/corridors";
 
 interface Props {
@@ -16,7 +18,7 @@ export const CorridorStopList = ({
   if (!corridorStops.length) return null;
 
   return (
-    <div className="corridor-stop-list">
+    <div className={styles.corridorStopList}>
       {corridorStops.map((stop, index) => {
         const isLast = index === corridorStops.length - 1;
         const canRemove = isLast && !loading && (isEdit ? index > 0 : true);
@@ -24,15 +26,15 @@ export const CorridorStopList = ({
         return (
           <div
             key={`${stop.stopId}-${index}`}
-            className={`corridor-stop-list__stop corridor-stop-list__stop--added${
-              isLast ? "" : " corridor-stop-list__stop--connected"
-            }`}
+            className={clsx(
+              styles.stop,
+              styles.stopAdded,
+              !isLast && styles.stopConnected,
+            )}
           >
-            <div className="corridor-stop-list__stop-details">
-              <div className="corridor-stop-list__stop-label">
-                {stop.stopName}
-              </div>
-              <div className="corridor-stop-list__naptan">{stop.naptan}</div>
+            <div className={styles.stopDetails}>
+              <div className={styles.stopLabel}>{stop.stopName}</div>
+              <div className={styles.naptan}>{stop.naptan}</div>
             </div>
             {canRemove ? (
               <button

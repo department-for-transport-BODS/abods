@@ -20,4 +20,12 @@ describe("Spinner", () => {
     expect(getByRole("alert")).toHaveClass("spinner", "spinner--default");
     expect(getByRole("alert")).toHaveTextContent("Loading...");
   });
+
+  it("centres the spinner when vCentre is set", () => {
+    const { getByRole } = render(
+      <Spinner size="default" message="Loading..." vCentre />,
+    );
+
+    expect(getByRole("alert")).toHaveClass("spinner--vcentre");
+  });
 });

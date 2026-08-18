@@ -1,0 +1,84 @@
+@use "../../styles/govuk-module" as *;
+.dateWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: govuk-spacing(3);
+}
+.dateRangePicker {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(2);
+}
+.dateRangeInputWrapper {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid govuk-colour("black");
+  background: govuk-colour("white");
+  height: 40px;
+  padding: 0 govuk-spacing(1) 0 govuk-spacing(2);
+  gap: govuk-spacing(1);
+}
+.dateRangeText {
+  @include govuk-font(19);
+  white-space: nowrap;
+}
+.dateRangeCalendarBtn {
+  display: inline-flex;
+  align-items: center;
+  color: govuk-colour("black");
+  cursor: pointer;
+  padding: govuk-spacing(1);
+  &:focus-visible {
+    outline: 3px solid govuk-functional-colour(focus);
+    outline-offset: 0;
+  }
+}
+.dateRangePanel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: govuk-colour("white");
+  border: 2px solid govuk-colour("black");
+  padding: govuk-spacing(3);
+  display: flex;
+  gap: govuk-spacing(3);
+}
+.summary {
+  display: flex;
+  margin-left: -(govuk-spacing(3));
+  margin-right: -(govuk-spacing(3));
+}
+.summaryStat {
+  border-top: 1px solid govuk-functional-colour(border);
+  padding-top: govuk-spacing(3);
+  flex: 1;
+  margin-left: govuk-spacing(3);
+  margin-right: govuk-spacing(3);
+}
+.analysisSelector {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: govuk-spacing(4);
+  :global(.govuk-form-group) {
+    margin-bottom: govuk-spacing(2);
+  }
+}
+.dateRange {
+  display: flex;
+  gap: govuk-spacing(2);
+  align-items: center;
+
+  > *:first-child {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+.presetSelect {
+  flex-shrink: 0;
+}

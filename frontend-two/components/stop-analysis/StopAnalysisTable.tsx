@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./stop-analysis-table.module.scss";
 import { useMemo, useState, type ReactNode } from "react";
 import { Direction, StopPerformanceRow } from "@/types/stop-analysis";
 import {
@@ -9,8 +11,8 @@ import {
   useStopPerformanceTable,
   type DisplayMode,
 } from "@/hooks/useStopPerformanceTable";
-import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox";
-import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal";
+import { MultiselectCheckbox } from "@/components/shared/MultiselectCheckbox/MultiselectCheckbox";
+import { DisplayOptionsModal } from "@/components/shared/DisplayOptionsModal/DisplayOptionsModal";
 import { Tooltip } from "@/components/shared/Tooltip";
 import {
   SortedPaginatedTable,
@@ -74,7 +76,7 @@ const TABLE_COLUMN_OPTIONS: TableColumnDefinition[] = [
   { key: "stopId", label: "NAPTAN", alwaysVisible: true },
   {
     key: "timingPoint",
-    label: <TimingIcon className="stop-analysis-table__timing-icon" />,
+    label: <TimingIcon className={styles.timingIcon} />,
     modalLabel: "Timing Point",
   },
   { key: "stopName", label: "Name" },
@@ -120,6 +122,21 @@ const COLUMN_LABELS: Record<string, ReactNode> = {
   early: "Early",
 };
 const ALWAYS_VISIBLE_KEYS = ["stopId"];
+
+const STOP_ANALYSIS_COLUMN_WIDTHS = {
+  stopId: "8rem",
+  timingPoint: "2rem",
+  stopName: "12rem",
+  direction: "5.5rem",
+  scheduledDepartures: "5rem",
+  actualDepartures: "6rem",
+  averageScheduled: "5rem",
+  averageActual: "5rem",
+  averageDelay: "5rem",
+  onTime: "4.5rem",
+  early: "4.5rem",
+  late: "4.5rem",
+};
 
 interface StopAnalysisTableProps {
   data: StopPerformanceRow[];
@@ -252,7 +269,7 @@ export const StopAnalysisTable = ({
       totals
         ? {
             key: "__totals__",
-            rowClassName: "stop-analysis-table__summary-row",
+            rowClassName: styles.summaryRow,
             stopId: "-",
             timingPoint: "",
             stopName: "-",
@@ -291,18 +308,22 @@ export const StopAnalysisTable = ({
   }
 
   return (
-    <div className="stop-analysis-table govuk-!-margin-top-6">
-      <div className="stop-analysis-table__display-toolbar">
-        <div className="stop-analysis-table__display-actions">
+    <div className={clsx(styles.stopAnalysisTable, "govuk-!-margin-top-6")}>
+      <div className={styles.displayToolbar}>
+        <div className={styles.displayActions}>
           <button
             type="button"
-            className="govuk-link button-link stop-analysis-table__display-options-link"
+            className={clsx(
+              "govuk-link",
+              "button-link",
+              styles.displayOptionsLink,
+            )}
             onClick={openDisplayOptions}
           >
             Display options
           </button>
           <fieldset
-            className="govuk-fieldset stop-analysis-table__display-mode"
+            className={clsx("govuk-fieldset", styles.displayMode)}
             aria-label="Show stop performance values as"
           >
             <legend className="govuk-visually-hidden">
@@ -341,31 +362,27 @@ export const StopAnalysisTable = ({
         onClose={() => setShowDisplayOptions(false)}
         onApply={handleDisplayOptionsApply}
       />
-      <div className="stop-analysis-table__controls">
-        <div className="stop-analysis-table__direction-filters">
+      <div className={styles.controls}>
+        <div className={styles.directionFilters}>
           <MultiselectCheckbox
-            id="sa-directions"
+            id="stop-analysis-directions"
             label="Directions"
+            showAllLabel="All Directions"
             options={directionOptions}
             selectedValues={directions}
             onChange={(values) => onDirectionsChange(values as Direction[])}
             onShowAll={() =>
               onDirectionsChange(
-                directionOptions.map((o) => o.value) as Direction[],
+                directionOptions.map((option) => option.value) as Direction[],
               )
             }
-            showAllLabel="All Directions"
             placeholder="Directions"
           />
         </div>
       </div>
 
-      <div className="stop-analysis-table__grid">
-        <div
-          className={
-            showTotals ? "stop-analysis-table__table--with-totals" : undefined
-          }
-        >
+      <div className={styles.grid}>
+        <div className={showTotals ? styles.tableWithTotals : undefined}>
           <SortedPaginatedTable
             key={`${displayMode}-${visibleColumns.join(",")}`}
             columns={tableColumns}
@@ -377,14 +394,14 @@ export const StopAnalysisTable = ({
               key: `${row.stopId}-${row.direction}`,
               stopId: row.stopId,
               timingPoint: row.timingPoint ? (
-                <TimingIcon className="stop-analysis-table__timing-icon" />
+                <TimingIcon className={styles.timingIcon} />
               ) : (
                 ""
               ),
               stopName: (
                 <Tooltip
                   message={`${row.localityName}, ${row.adminAreaName}`}
-                  className="stop-analysis-table__stop-link"
+                  className={styles.stopLink}
                   onClick={() => onStopNameClick(row)}
                 >
                   {row.stopName}
@@ -414,20 +431,7 @@ export const StopAnalysisTable = ({
             })}
             pinnedRows={totalsRow ? [totalsRow] : undefined}
             onSortChange={handleSortChange}
-            colWidths={{
-              stopId: "8rem",
-              timingPoint: "2rem",
-              stopName: "12rem",
-              direction: "5.5rem",
-              scheduledDepartures: "5rem",
-              actualDepartures: "6rem",
-              averageScheduled: "5rem",
-              averageActual: "5rem",
-              averageDelay: "5rem",
-              onTime: "4.5rem",
-              early: "4.5rem",
-              late: "4.5rem",
-            }}
+            colWidths={STOP_ANALYSIS_COLUMN_WIDTHS}
             initialSortKey={sortState.key}
             initialSortOrder={sortState.order}
             emptyMessage="No stop data found"

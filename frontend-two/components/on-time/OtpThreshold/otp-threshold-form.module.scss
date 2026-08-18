@@ -1,0 +1,12 @@
+@use "../../../styles/govuk-module" as *;
+.inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
+  column-gap: govuk-spacing(6);
+}
+.control {
+  min-width: 0;
+}
+.control :global(.govuk-hint) {
+  white-space: normal;
+}

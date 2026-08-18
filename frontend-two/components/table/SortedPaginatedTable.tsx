@@ -1,3 +1,5 @@
+import { clsx } from "clsx";
+import styles from "./sortable-table.module.scss";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
@@ -165,7 +167,7 @@ export const SortedPaginatedTable = <T,>({
         </div>
       )}
       {showEmptyMessage && footerAction ? (
-        <div className="sortable-table__footer-row sortable-table__footer-row--empty">
+        <div className={clsx(styles.footerRow, styles.footerRowEmpty)}>
           <div>{footerAction}</div>
         </div>
       ) : null}

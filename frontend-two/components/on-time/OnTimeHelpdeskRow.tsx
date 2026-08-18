@@ -1,5 +1,7 @@
+import styles from "./OnTimeHelpdesk/on-time-helpdesk-panel.module.scss";
+
 import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
-import { OtpThresholdModalLink } from "@/components/on-time/otp-threshold/OtpThresholdModalLink";
+import { OtpThresholdModalLink } from "@/components/on-time/OtpThreshold/OtpThresholdModalLink";
 import type {
   PerformanceParams,
   PunctualityOverview,
@@ -14,7 +16,7 @@ export const OnTimeHelpdeskRow = ({
   params,
   overview,
 }: OnTimeHelpdeskRowProps) => (
-  <div className="helpdesk-container">
+  <div className={styles.container}>
     <OnTimeHelpdeskButton />
     <OtpThresholdModalLink params={params} overview={overview} />
   </div>
