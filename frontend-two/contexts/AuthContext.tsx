@@ -14,7 +14,7 @@ import { clearUserScopedStorage } from "@/utils/authReset";
 import { apolloClient } from "@/services/apolloClient";
 import { useConfig } from "@/contexts/ConfigContext";
 
-const IDLE_TIMEOUT = 1000 * 60 * 2; // TESTING: 2 minutes, revert to 1000 * 60 * 60 * 12 (12 hours)
+const IDLE_TIMEOUT = 1000 * 60 * 60 * 12; // 12 hours
 
 interface AuthContextValue {
   user: LoginInfo | null;
