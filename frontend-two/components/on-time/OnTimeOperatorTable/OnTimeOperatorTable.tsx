@@ -74,7 +74,6 @@ const OPERATOR_TABLE_COLUMN_WIDTHS = {
   lateRatio: "10%",
   earlyRatio: "10%",
   sparkline: "28%",
-
 };
 
 function getSparklineKey(row: OperatorPerformance): string | null {
