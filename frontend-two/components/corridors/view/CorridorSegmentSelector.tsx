@@ -92,13 +92,9 @@ export const CorridorSegmentSelector = ({
                   styles.segment,
                   isInvalidServiceLink(seg.from.naptan, seg.to.naptan)
                     ? clsx(
-                        styles[
-                          "segment-selector__segment__invalid-service-link"
-                        ],
+                        styles.segmentInvalidServiceLink,
                         selectedSegmentIndex === seg.index &&
-                          styles[
-                            "segment-selector__segment__invalid-service-link--active"
-                          ],
+                          styles.segmentInvalidServiceLinkActive,
                       )
                     : selectedSegmentIndex === seg.index &&
                         styles.segmentActive,

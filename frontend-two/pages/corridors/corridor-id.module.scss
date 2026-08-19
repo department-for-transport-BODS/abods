@@ -59,6 +59,11 @@
   flex: 1;
   margin-left: govuk-spacing(3);
   margin-right: govuk-spacing(3);
+
+  > button {
+    display: block;
+    text-align: left;
+  }
 }
 .analysisSelector {
   display: flex;
