@@ -28,9 +28,14 @@ const formatDelay = (delay: number | null): string => {
   );
 };
 
+const percentFormatter = new Intl.NumberFormat("en-GB", {
+  style: "percent",
+  maximumFractionDigits: 2,
+});
+
 const formatPercentage = (value: number | null, total: number): string => {
   if (value == null || total <= 0) return "-";
-  return `${((value / total) * 100).toFixed(2)}%`;
+  return percentFormatter.format(value / total);
 };
 
 const formatIncompletePercentage = (
@@ -45,7 +50,7 @@ const formatIncompletePercentage = (
     return "-";
   }
 
-  return `${((value / totalStopDepartures) * 100).toFixed(2)}%`;
+  return percentFormatter.format(value / totalStopDepartures);
 };
 
 const formatCount = (value: number | null): string => {

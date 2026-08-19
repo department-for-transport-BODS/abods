@@ -10,12 +10,15 @@
   margin-bottom: govuk-spacing(4);
 }
 
+// Mirrors the Angular `.date-range` grid; width is left intrinsic, as it is there.
 .datePicker {
   grid-column: 1;
   grid-row: 2;
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
   align-items: center;
-  gap: govuk-spacing(2);
+  gap: govuk-spacing(1);
+  max-width: 100%;
   min-width: 0;
 
   :global(.govuk-form-group) {
@@ -26,8 +29,11 @@
     @include govuk-visually-hidden;
   }
 
+  // Undo the global `min-width: fit-content` override so govuk-frontend's own
+  // 11.5em applies; it is what sizes the fr tracks here.
   :global(.govuk-select) {
     height: 40px;
+    min-width: 11.5em;
   }
 }
 
@@ -64,7 +70,7 @@
 
   .datePicker {
     width: 100%;
-    flex-wrap: wrap;
+    grid-template-columns: 1fr;
   }
 
   .toggleContainer {

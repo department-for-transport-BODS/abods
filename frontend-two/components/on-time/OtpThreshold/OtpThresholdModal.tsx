@@ -29,8 +29,13 @@ const ratio = (
   return value / completed;
 };
 
+const percentFormatter = new Intl.NumberFormat("en-GB", {
+  style: "percent",
+  maximumFractionDigits: 2,
+});
+
 const formatRatio = (value: number | null, fallback: string): string =>
-  value == null ? fallback : `${(value * 100).toFixed(2)}%`;
+  value == null ? fallback : percentFormatter.format(value);
 
 interface ComparisonRow {
   key: string;

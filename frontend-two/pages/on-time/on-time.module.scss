@@ -29,11 +29,11 @@
   }
 }
 
+// Angular declares 350px here and lets the flex header shrink it.
 .adminAreaSelect {
-  flex: 1 1 auto;
-  width: auto;
+  width: 350px;
   min-width: 0;
-  max-width: 350px;
+  max-width: 100%;
 }
 
 .content {
