@@ -227,18 +227,35 @@ const STOP_NUMERIC_COLUMN_KEYS = new Set<StopsTableColumnKey>([
 ]);
 
 const STOP_TABLE_COLUMN_WIDTHS = {
-  stopId: "12%",
-  timingPoint: "4%",
-  stopName: "21%",
-  direction: "7%",
-  scheduledDepartures: "7%",
-  actualDepartures: "7%",
-  averageScheduled: "7%",
-  averageActual: "7%",
-  averageDelay: "7%",
-  onTimeRatio: "7%",
-  lateRatio: "7%",
-  earlyRatio: "7%",
+  stopId: "150px",
+  timingPoint: "50px",
+  stopName: "200px",
+  direction: "90px",
+  scheduledDepartures: "110px",
+  actualDepartures: "100px",
+  averageScheduled: "110px",
+  averageActual: "110px",
+  averageDelay: "90px",
+  onTimeRatio: "90px",
+  lateRatio: "90px",
+  earlyRatio: "80px",
+};
+
+// The first eleven columns fit within the laptop table viewport; Early is the
+// final overflow column, matching the Angular stop-grid proportions.
+const STOP_TABLE_COLUMN_MIN_WIDTHS = {
+  stopId: 150,
+  timingPoint: 50,
+  stopName: 200,
+  direction: 90,
+  scheduledDepartures: 110,
+  actualDepartures: 100,
+  averageScheduled: 110,
+  averageActual: 110,
+  averageDelay: 90,
+  onTimeRatio: 90,
+  lateRatio: 90,
+  earlyRatio: 80,
 };
 
 export const STOPS_TABLE_COLUMN_KEYS = STOPS_TABLE_COLUMN_OPTIONS.map(
@@ -496,6 +513,7 @@ export const OnTimeStopsTable = ({
         onDisplayedDataChange={setDisplayedRows}
         enablePagination={false}
         colWidths={STOP_TABLE_COLUMN_WIDTHS}
+        colMinWidths={STOP_TABLE_COLUMN_MIN_WIDTHS}
         footerAction={
           <CsvExportButton
             filename={csvFilename}

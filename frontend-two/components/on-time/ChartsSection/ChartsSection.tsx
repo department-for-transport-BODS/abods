@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 import { ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
 import { Box } from "@/components/shared/Box";
+import { Spinner } from "@/components/shared/Spinner";
 import { ChartNoDataMessage } from "@/components/on-time/ChartNoDataWrapper/ChartNoDataWrapper";
 import {
   DayOfWeekData,
@@ -46,6 +47,7 @@ const ExcessWaitTimeChart = dynamic(
 type ChartTab = "map" | "timeline" | "distribution" | "timeOfDay" | "dayOfWeek";
 
 interface ChartsSectionProps {
+  isLoading?: boolean;
   mapContent?: ReactNode;
   delayFrequency: DelayFrequencyType[];
   timeOfDay: TimeOfDayData[];
@@ -70,6 +72,7 @@ interface ChartsSectionProps {
 }
 
 export const ChartsSection = ({
+  isLoading = false,
   mapContent,
   delayFrequency,
   timeOfDay,
@@ -238,6 +241,11 @@ export const ChartsSection = ({
   return (
     <div className="govuk-!-margin-bottom-8">
       <Box minHeight="440px">
+        {isLoading && (
+          <div className={styles.loadingOverlay} role="status">
+            <Spinner size="default" message="Loading..." />
+          </div>
+        )}
         <div
           className={clsx(
             tabStyles.analysisTabs,

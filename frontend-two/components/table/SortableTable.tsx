@@ -5,6 +5,10 @@ import { PagingPanel } from "@/components/table/PagingPanel";
 
 export type SortOrder = "asc" | "desc" | "none";
 
+// Mirrors ag-grid's `defaultColDef.minWidth` in the Angular grids, which is what
+// makes them scroll horizontally rather than squash.
+const MIN_COLUMN_WIDTH = 100;
+
 export interface SortableTableHeadCell {
   key: string;
   label: ReactNode;
@@ -40,6 +44,7 @@ export interface SortableTableProps {
   pagination?: SortableTablePagination;
   paginationAlignment?: "left" | "right";
   colWidths?: Partial<Record<string, string>>;
+  colMinWidths?: Partial<Record<string, number>>;
   footerAction?: ReactNode;
   fontSize?: string;
 }
@@ -106,6 +111,7 @@ export const SortableTable = ({
   pagination,
   paginationAlignment = "right",
   colWidths,
+  colMinWidths,
   footerAction,
   fontSize,
 }: SortableTableProps): React.JSX.Element => {
@@ -137,7 +143,16 @@ export const SortableTable = ({
           styles.sortableTable,
           colWidths && styles.fixed,
         )}
-        style={{ width: "100%" }}
+        style={{
+          width: "100%",
+          ...(colWidths && {
+            minWidth: head.reduce(
+              (total, col) =>
+                total + (colMinWidths?.[col.key] ?? MIN_COLUMN_WIDTH),
+              0,
+            ),
+          }),
+        }}
       >
         {colWidths && (
           <colgroup>

@@ -57,10 +57,13 @@ vi.mock("@/services/distances/distance.services", () => ({
   },
 }));
 
+let mockQuery: Record<string, string | string[] | undefined> = {};
+
 vi.mock("next/router", () => ({
   useRouter: () => ({
     pathname: "/on-time",
     asPath: "/on-time",
+    query: mockQuery,
     replace: vi.fn(),
   }),
 }));
@@ -94,6 +97,7 @@ const mockFetchAdminOrg = vi.mocked(distanceService.fetchAdminOrg);
 describe("OnTimeIndexPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockQuery = {};
     mockUseConfig.mockReturnValue({
       config: { apiUrl: "http://test-api" },
       isLoading: false,
@@ -184,6 +188,22 @@ describe("OnTimeIndexPage", () => {
   });
 
   describe("Date selection", () => {
+    it("restores a date range from the query parameters", async () => {
+      mockQuery = { from: "2026-06-01", to: "2026-06-14" };
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+
+      render(<OnTimeIndexPage />);
+
+      await waitFor(() => {
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            fromTimestamp: expect.stringContaining("2026-06-01"),
+            toTimestamp: expect.stringContaining("2026-06-15"),
+          }),
+        );
+      });
+    });
+
     it("defaults to 'Last 7 days' and shows correct date range", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
@@ -226,6 +246,45 @@ describe("OnTimeIndexPage", () => {
           ][0];
         expect(lastCall.fromTimestamp).toContain(from.toFormat("yyyy-MM-dd"));
         expect(lastCall.toTimestamp).toContain(today.toFormat("yyyy-MM-dd"));
+      });
+    });
+
+    it("uses the selected preset in an operator link", async () => {
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+      render(<OnTimeIndexPage />);
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
+
+      fireEvent.change(screen.getByDisplayValue("Last 7 days"), {
+        target: { value: "Last 28 days" },
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("link", { name: "First Operator" }),
+        ).toHaveAttribute("href", "/on-time/ABCD?preset=last28&direction=all");
+      });
+    });
+
+    it("uses lastMonth when Last month is selected", async () => {
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+      render(<OnTimeIndexPage />);
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
+
+      fireEvent.change(screen.getByDisplayValue("Last 7 days"), {
+        target: { value: "Last month" },
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("link", { name: "First Operator" }),
+        ).toHaveAttribute(
+          "href",
+          "/on-time/ABCD?preset=lastMonth&direction=all",
+        );
       });
     });
 

@@ -1,6 +1,7 @@
 import styles from "./on-time-services-table.module.scss";
 
 import Link from "next/link";
+import { DateTime } from "luxon";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { CsvExportButton } from "@/components/shared/CsvExportButton";
 import { SortedPaginatedTable } from "@/components/table/SortedPaginatedTable";
@@ -8,6 +9,7 @@ import type { SortableTableRow } from "@/components/table/SortableTable";
 import { Tooltip } from "@/components/shared/Tooltip";
 import { FrequentServicePerformance } from "@/services/on-time/performance.service";
 import { FrequentIcon } from "../../icons/FrequentIcon/FrequentIcon";
+import { getDatePresetQueryParam } from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import {
   buildCsvRows,
   buildMetricCsvColumns,
@@ -182,14 +184,29 @@ const SERVICE_NUMERIC_COLUMN_KEYS = new Set<ServiceTableColumnKey>([
 ]);
 
 const SERVICE_TABLE_COLUMN_WIDTHS = {
-  frequent: "4%",
-  direction: "10%",
-  scheduledDepartures: "12%",
-  recordedDepartures: "10%",
-  averageDelay: "8%",
-  onTime: "8%",
-  late: "8%",
-  early: "8%",
+  frequent: "60px",
+  service: "250px",
+  direction: "130px",
+  scheduledDepartures: "160px",
+  recordedDepartures: "130px",
+  averageDelay: "130px",
+  onTime: "130px",
+  late: "130px",
+  early: "130px",
+};
+
+// The widths ag-grid resolves for the Angular service grid: an explicit width, a
+// flex column's minWidth, or its maxWidth capping ag-grid's 200px default.
+const SERVICE_TABLE_COLUMN_MIN_WIDTHS = {
+  frequent: 60,
+  service: 250,
+  direction: 130,
+  scheduledDepartures: 160,
+  recordedDepartures: 130,
+  averageDelay: 130,
+  onTime: 130,
+  late: 130,
+  early: 130,
 };
 
 export const SERVICE_TABLE_COLUMN_KEYS = ALL_COLUMNS.map(
@@ -267,11 +284,41 @@ function getRowValue(
   }
 }
 
-function createRenderRow(nocCode: string, displayMode: OnTimeDisplayMode) {
+function createRenderRow(
+  nocCode: string,
+  displayMode: OnTimeDisplayMode,
+  dateRange: { from: string; to: string },
+  selectedDatePreset: string,
+  selectedDirections: string[],
+) {
   return (row: FrequentServicePerformance): SortableTableRow => {
     const completedRatio =
       row.completedRatio ??
       getRatio(row.actualDepartures, row.scheduledDepartures);
+    const queryString = new URLSearchParams();
+    const preset = getDatePresetQueryParam(selectedDatePreset);
+    if (preset && preset !== "last7") {
+      queryString.set("preset", preset);
+    } else if (!preset) {
+      queryString.set(
+        "from",
+        DateTime.fromISO(dateRange.from).toFormat("yyyy-MM-dd"),
+      );
+      queryString.set(
+        "to",
+        DateTime.fromISO(dateRange.to)
+          .minus({ days: 1 })
+          .toFormat("yyyy-MM-dd"),
+      );
+    }
+
+    if (selectedDirections.length === 0) {
+      queryString.append("direction", "all");
+    } else {
+      selectedDirections.forEach((direction) =>
+        queryString.append("direction", direction),
+      );
+    }
 
     return {
       key: `${row.lineInfo?.serviceId}-${row.direction}`,
@@ -285,7 +332,7 @@ function createRenderRow(nocCode: string, displayMode: OnTimeDisplayMode) {
       ),
       service: (
         <Link
-          href={`/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(row.lineId ?? "")}`}
+          href={`/on-time/${encodeURIComponent(nocCode)}/${encodeURIComponent(row.lineId ?? "")}?${queryString.toString()}`}
           style={{ textDecoration: "none" }}
           className="govuk-link"
         >
@@ -309,6 +356,9 @@ function createRenderRow(nocCode: string, displayMode: OnTimeDisplayMode) {
 interface OnTimeServicesTableProps {
   data: FrequentServicePerformance[];
   nocCode: string;
+  dateRange: { from: string; to: string };
+  selectedDatePreset: string;
+  selectedDirections?: string[];
   displayMode: OnTimeDisplayMode;
   csvFilename: string;
   visibleColumns?: string[];
@@ -317,6 +367,9 @@ interface OnTimeServicesTableProps {
 export const OnTimeServicesTable = ({
   data,
   nocCode,
+  dateRange,
+  selectedDatePreset,
+  selectedDirections = [],
   displayMode,
   csvFilename,
   visibleColumns,
@@ -372,8 +425,15 @@ export const OnTimeServicesTable = ({
   }, [data, displayMode]);
 
   const renderRow = useMemo(
-    () => createRenderRow(nocCode, displayMode),
-    [nocCode, displayMode],
+    () =>
+      createRenderRow(
+        nocCode,
+        displayMode,
+        dateRange,
+        selectedDatePreset,
+        selectedDirections,
+      ),
+    [nocCode, displayMode, dateRange, selectedDatePreset, selectedDirections],
   );
   const getValue = useCallback(
     (row: FrequentServicePerformance, column: string) =>
@@ -406,6 +466,7 @@ export const OnTimeServicesTable = ({
         emptyMessage="No service data found"
         onDisplayedDataChange={setDisplayedRows}
         colWidths={SERVICE_TABLE_COLUMN_WIDTHS}
+        colMinWidths={SERVICE_TABLE_COLUMN_MIN_WIDTHS}
         footerAction={
           <CsvExportButton
             filename={csvFilename}

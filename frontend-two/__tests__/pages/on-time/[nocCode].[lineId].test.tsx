@@ -194,6 +194,55 @@ describe("OnTimeServicePage", () => {
     expect(backLink.parentElement).toHaveClass("page__back-link");
   });
 
+  it("uses the date range from the service link", async () => {
+    mockQuery = {
+      nocCode: "ABCD",
+      lineId: "LINE1",
+      from: "2026-06-01",
+      to: "2026-06-14",
+    };
+
+    render(<OnTimeServicePage />);
+
+    await waitFor(() => {
+      expect(mockFetchStopPerformance).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromTimestamp: expect.stringContaining("2026-06-01"),
+          toTimestamp: expect.stringContaining("2026-06-15"),
+        }),
+      );
+    });
+  });
+
+  it("restores the direction from the service link", async () => {
+    mockQuery = {
+      nocCode: "ABCD",
+      lineId: "LINE1",
+      direction: "Inbound",
+    };
+    mockFetchStopPerformance.mockResolvedValue([
+      {
+        stopId: "INBOUND",
+        direction: "inbound",
+        scheduledDepartures: 1,
+        actualDepartures: 1,
+      },
+      {
+        stopId: "OUTBOUND",
+        direction: "outbound",
+        scheduledDepartures: 1,
+        actualDepartures: 1,
+      },
+    ] as any);
+
+    render(<OnTimeServicePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("INBOUND")).toBeInTheDocument();
+      expect(screen.queryByText("OUTBOUND")).not.toBeInTheDocument();
+    });
+  });
+
   it("redirects to operator-not-found when nocCode is inaccessible", async () => {
     mockFetchOperator.mockResolvedValue(null);
 

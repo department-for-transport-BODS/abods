@@ -2,6 +2,7 @@ import styles from "./on-time-noccode.module.scss";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import { BaseLayout } from "@/components/layout/BaseLayout";
 import { ChartsSection } from "@/components/on-time/ChartsSection";
@@ -18,6 +19,8 @@ import {
   MATCH_TYPE_OPTIONS,
   STOP_TYPE_OPTIONS,
   calculateDateRange,
+  getDatePresetFromQuery,
+  getDatePresetQueryParam,
 } from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import {
   type OnTimeDisplayMode,
@@ -112,6 +115,26 @@ interface OperatorOnTimeData {
   toTimestamp: string;
   granularity: Granularity;
 }
+
+const getDateRangeFromQuery = (
+  from: string | string[] | undefined,
+  to: string | string[] | undefined,
+) => {
+  if (typeof from !== "string" || typeof to !== "string") {
+    return null;
+  }
+
+  const fromDate = DateTime.fromFormat(from, "yyyy-MM-dd");
+  const toDate = DateTime.fromFormat(to, "yyyy-MM-dd");
+  const fromTimestamp = fromDate.toISO();
+  const toTimestamp = toDate.plus({ days: 1 }).toISO();
+
+  if (!fromDate.isValid || !toDate.isValid || !fromTimestamp || !toTimestamp) {
+    return null;
+  }
+
+  return { from: fromTimestamp, to: toTimestamp };
+};
 
 const OnTimeOperatorPage = () => {
   useRequireAuth();
@@ -214,6 +237,25 @@ const OnTimeOperatorPage = () => {
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
 
+  const queryDateRange = useMemo(
+    () => getDateRangeFromQuery(router.query.from, router.query.to),
+    [router.query.from, router.query.to],
+  );
+  const queryDatePreset =
+    typeof router.query.preset === "string"
+      ? getDatePresetFromQuery(router.query.preset)
+      : undefined;
+
+  useEffect(() => {
+    if (queryDateRange) {
+      setDateRange(queryDateRange);
+      setSelectedDatePreset("Custom");
+    } else if (queryDatePreset) {
+      setDateRange(calculateDateRange(queryDatePreset));
+      setSelectedDatePreset(queryDatePreset);
+    }
+  }, [queryDatePreset, queryDateRange]);
+
   const servicePerformanceParams = useMemo<PerformanceParams | null>(() => {
     if (!nocCode) return null;
 
@@ -271,6 +313,43 @@ const OnTimeOperatorPage = () => {
     setSelectedDatePreset(selected);
     const range = calculateDateRange(selected);
     setDateRange(range);
+    const query = { ...router.query };
+    delete query.from;
+    delete query.to;
+    const preset = getDatePresetQueryParam(selected);
+    if (preset === "last7") {
+      delete query.preset;
+    } else {
+      query.preset = preset;
+    }
+    void router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
+  };
+
+  const handleDateRangeChange = (value: { from: string; to: string } | undefined) => {
+    setDateRange(value ?? null);
+    if (!value) {
+      return;
+    }
+
+    setSelectedDatePreset("Custom");
+    const query = { ...router.query };
+    delete query.preset;
+    void router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          ...query,
+          from: DateTime.fromISO(value.from).toFormat("yyyy-MM-dd"),
+          to: DateTime.fromISO(value.to)
+            .minus({ days: 1 })
+            .toFormat("yyyy-MM-dd"),
+        },
+      },
+      undefined,
+      { shallow: true },
+    );
   };
 
   const handleOperatorChange = (operatorId: string | null) => {
@@ -300,6 +379,19 @@ const OnTimeOperatorPage = () => {
       return;
     const load = async () => {
       setIsLoading(true);
+      const fromDate = DateTime.fromISO(servicePerformanceParams.fromTimestamp);
+      const toDate = DateTime.fromISO(servicePerformanceParams.toTimestamp);
+      const granularity =
+        Math.abs(toDate.diff(fromDate, "days").days) <= 5
+          ? Granularity.Hour
+          : Granularity.Day;
+      const timeSeriesParams = {
+        ...servicePerformanceParams,
+        filters: {
+          ...servicePerformanceParams.filters,
+          granularity,
+        },
+      };
       const operator = await operatorsService.fetchOperator(nocCode);
       if (!operator) {
         replace("/on-time/operator-not-found");
@@ -322,7 +414,7 @@ const OnTimeOperatorPage = () => {
           onTimeService.fetchOnTimeDelayFrequencyData(servicePerformanceParams),
         ),
         settle(
-          onTimeService.fetchOnTimeTimeSeriesData(servicePerformanceParams),
+          onTimeService.fetchOnTimeTimeSeriesData(timeSeriesParams),
         ),
         settle(
           onTimeService.fetchOnTimePunctualityTimeOfDayData(
@@ -354,7 +446,7 @@ const OnTimeOperatorPage = () => {
         headwayTimeSeries: headwayTimeSeries.data ?? [],
         fromTimestamp: servicePerformanceParams.fromTimestamp,
         toTimestamp: servicePerformanceParams.toTimestamp,
-        granularity: Granularity.Day,
+        granularity,
       });
       setErrors({
         overview: overview.error,
@@ -379,6 +471,7 @@ const OnTimeOperatorPage = () => {
     selectedStopType,
     isReady,
     replace,
+    queryDateRange,
   ]);
 
   const summaryStats = data.overview?.onTime;
@@ -561,12 +654,7 @@ const OnTimeOperatorPage = () => {
             }}
             onResetRefineResults={() => setRefineResultsFilters({})}
             dateRange={dateRange}
-            onDateRangeChange={(value) => {
-              setDateRange(value ?? null);
-              if (value) {
-                setSelectedDatePreset("Custom");
-              }
-            }}
+            onDateRangeChange={handleDateRangeChange}
             datePresetOptions={DATE_PRESET_OPTIONS}
             selectedDatePreset={selectedDatePreset}
             onDatePresetChange={handleDatePresetChange}
@@ -587,6 +675,7 @@ const OnTimeOperatorPage = () => {
             />
           )}
           <ChartsSection
+            isLoading={isLoading}
             noData={wrapperNoData}
             dataExpected={wrapperDataExpected}
             timingPointsNotSupported={wrapperTimingPointsNotSupported}
@@ -652,6 +741,9 @@ const OnTimeOperatorPage = () => {
                 <OnTimeServicesTable
                   data={filteredServices}
                   nocCode={nocCode ?? ""}
+                  dateRange={dateRange ?? calculateDateRange("Last 7 days")!}
+                  selectedDatePreset={selectedDatePreset}
+                  selectedDirections={selectedDirections}
                   displayMode={selectedDisplayMode}
                   csvFilename={formatServicePerformanceCsvFilename({
                     nocCode: nocCode ?? "",

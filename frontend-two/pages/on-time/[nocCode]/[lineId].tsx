@@ -24,6 +24,8 @@ import {
   MATCH_TYPE_OPTIONS,
   STOP_TYPE_OPTIONS,
   calculateDateRange,
+  getDatePresetFromQuery,
+  getDatePresetQueryParam,
 } from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import {
   refineResultsToPerformanceFilters,
@@ -108,6 +110,26 @@ interface ServiceLevelData {
   dayOfWeek: DayOfWeekData[];
 }
 
+const getDateRangeFromQuery = (
+  from: string | string[] | undefined,
+  to: string | string[] | undefined,
+) => {
+  if (typeof from !== "string" || typeof to !== "string") {
+    return null;
+  }
+
+  const fromDate = DateTime.fromFormat(from, "yyyy-MM-dd");
+  const toDate = DateTime.fromFormat(to, "yyyy-MM-dd");
+  const fromTimestamp = fromDate.toISO();
+  const toTimestamp = toDate.plus({ days: 1 }).toISO();
+
+  if (!fromDate.isValid || !toDate.isValid || !fromTimestamp || !toTimestamp) {
+    return null;
+  }
+
+  return { from: fromTimestamp, to: toTimestamp };
+};
+
 const OnTimeServicePage = () => {
   useRequireAuth();
   const router = useRouter();
@@ -151,6 +173,40 @@ const OnTimeServicePage = () => {
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
 
+  const queryDirections = useMemo(() => {
+    const direction = router.query.direction;
+
+    if (!direction) {
+      return [];
+    }
+
+    const directions = Array.isArray(direction) ? direction : [direction];
+    return directions.filter((value) => value.toLowerCase() !== "all");
+  }, [router.query.direction]);
+
+  useEffect(() => {
+    setSelectedDirections(queryDirections);
+  }, [queryDirections]);
+
+  const queryDateRange = useMemo(
+    () => getDateRangeFromQuery(router.query.from, router.query.to),
+    [router.query.from, router.query.to],
+  );
+  const queryDatePreset =
+    typeof router.query.preset === "string"
+      ? getDatePresetFromQuery(router.query.preset)
+      : undefined;
+
+  useEffect(() => {
+    if (queryDateRange) {
+      setDateRange(queryDateRange);
+      setSelectedDatePreset("Custom");
+    } else if (queryDatePreset) {
+      setDateRange(calculateDateRange(queryDatePreset));
+      setSelectedDatePreset(queryDatePreset);
+    }
+  }, [queryDatePreset, queryDateRange]);
+
   const stopPerformanceParams = useMemo<PerformanceParams | null>(() => {
     if (!nocCode || !lineId) return null;
 
@@ -187,6 +243,43 @@ const OnTimeServicePage = () => {
     setSelectedDatePreset(selected);
     const range = calculateDateRange(selected);
     setDateRange(range);
+    const query = { ...router.query };
+    delete query.from;
+    delete query.to;
+    const preset = getDatePresetQueryParam(selected);
+    if (preset === "last7") {
+      delete query.preset;
+    } else {
+      query.preset = preset;
+    }
+    void router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
+  };
+
+  const handleDateRangeChange = (value: { from: string; to: string } | undefined) => {
+    setDateRange(value ?? null);
+    if (!value) {
+      return;
+    }
+
+    setSelectedDatePreset("Custom");
+    const query = { ...router.query };
+    delete query.preset;
+    void router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          ...query,
+          from: DateTime.fromISO(value.from).toFormat("yyyy-MM-dd"),
+          to: DateTime.fromISO(value.to)
+            .minus({ days: 1 })
+            .toFormat("yyyy-MM-dd"),
+        },
+      },
+      undefined,
+      { shallow: true },
+    );
   };
 
   const filteredStopPerformance = useMemo(() => {
@@ -456,12 +549,7 @@ const OnTimeServicePage = () => {
             }}
             onResetRefineResults={() => setRefineResultsFilters({})}
             dateRange={dateRange}
-            onDateRangeChange={(value) => {
-              setDateRange(value ?? null);
-              if (value) {
-                setSelectedDatePreset("Custom");
-              }
-            }}
+            onDateRangeChange={handleDateRangeChange}
             datePresetOptions={DATE_PRESET_OPTIONS}
             selectedDatePreset={selectedDatePreset}
             onDatePresetChange={handleDatePresetChange}

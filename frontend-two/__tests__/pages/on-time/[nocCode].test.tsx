@@ -4,6 +4,7 @@ import {
   waitFor,
   cleanup,
   within,
+  fireEvent,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import OnTimeOperatorPage from "@/pages/on-time/[nocCode]";
@@ -236,10 +237,102 @@ describe("OnTimeOperatorPage", () => {
     expect(backLink.parentElement).toHaveClass("page__back-link");
   });
 
+  it("uses the date range from the operator link", async () => {
+    mockQuery = {
+      nocCode: "ABCD",
+      from: "2026-06-01",
+      to: "2026-06-14",
+    };
+
+    render(<OnTimeOperatorPage />);
+
+    await waitFor(() => {
+      expect(mockFetchOverviewStats).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromTimestamp: expect.stringContaining("2026-06-01"),
+          toTimestamp: expect.stringContaining("2026-06-15"),
+        }),
+      );
+    });
+  });
+
+  it("refreshes data when a custom date range is applied", async () => {
+    const user = userEvent.setup();
+    mockQuery = { nocCode: "ABCD", preset: "lastMonth" };
+    render(<OnTimeOperatorPage />);
+
+    await user.click(
+      await screen.findByRole("button", { name: /May 2026/ }),
+    );
+
+    const [startDate, endDate] = screen.getAllByDisplayValue(/2026-05-/);
+    fireEvent.change(startDate, { target: { value: "2026-06-10" } });
+    fireEvent.change(endDate, { target: { value: "2026-06-12" } });
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+
+    await waitFor(() => {
+      expect(mockFetchOverviewStats).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromTimestamp: expect.stringContaining("2026-06-10"),
+          toTimestamp: expect.stringContaining("2026-06-13"),
+        }),
+      );
+      expect(mockReplace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            from: "2026-06-10",
+            to: "2026-06-12",
+          }),
+        }),
+        undefined,
+        { shallow: true },
+      );
+      expect(mockReplace.mock.calls[0][0].query.preset).toBeUndefined();
+    });
+  });
+
+  it("shows loading while refreshing data after a custom range is applied", async () => {
+    const user = userEvent.setup();
+    render(<OnTimeOperatorPage />);
+
+    await screen.findByRole("heading", { name: "All services" });
+    mockFetchOverviewStats.mockImplementationOnce(
+      () => new Promise(() => {}),
+    );
+
+    await user.click(screen.getByRole("button", { name: /Jun 2026/ }));
+    const [startDate, endDate] = screen.getAllByDisplayValue(/2026-06-/);
+    fireEvent.change(startDate, { target: { value: "2026-06-10" } });
+    fireEvent.change(endDate, { target: { value: "2026-06-12" } });
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+
+    const loadingMessage = await screen.findByText("Loading...");
+    expect(loadingMessage.closest(".app-box")).toBeInTheDocument();
+  });
+
+  it("requests hourly timeline data for a range of five days or fewer", async () => {
+    mockQuery = {
+      nocCode: "ABCD",
+      from: "2026-06-01",
+      to: "2026-06-05",
+    };
+
+    render(<OnTimeOperatorPage />);
+
+    await waitFor(() => {
+      expect(mockFetchTimeSeries).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({ granularity: "hour" }),
+        }),
+      );
+    });
+  });
+
   it("renders a service row with a link to its detail page", async () => {
     mockFetchServicePerformance.mockResolvedValue([
       makeService({
         lineId: "LINE1",
+        direction: Direction.Inbound,
         lineInfo: {
           serviceId: "S1",
           serviceName: "Demo Service",
@@ -253,7 +346,41 @@ describe("OnTimeOperatorPage", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("link", { name: "1: Demo Service" }),
-      ).toHaveAttribute("href", "/on-time/ABCD/LINE1");
+      ).toHaveAttribute(
+        "href",
+        "/on-time/ABCD/LINE1?direction=all",
+      );
+    });
+  });
+
+  it("preserves the selected direction in a service link", async () => {
+    mockFetchServicePerformance.mockResolvedValue([
+      makeService({
+        lineId: "LINE1",
+        direction: Direction.Inbound,
+        lineInfo: {
+          serviceId: "S1",
+          serviceName: "Demo Service",
+          serviceNumber: "1",
+        },
+      }),
+    ]);
+
+    render(<OnTimeOperatorPage />);
+
+    const directionsInput = await screen.findByRole("textbox", {
+      name: "Directions",
+    });
+    fireEvent.focus(directionsInput);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Inbound" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("link", { name: "1: Demo Service" }),
+      ).toHaveAttribute(
+        "href",
+        "/on-time/ABCD/LINE1?direction=Inbound",
+      );
     });
   });
 

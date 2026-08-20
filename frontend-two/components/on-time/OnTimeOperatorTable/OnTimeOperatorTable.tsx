@@ -15,6 +15,7 @@ import {
   type PerformanceParams,
   type TimeSeriesData,
 } from "@/services/on-time/on-time.service";
+import { getDatePresetQueryParam } from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 
 const OperatorSparkline = dynamic(
   () => import("./OperatorSparkline").then((mod) => mod.OperatorSparkline),
@@ -76,6 +77,15 @@ const OPERATOR_TABLE_COLUMN_WIDTHS = {
   sparkline: "28%",
 };
 
+// The widths ag-grid resolves for the Angular operator grid; the flex columns
+// fall back to its `defaultColDef.minWidth`.
+const OPERATOR_TABLE_COLUMN_MIN_WIDTHS = {
+  nocCode: 60,
+  name: 200,
+  onTimeRatio: 130,
+  sparkline: 350,
+};
+
 function getSparklineKey(row: OperatorPerformance): string | null {
   return row.nocCode ?? row.operatorId ?? null;
 }
@@ -122,6 +132,7 @@ function renderRow(
   sparklineByOperatorId: Record<string, TimeSeriesData[]>,
   sparklineParams: PerformanceParams | null | undefined,
   selectedAdminAreaIds: string[],
+  selectedDatePreset: string,
 ): SortableTableRow {
   const sparklineKey = getSparklineKey(row);
   const sparklineData = sparklineKey
@@ -133,6 +144,23 @@ function renderRow(
   selectedAdminAreaIds.forEach((id) => {
     queryString.append("adminAreaId", id);
   });
+
+  const preset = getDatePresetQueryParam(selectedDatePreset);
+  if (preset && preset !== "last7") {
+    queryString.set("preset", preset);
+  } else if (!preset && sparklineParams) {
+    queryString.set(
+      "from",
+      DateTime.fromISO(sparklineParams.fromTimestamp).toFormat("yyyy-MM-dd"),
+    );
+    queryString.set(
+      "to",
+      DateTime.fromISO(sparklineParams.toTimestamp)
+        .minus({ days: 1 })
+        .toFormat("yyyy-MM-dd"),
+    );
+  }
+  queryString.set("direction", "all");
 
   const href =
     `/on-time/${encodeURIComponent(row.nocCode ?? "")}` +
@@ -173,12 +201,14 @@ interface OnTimeOperatorTableProps {
   data: OperatorPerformance[];
   sparklineParams: PerformanceParams;
   selectedAdminAreaIds?: string[];
+  selectedDatePreset: string;
 }
 
 export const OnTimeOperatorTable = ({
   data,
   sparklineParams,
   selectedAdminAreaIds = [],
+  selectedDatePreset,
 }: OnTimeOperatorTableProps) => {
   const [pageRows, setPageRows] = useState<OperatorPerformance[]>([]);
   const [sparklineByOperatorId, setSparklineByOperatorId] = useState<
@@ -314,6 +344,7 @@ export const OnTimeOperatorTable = ({
       sparklineByOperatorId,
       granularSparklineParams,
       selectedAdminAreaIds,
+      selectedDatePreset,
     );
 
   return (
@@ -324,6 +355,7 @@ export const OnTimeOperatorTable = ({
         getRowValue={getRowValue}
         renderRow={renderOperatorRow}
         colWidths={OPERATOR_TABLE_COLUMN_WIDTHS}
+        colMinWidths={OPERATOR_TABLE_COLUMN_MIN_WIDTHS}
         initialSortKey="name"
         initialSortOrder="asc"
         paginationNoun="operator"
