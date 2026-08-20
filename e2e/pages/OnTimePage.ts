@@ -48,14 +48,11 @@ export class OnTimePage {
   }
 
   operatorLinks(): Locator {
-    return this.page.locator('main ul.govuk-list a[href^="/on-time/"]');
+    return this.operatorTable().getByRole("link");
   }
 
   firstServiceDrillInLink(): Locator {
-    return this.page
-      .locator("p", { hasText: "Drill in to a service:" })
-      .getByRole("link")
-      .first();
+    return this.serviceTable().getByRole("link").first();
   }
 
   distributionTab(): Locator {
@@ -97,15 +94,17 @@ export class OnTimePage {
   }
 
   dateRangeButton(): Locator {
-    return this.page.locator(".date-range-select__button");
+    return this.page.getByRole("button", {
+      name: /\d{1,2} [A-Za-z]{3} \d{4} - \d{1,2} [A-Za-z]{3} \d{4}/,
+    });
   }
 
   datePresetSelect(): Locator {
-    return this.page.locator('select[name="date-preset"]');
+    return this.page.getByRole("combobox", { name: "Date preset" });
   }
 
   refineResultsButton(): Locator {
-    return this.page.locator(".on-time-refine-results-button");
+    return this.page.getByRole("button", { name: "Refine results" });
   }
 
   refineResultsHeading(): Locator {
@@ -114,8 +113,8 @@ export class OnTimePage {
 
   refineResultsCloseButton(): Locator {
     return this.page
-      .locator(".refine-results-panel")
-      .locator(".refine-results-panel__close");
+      .getByRole("dialog", { name: "Refine results" })
+      .getByRole("button", { name: "Close" });
   }
 
   refineResultsMaximumEarlySelect(): Locator {
@@ -169,7 +168,7 @@ export class OnTimePage {
   }
 
   operatorTableHeader(name: string): Locator {
-    return this.operatorTable().getByRole("columnheader", { name });
+    return this.tableHeader(this.operatorTable(), name);
   }
 
   serviceHeading(): Locator {
@@ -177,27 +176,27 @@ export class OnTimePage {
   }
 
   operatorSparklines(): Locator {
-    return this.page.locator('svg[role="img"][aria-label*="On time stats"]');
+    return this.page.getByRole("img", { name: /On time stats/i });
   }
 
   boundariesMapContainer(): Locator {
-    return this.page.locator(".summary-map-container");
+    return this.page.getByLabel("On-time admin area boundaries map");
   }
 
   operatorSearchInput(): Locator {
-    return this.page.getByLabel("Search operators");
+    return this.page.getByRole("textbox", { name: "Search for an operator" });
   }
 
   // Operator (nocCode) page locators
 
   backToAllOperatorsLink(): Locator {
-    return this.page
-      .locator(".govuk-link")
-      .filter({ hasText: /All operators/i });
+    return this.page.getByRole("link", { name: "All operators" });
   }
 
   operatorPageCaption(): Locator {
-    return this.page.locator(".govuk-caption-xl").first();
+    return this.page.locator("main").getByText("On-time performance", {
+      exact: true,
+    });
   }
 
   serviceTable(): Locator {
@@ -205,7 +204,7 @@ export class OnTimePage {
   }
 
   serviceTableHeader(name: string): Locator {
-    return this.serviceTable().getByRole("columnheader", { name });
+    return this.tableHeader(this.serviceTable(), name);
   }
 
   serviceSearchInput(): Locator {
@@ -213,9 +212,7 @@ export class OnTimePage {
   }
 
   directionsDropdown(): Locator {
-    return this.page
-      .locator(".multiselect-dropdown")
-      .filter({ hasText: "Directions" });
+    return this.page.getByRole("textbox", { name: "Directions" });
   }
 
   displayOptionsButton(): Locator {
@@ -237,7 +234,16 @@ export class OnTimePage {
   }
 
   stopsTableHeader(name: string): Locator {
-    return this.stopsTable().getByRole("columnheader", { name });
+    return this.tableHeader(this.stopsTable(), name);
+  }
+
+  private tableHeader(table: Locator, name: string): Locator {
+    const accessibleName = name === "Av. delay" ? "Average delay" : name;
+    const escapedName = accessibleName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    return table.getByRole("columnheader", {
+      name: new RegExp(`^(?:Sort by )?${escapedName}(?:\\s|$)`, "i"),
+    });
   }
 
   // Operator not found page locators
@@ -255,9 +261,7 @@ export class OnTimePage {
   }
 
   operatorNotFoundBackLink(): Locator {
-    return this.page
-      .locator(".govuk-back-link")
-      .filter({ hasText: "On-time performance" });
+    return this.page.getByRole("link", { name: "On-time performance" });
   }
 
   async gotoOperatorNotFound(): Promise<void> {

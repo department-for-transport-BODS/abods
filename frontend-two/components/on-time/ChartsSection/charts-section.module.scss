@@ -11,6 +11,17 @@
   margin-bottom: 0;
 }
 
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.35);
+}
+
 .footer {
   display: flex;
   flex-direction: column;

@@ -45,6 +45,7 @@ export const OperatorDropdown = ({
       <button
         onClick={() => setOpenDropdown((o) => !o)}
         className={styles.button}
+        aria-label="Select operator"
       >
         <span className={clsx("govuk-body", styles.label)}>
           {current ? `${current.name} (${current.nocCode})` : "Select operator"}

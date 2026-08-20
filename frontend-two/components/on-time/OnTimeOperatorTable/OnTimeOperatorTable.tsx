@@ -15,10 +15,14 @@ import {
   type PerformanceParams,
   type TimeSeriesData,
 } from "@/services/on-time/on-time.service";
+import { getDatePresetQueryParam } from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 
 const OperatorSparkline = dynamic(
   () => import("./OperatorSparkline").then((mod) => mod.OperatorSparkline),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => <div className={styles.sparklinePlaceholder} />,
+  },
 );
 
 const columns = [
@@ -67,13 +71,16 @@ const columns = [
   },
 ];
 
+// The widths ag-grid resolves for the Angular operator grid; the flex columns
+// fall back to its `defaultColDef.minWidth`.
 const OPERATOR_TABLE_COLUMN_WIDTHS = {
-  nocCode: "7%",
-  averageDelay: "10%",
-  onTimeRatio: "10%",
-  lateRatio: "10%",
-  earlyRatio: "10%",
-  sparkline: "28%",
+  nocCode: 60,
+  name: 200,
+  averageDelay: 100,
+  onTimeRatio: 130,
+  lateRatio: 100,
+  earlyRatio: 100,
+  sparkline: 350,
 };
 
 function getSparklineKey(row: OperatorPerformance): string | null {
@@ -122,6 +129,7 @@ function renderRow(
   sparklineByOperatorId: Record<string, TimeSeriesData[]>,
   sparklineParams: PerformanceParams | null | undefined,
   selectedAdminAreaIds: string[],
+  selectedDatePreset: string,
 ): SortableTableRow {
   const sparklineKey = getSparklineKey(row);
   const sparklineData = sparklineKey
@@ -133,6 +141,23 @@ function renderRow(
   selectedAdminAreaIds.forEach((id) => {
     queryString.append("adminAreaId", id);
   });
+
+  const preset = getDatePresetQueryParam(selectedDatePreset);
+  if (preset && preset !== "last7") {
+    queryString.set("preset", preset);
+  } else if (!preset && sparklineParams) {
+    queryString.set(
+      "from",
+      DateTime.fromISO(sparklineParams.fromTimestamp).toFormat("yyyy-MM-dd"),
+    );
+    queryString.set(
+      "to",
+      DateTime.fromISO(sparklineParams.toTimestamp)
+        .minus({ days: 1 })
+        .toFormat("yyyy-MM-dd"),
+    );
+  }
+  queryString.set("direction", "all");
 
   const href =
     `/on-time/${encodeURIComponent(row.nocCode ?? "")}` +
@@ -173,17 +198,20 @@ interface OnTimeOperatorTableProps {
   data: OperatorPerformance[];
   sparklineParams: PerformanceParams;
   selectedAdminAreaIds?: string[];
+  selectedDatePreset: string;
 }
 
 export const OnTimeOperatorTable = ({
   data,
   sparklineParams,
   selectedAdminAreaIds = [],
+  selectedDatePreset,
 }: OnTimeOperatorTableProps) => {
   const [pageRows, setPageRows] = useState<OperatorPerformance[]>([]);
   const [sparklineByOperatorId, setSparklineByOperatorId] = useState<
     Record<string, TimeSeriesData[]>
   >({});
+  const [hasReceivedPageRows, setHasReceivedPageRows] = useState(false);
   const inFlightOperatorIdsRef = useRef(new Set<string>());
   const loadedOperatorIdsRef = useRef(new Set<string>());
 
@@ -215,6 +243,7 @@ export const OnTimeOperatorTable = ({
 
   useEffect(() => {
     setSparklineByOperatorId({});
+    setHasReceivedPageRows(false);
     inFlightOperatorIdsRef.current.clear();
     loadedOperatorIdsRef.current.clear();
   }, [sparklineParamsKey]);
@@ -314,21 +343,41 @@ export const OnTimeOperatorTable = ({
       sparklineByOperatorId,
       granularSparklineParams,
       selectedAdminAreaIds,
+      selectedDatePreset,
     );
+
+  const isLoadingSparklines =
+    sortedData.length > 0 &&
+    (!hasReceivedPageRows ||
+      pageRows.some((operator) => {
+        const sparklineKey = getSparklineKey(operator);
+        return (
+          sparklineKey !== null &&
+          !loadedOperatorIdsRef.current.has(sparklineKey)
+        );
+      }));
 
   return (
     <div className={styles.container}>
-      <SortedPaginatedTable
-        columns={columns}
-        data={sortedData}
-        getRowValue={getRowValue}
-        renderRow={renderOperatorRow}
-        colWidths={OPERATOR_TABLE_COLUMN_WIDTHS}
-        initialSortKey="name"
-        initialSortOrder="asc"
-        paginationNoun="operator"
-        onPageDataChange={setPageRows}
-      />
+      {isLoadingSparklines && (
+        <p className={`govuk-body ${styles.loading}`}>Loading...</p>
+      )}
+      <div className={isLoadingSparklines ? styles.tableLoading : undefined}>
+        <SortedPaginatedTable
+          columns={columns}
+          data={sortedData}
+          getRowValue={getRowValue}
+          renderRow={renderOperatorRow}
+          colWidths={OPERATOR_TABLE_COLUMN_WIDTHS}
+          initialSortKey="name"
+          initialSortOrder="asc"
+          paginationNoun="operator"
+          onPageDataChange={(rows) => {
+            setPageRows(rows);
+            setHasReceivedPageRows(true);
+          }}
+        />
+      </div>
     </div>
   );
 };

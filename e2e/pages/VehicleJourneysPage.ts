@@ -32,15 +32,11 @@ export class VehicleJourneysPage {
   }
 
   operatorSelect(): Locator {
-    return this.page
-      .locator(".vehicle-journeys-search__operator")
-      .getByRole("button", { name: /select|loading/i });
+    return this.page.getByRole("textbox", { name: "Operator" });
   }
 
   serviceSelect(): Locator {
-    return this.page
-      .locator(".vehicle-journeys-search__service")
-      .getByRole("button", { name: /select|loading/i });
+    return this.page.getByRole("textbox", { name: "Service name" });
   }
 
   operatorSelectLabel(): Locator {
@@ -64,7 +60,9 @@ export class VehicleJourneysPage {
   }
 
   resultLinks(): Locator {
-    return this.page.locator(".journey-search-grid__time");
+    return this.page
+      .locator("main")
+      .getByRole("link", { name: /^\d{2}:\d{2}$/ });
   }
 
   patternHeadings(): Locator {
@@ -108,11 +106,13 @@ export class VehicleJourneysPage {
   }
 
   journeyInfo(): Locator {
-    return this.page.locator(".vehicle-journeys__summary-list");
+    return this.page.locator("main dl").filter({
+      has: this.page.getByText("Operator:", { exact: true }),
+    });
   }
 
   journeyNav(): Locator {
-    return this.page.locator(".journey-nav");
+    return this.page.locator("main").getByText("Journey", { exact: true });
   }
 
   estimatedRadio(): Locator {
@@ -132,11 +132,15 @@ export class VehicleJourneysPage {
   }
 
   stopListItems(): Locator {
-    return this.page.locator(".stop-list-item");
+    return this.page
+      .getByLabel("Scheduled and actual stops")
+      .getByRole("button");
   }
 
   otpStats(): Locator {
-    return this.page.locator(".vehicle-journeys__otp-stats");
+    return this.page.getByRole("group", {
+      name: "Journey performance statistics",
+    });
   }
 
   journeyMap(): Locator {
@@ -145,18 +149,14 @@ export class VehicleJourneysPage {
 
   async openOperatorOptions(): Promise<Locator> {
     await this.operatorSelect().click();
-    const options = this.page
-      .locator(".vehicle-journeys-search__operator")
-      .getByRole("listitem");
+    const options = this.page.getByRole("listbox").getByRole("option");
     await expect(options.first()).toBeVisible({ timeout: 60000 });
     return options;
   }
 
   async openServiceOptions(): Promise<Locator> {
     await this.serviceSelect().click();
-    const options = this.page
-      .locator(".vehicle-journeys-search__service")
-      .getByRole("listitem");
+    const options = this.page.getByRole("listbox").getByRole("option");
     await expect(options.first()).toBeVisible({ timeout: 60000 });
     return options;
   }

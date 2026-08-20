@@ -36,10 +36,6 @@ export class HelpdeskPanel {
 
   // ── Panel ────────────────────────────────────────────────────────────────
 
-  overlay(): Locator {
-    return this.page.locator(".helpdesk-overlay");
-  }
-
   panel(): Locator {
     return this.page.getByRole("dialog");
   }

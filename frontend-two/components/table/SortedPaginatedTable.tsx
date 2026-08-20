@@ -39,7 +39,7 @@ export interface SortedPaginatedTableProps<T> {
   paginationNoun?: string;
   paginationAlignment?: "left" | "right";
   onSortChange?: (key: string | null, order: SortOrder) => void;
-  colWidths?: Partial<Record<string, string>>;
+  colWidths?: Partial<Record<string, string | number>>;
   fontSize?: string;
 }
 

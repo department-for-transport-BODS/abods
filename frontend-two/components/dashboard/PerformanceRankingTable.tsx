@@ -90,7 +90,10 @@ export const PerformanceRankingTable = ({
         : null;
 
   return (
-    <div className={styles.appPerformanceRanking}>
+    <div
+      className={styles.appPerformanceRanking}
+      data-testid="performance-ranking"
+    >
       <div className="tabs">
         <ul className={styles.tabsList}>
           <li

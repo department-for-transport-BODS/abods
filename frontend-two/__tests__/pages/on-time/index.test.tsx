@@ -10,6 +10,7 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { onTimeService } from "@/services/on-time/on-time.service";
 import { operatorsService } from "@/services/operator.service";
 import { distanceService } from "@/services/distances/distance.services";
+import operatorTableStyles from "@/components/on-time/OnTimeOperatorTable/on-time-operator-table.module.scss";
 import OnTimeIndexPage from "@/pages/on-time";
 import { DateTime } from "luxon";
 
@@ -42,6 +43,7 @@ vi.mock("@/services/on-time/on-time.service", () => ({
   onTimeService: {
     fetchOperatorPerformanceList: vi.fn(),
     fetchOnTimeStats: vi.fn(),
+    fetchOnTimeTimeSeriesData: vi.fn(),
   },
 }));
 
@@ -57,10 +59,14 @@ vi.mock("@/services/distances/distance.services", () => ({
   },
 }));
 
+let mockQuery: Record<string, string | string[] | undefined> = {};
+
 vi.mock("next/router", () => ({
   useRouter: () => ({
     pathname: "/on-time",
     asPath: "/on-time",
+    query: mockQuery,
+    isReady: true,
     replace: vi.fn(),
   }),
 }));
@@ -88,12 +94,14 @@ const mockFetchOperatorPerformanceList = vi.mocked(
   onTimeService.fetchOperatorPerformanceList,
 );
 const mockFetchOnTimeStats = vi.mocked(onTimeService.fetchOnTimeStats);
+const mockFetchTimeSeries = vi.mocked(onTimeService.fetchOnTimeTimeSeriesData);
 const mockFetchAdminAreas = vi.mocked(operatorsService.fetchAdminAreas);
 const mockFetchAdminOrg = vi.mocked(distanceService.fetchAdminOrg);
 
 describe("OnTimeIndexPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockQuery = {};
     mockUseConfig.mockReturnValue({
       config: { apiUrl: "http://test-api" },
       isLoading: false,
@@ -109,6 +117,7 @@ describe("OnTimeIndexPage", () => {
       averageDelay: null,
       noData: 0,
     });
+    mockFetchTimeSeries.mockResolvedValue([]);
     mockFetchAdminAreas.mockResolvedValue([
       { id: "AA100", name: "Derbyshire", shape: "{}" },
       { id: "AA200", name: "Nottinghamshire", shape: "{}" },
@@ -184,6 +193,47 @@ describe("OnTimeIndexPage", () => {
   });
 
   describe("Date selection", () => {
+    it("restores a date range from the query parameters", async () => {
+      mockQuery = { from: "2026-06-01", to: "2026-06-14" };
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+
+      render(<OnTimeIndexPage />);
+
+      await waitFor(() => {
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            fromTimestamp: expect.stringContaining("2026-06-01"),
+            toTimestamp: expect.stringContaining("2026-06-15"),
+          }),
+        );
+      });
+
+      expect(mockFetchOperatorPerformanceList).toHaveBeenCalledTimes(1);
+    });
+
+    it("waits for a changed query date range before fetching", async () => {
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+      const { rerender } = render(<OnTimeIndexPage />);
+
+      await waitFor(() => {
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalledTimes(1);
+      });
+      mockFetchOperatorPerformanceList.mockClear();
+
+      mockQuery = { from: "2026-06-01", to: "2026-06-14" };
+      rerender(<OnTimeIndexPage />);
+
+      await waitFor(() => {
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalledTimes(1);
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            fromTimestamp: expect.stringContaining("2026-06-01"),
+            toTimestamp: expect.stringContaining("2026-06-15"),
+          }),
+        );
+      });
+    });
+
     it("defaults to 'Last 7 days' and shows correct date range", async () => {
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       render(<OnTimeIndexPage />);
@@ -226,6 +276,45 @@ describe("OnTimeIndexPage", () => {
           ][0];
         expect(lastCall.fromTimestamp).toContain(from.toFormat("yyyy-MM-dd"));
         expect(lastCall.toTimestamp).toContain(today.toFormat("yyyy-MM-dd"));
+      });
+    });
+
+    it("uses the selected preset in an operator link", async () => {
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+      render(<OnTimeIndexPage />);
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
+
+      fireEvent.change(screen.getByDisplayValue("Last 7 days"), {
+        target: { value: "Last 28 days" },
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("link", { name: "First Operator" }),
+        ).toHaveAttribute("href", "/on-time/ABCD?preset=last28&direction=all");
+      });
+    });
+
+    it("uses lastMonth when Last month is selected", async () => {
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+      render(<OnTimeIndexPage />);
+      await waitFor(() =>
+        expect(mockFetchOperatorPerformanceList).toHaveBeenCalled(),
+      );
+
+      fireEvent.change(screen.getByDisplayValue("Last 7 days"), {
+        target: { value: "Last month" },
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("link", { name: "First Operator" }),
+        ).toHaveAttribute(
+          "href",
+          "/on-time/ABCD?preset=lastMonth&direction=all",
+        );
       });
     });
 
@@ -286,6 +375,41 @@ describe("OnTimeIndexPage", () => {
         expect(lastCall.toTimestamp).toContain(
           today.plus({ days: 1 }).toFormat("yyyy-MM-dd"),
         );
+      });
+    });
+  });
+
+  describe("Operator sparklines", () => {
+    it("hides the table until the current page's sparklines have loaded", async () => {
+      let resolveSparkline!: (value: any[]) => void;
+      mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
+      mockFetchTimeSeries.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveSparkline = resolve;
+          }),
+      );
+
+      render(<OnTimeIndexPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Loading...")).toBeInTheDocument();
+        expect(
+          screen
+            .getByText("First Operator")
+            .closest(`.${operatorTableStyles.tableLoading}`),
+        ).toBeInTheDocument();
+      });
+
+      resolveSparkline([{ timestamp: "2026-06-01T00:00:00Z" }]);
+
+      await waitFor(() => {
+        expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+        expect(
+          screen
+            .getByText("First Operator")
+            .closest(`.${operatorTableStyles.tableLoading}`),
+        ).not.toBeInTheDocument();
       });
     });
   });

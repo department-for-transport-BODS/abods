@@ -9,7 +9,13 @@ interface LinkWithArrowProps {
 }
 
 export const LinkWithArrow = ({ href, children }: LinkWithArrowProps) => (
-  <Link className={clsx("govuk-link", styles.linkWithArrow)} href={href}>
-    {children} <span aria-hidden="true">»</span>
+  <Link
+    className={clsx("govuk-link", styles.noUnderline, styles.linkWithArrow)}
+    href={href}
+  >
+    <span className={styles.text}>{children}</span>
+    <span aria-hidden="true" className={styles.arrow}>
+      »
+    </span>
   </Link>
 );

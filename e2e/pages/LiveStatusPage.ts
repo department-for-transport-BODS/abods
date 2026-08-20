@@ -21,7 +21,7 @@ export class LiveStatusPage {
   }
 
   operatorDropdown(): Locator {
-    return this.page.locator(".operator-dropdown__button");
+    return this.page.getByRole("button", { name: "Select operator" });
   }
 
   viewFeedHistoryLink(): Locator {

@@ -226,19 +226,21 @@ const STOP_NUMERIC_COLUMN_KEYS = new Set<StopsTableColumnKey>([
   "earlyRatio",
 ]);
 
+// The first eleven columns fit within the laptop table viewport; Early is the
+// final overflow column, matching the Angular stop-grid proportions.
 const STOP_TABLE_COLUMN_WIDTHS = {
-  stopId: "12%",
-  timingPoint: "4%",
-  stopName: "21%",
-  direction: "7%",
-  scheduledDepartures: "7%",
-  actualDepartures: "7%",
-  averageScheduled: "7%",
-  averageActual: "7%",
-  averageDelay: "7%",
-  onTimeRatio: "7%",
-  lateRatio: "7%",
-  earlyRatio: "7%",
+  stopId: 150,
+  timingPoint: 50,
+  stopName: 200,
+  direction: 90,
+  scheduledDepartures: 110,
+  actualDepartures: 100,
+  averageScheduled: 110,
+  averageActual: 110,
+  averageDelay: 90,
+  onTimeRatio: 90,
+  lateRatio: 90,
+  earlyRatio: 80,
 };
 
 export const STOPS_TABLE_COLUMN_KEYS = STOPS_TABLE_COLUMN_OPTIONS.map(

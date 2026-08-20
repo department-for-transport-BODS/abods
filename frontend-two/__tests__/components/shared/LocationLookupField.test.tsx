@@ -1,12 +1,19 @@
 import React from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { LocationLookupField } from "@/components/shared/LocationLookupField";
+import {
+  LocationLookupField,
+  LocationLookupSelection,
+} from "@/components/shared/LocationLookupField";
 
 describe("LocationLookupField", () => {
   const mockFetch = vi.fn();
 
-  const Harness = ({ onSelect }: { onSelect: ReturnType<typeof vi.fn> }) => {
+  const Harness = ({
+    onSelect,
+  }: {
+    onSelect: (selection: LocationLookupSelection) => void;
+  }) => {
     const [value, setValue] = React.useState("");
 
     return (

@@ -1,6 +1,7 @@
 import styles from "./on-time.module.scss";
 import helpdeskStyles from "../../components/on-time/OnTimeHelpdesk/on-time-helpdesk-panel.module.scss";
 
+import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { BaseLayout } from "@/components/layout/BaseLayout";
@@ -11,6 +12,8 @@ import {
   MATCH_TYPE_OPTIONS,
   STOP_TYPE_OPTIONS,
   calculateDateRange,
+  getDatePresetFromQuery,
+  getDatePresetQueryParam,
 } from "@/components/on-time/OnTimeFilterPanel/OnTimeFilterPanel";
 import { operatorsService } from "@/services/operator.service";
 import { OnTimeBoundariesMap } from "@/components/on-time/OnTimeBoundariesMap";
@@ -46,6 +49,26 @@ type AdminOrgMap = AdminOrgListQuery["adminOrgMap"][number];
 type AdminArea = NonNullable<GetAdminAreasQuery["adminAreas"]>[number];
 
 const EMPTY_ADMIN_AREA_IDS: string[] = [];
+
+const getDateRangeFromQuery = (
+  from: string | string[] | undefined,
+  to: string | string[] | undefined,
+) => {
+  if (typeof from !== "string" || typeof to !== "string") {
+    return null;
+  }
+
+  const fromDate = DateTime.fromFormat(from, "yyyy-MM-dd");
+  const toDate = DateTime.fromFormat(to, "yyyy-MM-dd");
+  const fromTimestamp = fromDate.toISO();
+  const toTimestamp = toDate.plus({ days: 1 }).toISO();
+
+  if (!fromDate.isValid || !toDate.isValid || !fromTimestamp || !toTimestamp) {
+    return null;
+  }
+
+  return { from: fromTimestamp, to: toTimestamp };
+};
 
 const OnTimeIndexPage = () => {
   useRequireAuth();
@@ -90,6 +113,35 @@ const OnTimeIndexPage = () => {
     from: string;
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
+  const [appliedQueryDateKey, setAppliedQueryDateKey] = useState<string>();
+
+  const queryDateRange = useMemo(
+    () => getDateRangeFromQuery(router.query.from, router.query.to),
+    [router.query.from, router.query.to],
+  );
+  const queryDatePreset =
+    typeof router.query.preset === "string"
+      ? getDatePresetFromQuery(router.query.preset)
+      : undefined;
+  const queryDateKey = JSON.stringify({
+    from: router.query.from ?? null,
+    to: router.query.to ?? null,
+    preset: router.query.preset ?? null,
+  });
+  const hasAppliedQueryDate = appliedQueryDateKey === queryDateKey;
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    if (queryDateRange) {
+      setDateRange(queryDateRange);
+      setSelectedDatePreset("Custom");
+    } else if (queryDatePreset) {
+      setDateRange(calculateDateRange(queryDatePreset));
+      setSelectedDatePreset(queryDatePreset);
+    }
+    setAppliedQueryDateKey(queryDateKey);
+  }, [router.isReady, queryDateKey, queryDatePreset, queryDateRange]);
 
   const adminAreaOptions = useMemo(
     () =>
@@ -145,6 +197,45 @@ const OnTimeIndexPage = () => {
     setSelectedDatePreset(selected);
     const range = calculateDateRange(selected);
     setDateRange(range);
+    const query = { ...router.query };
+    delete query.from;
+    delete query.to;
+    const preset = getDatePresetQueryParam(selected);
+    if (preset === "last7") {
+      delete query.preset;
+    } else {
+      query.preset = preset;
+    }
+    void router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
+  };
+
+  const handleDateRangeChange = (
+    value: { from: string; to: string } | undefined,
+  ) => {
+    setDateRange(value ?? null);
+    if (!value) {
+      return;
+    }
+
+    setSelectedDatePreset("Custom");
+    const query = { ...router.query };
+    delete query.preset;
+    void router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          ...query,
+          from: DateTime.fromISO(value.from).toFormat("yyyy-MM-dd"),
+          to: DateTime.fromISO(value.to)
+            .minus({ days: 1 })
+            .toFormat("yyyy-MM-dd"),
+        },
+      },
+      undefined,
+      { shallow: true },
+    );
   };
 
   useEffect(() => {
@@ -254,7 +345,7 @@ const OnTimeIndexPage = () => {
   ]);
 
   useEffect(() => {
-    if (!config?.apiUrl) return;
+    if (!router.isReady || !hasAppliedQueryDate || !config?.apiUrl) return;
 
     const load = async () => {
       setIsLoading(true);
@@ -277,7 +368,12 @@ const OnTimeIndexPage = () => {
     };
 
     load();
-  }, [config?.apiUrl, operatorTableParams]);
+  }, [
+    router.isReady,
+    hasAppliedQueryDate,
+    config?.apiUrl,
+    operatorTableParams,
+  ]);
 
   return (
     <BaseLayout title="All services: Analyse Bus Open Data">
@@ -292,12 +388,7 @@ const OnTimeIndexPage = () => {
         }}
         onResetRefineResults={() => setRefineResultsFilters({})}
         dateRange={dateRange}
-        onDateRangeChange={(value) => {
-          setDateRange(value ?? null);
-          if (value) {
-            setSelectedDatePreset("Custom");
-          }
-        }}
+        onDateRangeChange={handleDateRangeChange}
         datePresetOptions={DATE_PRESET_OPTIONS}
         selectedDatePreset={selectedDatePreset}
         onDatePresetChange={handleDatePresetChange}
@@ -413,6 +504,7 @@ const OnTimeIndexPage = () => {
               data={filteredOperators}
               sparklineParams={operatorTableParams}
               selectedAdminAreaIds={selectedAdminAreaIds}
+              selectedDatePreset={selectedDatePreset}
             />
           </ChartNoDataWrapper>
         )}

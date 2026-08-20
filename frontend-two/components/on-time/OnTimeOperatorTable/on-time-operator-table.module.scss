@@ -12,6 +12,18 @@
   }
 }
 
+.tableLoading {
+  display: none;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  color: govuk-functional-colour(secondary-text);
+}
+
 .nocCell {
   white-space: nowrap;
 }
@@ -42,4 +54,9 @@
   max-width: 100%;
   overflow: hidden;
   margin-left: auto;
+}
+
+.sparklinePlaceholder {
+  width: 100%;
+  height: 60px;
 }

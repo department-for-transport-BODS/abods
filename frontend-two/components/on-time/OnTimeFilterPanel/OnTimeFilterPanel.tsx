@@ -19,6 +19,21 @@ export const DATE_PRESET_OPTIONS = [
   "Month to date",
 ];
 
+const DATE_PRESET_QUERY_PARAMS: Record<string, string> = {
+  "Last 7 days": "last7",
+  "Last 28 days": "last28",
+  "Last month": "lastMonth",
+  "Month to date": "monthToDate",
+};
+
+export const getDatePresetQueryParam = (preset: string) =>
+  DATE_PRESET_QUERY_PARAMS[preset];
+
+export const getDatePresetFromQuery = (preset: string) =>
+  Object.entries(DATE_PRESET_QUERY_PARAMS).find(
+    ([, value]) => value === preset,
+  )?.[0];
+
 export const MATCH_TYPE_OPTIONS = [
   { value: "estimated", label: "Estimated" },
   { value: "evidenced", label: "Evidenced" },

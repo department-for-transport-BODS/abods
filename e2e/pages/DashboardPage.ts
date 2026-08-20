@@ -52,20 +52,24 @@ export class DashboardPage {
       .or(this.page.getByRole("combobox").nth(1));
   }
 
+  performanceRanking(): Locator {
+    return this.page.getByTestId("performance-ranking");
+  }
+
   topThreeTab(): Locator {
-    return this.page
-      .locator(".app-performance-ranking")
-      .getByText("Top 3", { exact: true });
+    return this.performanceRanking().getByText("Top 3", { exact: true });
   }
 
   bottomThreeTab(): Locator {
-    return this.page
-      .locator(".app-performance-ranking")
-      .getByText("Bottom 3", { exact: true });
+    return this.performanceRanking().getByText("Bottom 3", { exact: true });
   }
 
   rankingRows(): Locator {
-    return this.page.locator("table.ranking-table__data tbody tr");
+    return this.performanceRanking()
+      .getByRole("row")
+      .filter({
+        has: this.page.getByRole("cell"),
+      });
   }
 
   async selectTopThree(): Promise<void> {
@@ -101,7 +105,12 @@ export class DashboardPage {
   }
 
   feedStatusTable(): Locator {
-    return this.page.locator("table.feed-status-summary");
+    return this.page.getByRole("table").filter({
+      has: this.page.getByRole("columnheader", {
+        name: "Status",
+        exact: true,
+      }),
+    });
   }
 
   nocFeedMonitoringLink(): Locator {

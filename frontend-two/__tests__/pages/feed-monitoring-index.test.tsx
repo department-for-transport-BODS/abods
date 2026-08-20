@@ -277,9 +277,7 @@ it("Shows correct options in operator dropdown", async () => {
     expect(screen.getByText(/Alpha Buses \(ALPH\)/i)).toBeInTheDocument(),
   );
 
-  fireEvent.click(
-    screen.getByRole("button", { name: /Alpha Buses \(ALPH\)/i }),
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Select operator" }));
 
   expect(screen.getAllByText("Alpha Buses (ALPH)").length).toEqual(2); // One in the button, one in the dropdown
   expect(screen.getByText("Beta Coaches (BETA)")).toBeInTheDocument();
@@ -298,9 +296,7 @@ it("Changes the page if new operator is selected using dropdown", async () => {
     expect(screen.getByText(/Alpha Buses \(ALPH\)/i)).toBeInTheDocument(),
   );
 
-  fireEvent.click(
-    screen.getByRole("button", { name: /Alpha Buses \(ALPH\)/i }),
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Select operator" }));
   fireEvent.click(screen.getByText("Beta Coaches (BETA)"));
 
   expect(mockRouterPush).toHaveBeenCalledWith("/feed-monitoring/BETA");

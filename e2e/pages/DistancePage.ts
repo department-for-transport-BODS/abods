@@ -28,6 +28,26 @@ export class DistancesPage {
     return this.page.locator("main");
   }
 
+  adminAreaFilter(): Locator {
+    return this.page.getByRole("textbox", { name: "Admin Area" });
+  }
+
+  organisationsFilter(): Locator {
+    return this.page.getByRole("textbox", { name: "Organisations" });
+  }
+
+  operatorsFilter(): Locator {
+    return this.page.getByRole("textbox", { name: "Operators" });
+  }
+
+  licensesFilter(): Locator {
+    return this.page.getByRole("textbox", { name: "Licenses" });
+  }
+
+  servicesFilter(): Locator {
+    return this.page.getByRole("textbox", { name: "Services" });
+  }
+
   table(): Locator {
     return this.page.locator("table");
   }

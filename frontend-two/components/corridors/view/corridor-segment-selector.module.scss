@@ -28,6 +28,8 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   width: $segment-stop-size;
   height: $segment-stop-size;
   border: 5px solid govuk-functional-colour(border);
+  box-shadow: 0 0 0 $segment-stop-surround govuk-colour("white");
+  pointer-events: auto;
   flex-shrink: 0;
   &:hover {
     border-color: govuk-colour("black");
@@ -38,6 +40,8 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   width: 100%;
   min-width: $segment-min-width;
   height: $segment-half-height;
+  border-bottom-left-radius: 999em;
+  border-bottom-right-radius: 999em;
   cursor: pointer;
   &:hover {
     background-color: govuk-colour("blue", $variant: "tint-25");
@@ -55,6 +59,10 @@ $segment-half-height: calc(($segment-stop-size - 2px) / 2);
   display: block;
   margin: 0 ($segment-stop-size + $segment-stop-surround) 2px;
   width: calc(100% - #{(2 * ($segment-stop-size + $segment-stop-surround))});
+  border-top-left-radius: 999em;
+  border-top-right-radius: 999em;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 .segmentInvalidServiceLink {
   background: repeating-linear-gradient(
