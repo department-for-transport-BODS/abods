@@ -53,6 +53,7 @@ export interface SortableTableProps {
   colWidths?: Partial<Record<string, string | number>>;
   footerAction?: ReactNode;
   fontSize?: string;
+  scrollable?: boolean;
 }
 
 const ascIcon = (
@@ -119,6 +120,7 @@ export const SortableTable = ({
   colWidths,
   footerAction,
   fontSize,
+  scrollable = false,
 }: SortableTableProps): React.JSX.Element => {
   const handleSort = (key: string) => {
     const current = head.find((c) => c.key === key)?.sortOrder ?? "none";
@@ -142,7 +144,8 @@ export const SortableTable = ({
   return (
     <>
       {title ? <h2 className="govuk-heading-m">{title}</h2> : null}
-      <table
+      <div className={clsx(scrollable && styles.tableScroll)}>
+        <table
         className={clsx(
           "govuk-table",
           styles.sortableTable,
@@ -249,7 +252,8 @@ export const SortableTable = ({
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
       {pagination || footerAction ? (
         <div className={styles.footerRow}>
           <div>{footerAction ?? null}</div>

@@ -463,6 +463,7 @@ export const OnTimeServicesTable = ({
           />
         }
         fontSize="govuk-!-font-size-16"
+        scrollable
       />
     </div>
   );

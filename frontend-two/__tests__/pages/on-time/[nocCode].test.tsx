@@ -223,6 +223,11 @@ describe("OnTimeOperatorPage", () => {
   });
 
   it("renders the page heading and back link after data loads", async () => {
+    mockQuery = {
+      nocCode: "ABCD",
+      preset: "lastMonth",
+      direction: "Inbound",
+    };
     render(<OnTimeOperatorPage />);
 
     await waitFor(() => {
@@ -233,7 +238,7 @@ describe("OnTimeOperatorPage", () => {
 
     const backLink = screen.getByRole("link", { name: /All operators/i });
 
-    expect(backLink).toHaveAttribute("href", "/on-time");
+    expect(backLink).toHaveAttribute("href", "/on-time?preset=lastMonth");
     expect(backLink.parentElement).toHaveClass("page__back-link");
   });
 

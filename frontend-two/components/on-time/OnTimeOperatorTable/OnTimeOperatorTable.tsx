@@ -376,6 +376,7 @@ export const OnTimeOperatorTable = ({
             setPageRows(rows);
             setHasReceivedPageRows(true);
           }}
+          scrollable
         />
       </div>
     </div>

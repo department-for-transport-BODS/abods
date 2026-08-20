@@ -636,11 +636,18 @@ const OnTimeOperatorPage = () => {
     );
   }
 
+  const allOperatorsQuery = { ...router.query };
+  delete allOperatorsQuery.nocCode;
+  delete allOperatorsQuery.direction;
+
   return (
     <BaseLayout
       title="All services: Analyse Bus Open Data"
       backLink={
-        <Link href="/on-time" className="govuk-back-link">
+        <Link
+          href={{ pathname: "/on-time", query: allOperatorsQuery }}
+          className="govuk-back-link"
+        >
           All operators
         </Link>
       }
