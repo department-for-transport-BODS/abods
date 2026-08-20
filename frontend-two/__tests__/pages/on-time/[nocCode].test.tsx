@@ -255,7 +255,7 @@ describe("OnTimeOperatorPage", () => {
       );
     });
 
-      expect(mockFetchOverviewStats).toHaveBeenCalledTimes(1);
+    expect(mockFetchOverviewStats).toHaveBeenCalledTimes(1);
   });
 
   it("refreshes data when a custom date range is applied", async () => {
@@ -263,9 +263,7 @@ describe("OnTimeOperatorPage", () => {
     mockQuery = { nocCode: "ABCD", preset: "lastMonth" };
     render(<OnTimeOperatorPage />);
 
-    await user.click(
-      await screen.findByRole("button", { name: /May 2026/ }),
-    );
+    await user.click(await screen.findByRole("button", { name: /May 2026/ }));
 
     const [startDate, endDate] = screen.getAllByDisplayValue(/2026-05-/);
     fireEvent.change(startDate, { target: { value: "2026-06-10" } });
@@ -298,9 +296,7 @@ describe("OnTimeOperatorPage", () => {
     render(<OnTimeOperatorPage />);
 
     await screen.findByRole("heading", { name: "All services" });
-    mockFetchOverviewStats.mockImplementationOnce(
-      () => new Promise(() => {}),
-    );
+    mockFetchOverviewStats.mockImplementationOnce(() => new Promise(() => {}));
 
     await user.click(screen.getByRole("button", { name: /Jun 2026/ }));
     const [startDate, endDate] = screen.getAllByDisplayValue(/2026-06-/);
@@ -348,10 +344,7 @@ describe("OnTimeOperatorPage", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("link", { name: "1: Demo Service" }),
-      ).toHaveAttribute(
-        "href",
-        "/on-time/ABCD/LINE1?direction=all",
-      );
+      ).toHaveAttribute("href", "/on-time/ABCD/LINE1?direction=all");
     });
   });
 
@@ -379,10 +372,7 @@ describe("OnTimeOperatorPage", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("link", { name: "1: Demo Service" }),
-      ).toHaveAttribute(
-        "href",
-        "/on-time/ABCD/LINE1?direction=Inbound",
-      );
+      ).toHaveAttribute("href", "/on-time/ABCD/LINE1?direction=Inbound");
     });
   });
 

@@ -384,9 +384,10 @@ describe("OnTimeIndexPage", () => {
       let resolveSparkline!: (value: any[]) => void;
       mockFetchOperatorPerformanceList.mockResolvedValue(mockOperatorData);
       mockFetchTimeSeries.mockImplementation(
-        () => new Promise((resolve) => {
-          resolveSparkline = resolve;
-        }),
+        () =>
+          new Promise((resolve) => {
+            resolveSparkline = resolve;
+          }),
       );
 
       render(<OnTimeIndexPage />);

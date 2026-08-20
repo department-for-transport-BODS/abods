@@ -337,7 +337,9 @@ const OnTimeOperatorPage = () => {
     });
   };
 
-  const handleDateRangeChange = (value: { from: string; to: string } | undefined) => {
+  const handleDateRangeChange = (
+    value: { from: string; to: string } | undefined,
+  ) => {
     setDateRange(value ?? null);
     if (!value) {
       return;
@@ -429,9 +431,7 @@ const OnTimeOperatorPage = () => {
         settle(
           onTimeService.fetchOnTimeDelayFrequencyData(servicePerformanceParams),
         ),
-        settle(
-          onTimeService.fetchOnTimeTimeSeriesData(timeSeriesParams),
-        ),
+        settle(onTimeService.fetchOnTimeTimeSeriesData(timeSeriesParams)),
         settle(
           onTimeService.fetchOnTimePunctualityTimeOfDayData(
             servicePerformanceParams,

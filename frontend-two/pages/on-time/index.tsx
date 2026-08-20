@@ -211,7 +211,9 @@ const OnTimeIndexPage = () => {
     });
   };
 
-  const handleDateRangeChange = (value: { from: string; to: string } | undefined) => {
+  const handleDateRangeChange = (
+    value: { from: string; to: string } | undefined,
+  ) => {
     setDateRange(value ?? null);
     if (!value) {
       return;
@@ -366,7 +368,12 @@ const OnTimeIndexPage = () => {
     };
 
     load();
-  }, [router.isReady, hasAppliedQueryDate, config?.apiUrl, operatorTableParams]);
+  }, [
+    router.isReady,
+    hasAppliedQueryDate,
+    config?.apiUrl,
+    operatorTableParams,
+  ]);
 
   return (
     <BaseLayout title="All services: Analyse Bus Open Data">

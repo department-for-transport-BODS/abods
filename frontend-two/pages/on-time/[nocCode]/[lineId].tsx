@@ -267,7 +267,9 @@ const OnTimeServicePage = () => {
     });
   };
 
-  const handleDateRangeChange = (value: { from: string; to: string } | undefined) => {
+  const handleDateRangeChange = (
+    value: { from: string; to: string } | undefined,
+  ) => {
     setDateRange(value ?? null);
     if (!value) {
       return;
