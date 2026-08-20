@@ -254,6 +254,8 @@ describe("OnTimeOperatorPage", () => {
         }),
       );
     });
+
+      expect(mockFetchOverviewStats).toHaveBeenCalledTimes(1);
   });
 
   it("refreshes data when a custom date range is applied", async () => {

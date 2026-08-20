@@ -19,7 +19,10 @@ import { getDatePresetQueryParam } from "@/components/on-time/OnTimeFilterPanel/
 
 const OperatorSparkline = dynamic(
   () => import("./OperatorSparkline").then((mod) => mod.OperatorSparkline),
-  { ssr: false },
+  {
+    ssr: false,
+    loading: () => <div className={styles.sparklinePlaceholder} />,
+  },
 );
 
 const columns = [
@@ -214,6 +217,7 @@ export const OnTimeOperatorTable = ({
   const [sparklineByOperatorId, setSparklineByOperatorId] = useState<
     Record<string, TimeSeriesData[]>
   >({});
+  const [hasReceivedPageRows, setHasReceivedPageRows] = useState(false);
   const inFlightOperatorIdsRef = useRef(new Set<string>());
   const loadedOperatorIdsRef = useRef(new Set<string>());
 
@@ -245,6 +249,7 @@ export const OnTimeOperatorTable = ({
 
   useEffect(() => {
     setSparklineByOperatorId({});
+    setHasReceivedPageRows(false);
     inFlightOperatorIdsRef.current.clear();
     loadedOperatorIdsRef.current.clear();
   }, [sparklineParamsKey]);
@@ -347,20 +352,39 @@ export const OnTimeOperatorTable = ({
       selectedDatePreset,
     );
 
+  const isLoadingSparklines =
+    sortedData.length > 0 &&
+    (!hasReceivedPageRows ||
+      pageRows.some((operator) => {
+        const sparklineKey = getSparklineKey(operator);
+        return (
+          sparklineKey !== null &&
+          !loadedOperatorIdsRef.current.has(sparklineKey)
+        );
+      }));
+
   return (
     <div className={styles.container}>
-      <SortedPaginatedTable
-        columns={columns}
-        data={sortedData}
-        getRowValue={getRowValue}
-        renderRow={renderOperatorRow}
-        colWidths={OPERATOR_TABLE_COLUMN_WIDTHS}
-        colMinWidths={OPERATOR_TABLE_COLUMN_MIN_WIDTHS}
-        initialSortKey="name"
-        initialSortOrder="asc"
-        paginationNoun="operator"
-        onPageDataChange={setPageRows}
-      />
+      {isLoadingSparklines && (
+        <p className={`govuk-body ${styles.loading}`}>Loading...</p>
+      )}
+      <div className={isLoadingSparklines ? styles.tableLoading : undefined}>
+        <SortedPaginatedTable
+          columns={columns}
+          data={sortedData}
+          getRowValue={getRowValue}
+          renderRow={renderOperatorRow}
+          colWidths={OPERATOR_TABLE_COLUMN_WIDTHS}
+          colMinWidths={OPERATOR_TABLE_COLUMN_MIN_WIDTHS}
+          initialSortKey="name"
+          initialSortOrder="asc"
+          paginationNoun="operator"
+          onPageDataChange={(rows) => {
+            setPageRows(rows);
+            setHasReceivedPageRows(true);
+          }}
+        />
+      </div>
     </div>
   );
 };

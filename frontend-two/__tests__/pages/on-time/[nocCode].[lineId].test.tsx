@@ -212,6 +212,8 @@ describe("OnTimeServicePage", () => {
         }),
       );
     });
+
+      expect(mockFetchStopPerformance).toHaveBeenCalledTimes(1);
   });
 
   it("restores the direction from the service link", async () => {

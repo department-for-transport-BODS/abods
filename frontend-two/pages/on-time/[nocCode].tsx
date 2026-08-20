@@ -236,6 +236,7 @@ const OnTimeOperatorPage = () => {
     from: string;
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
+  const [appliedQueryDateKey, setAppliedQueryDateKey] = useState<string>();
 
   const queryDateRange = useMemo(
     () => getDateRangeFromQuery(router.query.from, router.query.to),
@@ -245,8 +246,16 @@ const OnTimeOperatorPage = () => {
     typeof router.query.preset === "string"
       ? getDatePresetFromQuery(router.query.preset)
       : undefined;
+  const queryDateKey = JSON.stringify({
+    from: router.query.from ?? null,
+    to: router.query.to ?? null,
+    preset: router.query.preset ?? null,
+  });
+  const hasAppliedQueryDate = appliedQueryDateKey === queryDateKey;
 
   useEffect(() => {
+    if (!isReady) return;
+
     if (queryDateRange) {
       setDateRange(queryDateRange);
       setSelectedDatePreset("Custom");
@@ -254,7 +263,8 @@ const OnTimeOperatorPage = () => {
       setDateRange(calculateDateRange(queryDatePreset));
       setSelectedDatePreset(queryDatePreset);
     }
-  }, [queryDatePreset, queryDateRange]);
+    setAppliedQueryDateKey(queryDateKey);
+  }, [isReady, queryDateKey, queryDatePreset, queryDateRange]);
 
   const servicePerformanceParams = useMemo<PerformanceParams | null>(() => {
     if (!nocCode) return null;
@@ -375,7 +385,13 @@ const OnTimeOperatorPage = () => {
   }, [config, isReady]);
 
   useEffect(() => {
-    if (!isReady || !config?.apiUrl || !nocCode || !servicePerformanceParams)
+    if (
+      !isReady ||
+      !hasAppliedQueryDate ||
+      !config?.apiUrl ||
+      !nocCode ||
+      !servicePerformanceParams
+    )
       return;
     const load = async () => {
       setIsLoading(true);
@@ -470,6 +486,7 @@ const OnTimeOperatorPage = () => {
     selectedMatchType,
     selectedStopType,
     isReady,
+    hasAppliedQueryDate,
     replace,
     queryDateRange,
   ]);

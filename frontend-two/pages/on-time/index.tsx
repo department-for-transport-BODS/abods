@@ -113,6 +113,7 @@ const OnTimeIndexPage = () => {
     from: string;
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
+  const [appliedQueryDateKey, setAppliedQueryDateKey] = useState<string>();
 
   const queryDateRange = useMemo(
     () => getDateRangeFromQuery(router.query.from, router.query.to),
@@ -122,8 +123,16 @@ const OnTimeIndexPage = () => {
     typeof router.query.preset === "string"
       ? getDatePresetFromQuery(router.query.preset)
       : undefined;
+  const queryDateKey = JSON.stringify({
+    from: router.query.from ?? null,
+    to: router.query.to ?? null,
+    preset: router.query.preset ?? null,
+  });
+  const hasAppliedQueryDate = appliedQueryDateKey === queryDateKey;
 
   useEffect(() => {
+    if (!router.isReady) return;
+
     if (queryDateRange) {
       setDateRange(queryDateRange);
       setSelectedDatePreset("Custom");
@@ -131,7 +140,8 @@ const OnTimeIndexPage = () => {
       setDateRange(calculateDateRange(queryDatePreset));
       setSelectedDatePreset(queryDatePreset);
     }
-  }, [queryDatePreset, queryDateRange]);
+    setAppliedQueryDateKey(queryDateKey);
+  }, [router.isReady, queryDateKey, queryDatePreset, queryDateRange]);
 
   const adminAreaOptions = useMemo(
     () =>
@@ -333,7 +343,7 @@ const OnTimeIndexPage = () => {
   ]);
 
   useEffect(() => {
-    if (!config?.apiUrl) return;
+    if (!router.isReady || !hasAppliedQueryDate || !config?.apiUrl) return;
 
     const load = async () => {
       setIsLoading(true);
@@ -356,7 +366,7 @@ const OnTimeIndexPage = () => {
     };
 
     load();
-  }, [config?.apiUrl, operatorTableParams]);
+  }, [router.isReady, hasAppliedQueryDate, config?.apiUrl, operatorTableParams]);
 
   return (
     <BaseLayout title="All services: Analyse Bus Open Data">

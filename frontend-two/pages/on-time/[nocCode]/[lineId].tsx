@@ -172,6 +172,7 @@ const OnTimeServicePage = () => {
     from: string;
     to: string;
   } | null>(calculateDateRange("Last 7 days"));
+  const [appliedQueryDateKey, setAppliedQueryDateKey] = useState<string>();
 
   const queryDirections = useMemo(() => {
     const direction = router.query.direction;
@@ -196,8 +197,16 @@ const OnTimeServicePage = () => {
     typeof router.query.preset === "string"
       ? getDatePresetFromQuery(router.query.preset)
       : undefined;
+  const queryDateKey = JSON.stringify({
+    from: router.query.from ?? null,
+    to: router.query.to ?? null,
+    preset: router.query.preset ?? null,
+  });
+  const hasAppliedQueryDate = appliedQueryDateKey === queryDateKey;
 
   useEffect(() => {
+    if (!isReady) return;
+
     if (queryDateRange) {
       setDateRange(queryDateRange);
       setSelectedDatePreset("Custom");
@@ -205,7 +214,8 @@ const OnTimeServicePage = () => {
       setDateRange(calculateDateRange(queryDatePreset));
       setSelectedDatePreset(queryDatePreset);
     }
-  }, [queryDatePreset, queryDateRange]);
+    setAppliedQueryDateKey(queryDateKey);
+  }, [isReady, queryDateKey, queryDatePreset, queryDateRange]);
 
   const stopPerformanceParams = useMemo<PerformanceParams | null>(() => {
     if (!nocCode || !lineId) return null;
@@ -383,6 +393,7 @@ const OnTimeServicePage = () => {
   useEffect(() => {
     if (
       !isReady ||
+      !hasAppliedQueryDate ||
       !config?.apiUrl ||
       !nocCode ||
       !lineId ||
@@ -481,6 +492,7 @@ const OnTimeServicePage = () => {
     selectedMatchType,
     selectedStopType,
     isReady,
+    hasAppliedQueryDate,
     replace,
   ]);
 
