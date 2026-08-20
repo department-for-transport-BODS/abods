@@ -146,112 +146,112 @@ export const SortableTable = ({
       {title ? <h2 className="govuk-heading-m">{title}</h2> : null}
       <div className={clsx(scrollable && styles.tableScroll)}>
         <table
-        className={clsx(
-          "govuk-table",
-          styles.sortableTable,
-          colWidths && styles.fixed,
-        )}
-        style={{
-          width: "100%",
-          ...(colWidths && {
-            minWidth: head.reduce(
-              (total, col) => total + toMinWidth(colWidths[col.key]),
-              0,
-            ),
-          }),
-        }}
-      >
-        {colWidths && (
-          <colgroup>
-            {head.map((col) => (
-              <col
-                key={col.key}
-                style={
-                  colWidths[col.key]
-                    ? { width: toCssWidth(colWidths[col.key]!) }
-                    : undefined
-                }
-              />
-            ))}
-          </colgroup>
-        )}
-        <thead className="govuk-table__head">
-          <tr className="govuk-table__row">
-            {head.map((item) => (
-              <th
-                key={item.key}
-                className={clsx(
-                  "govuk-table__header",
-                  getAlignmentClassName(item.alignment),
-                  item.headerClassName,
-                )}
-                style={
-                  colWidths?.[item.key]
-                    ? { width: toCssWidth(colWidths[item.key]!) }
-                    : undefined
-                }
-                {...(item?.sortable && { "aria-sort": getAriaSort(item) })}
-              >
-                <div className={styles.clip}>
-                  {item.sortable ? (
-                    <button
-                      type="button"
-                      className={clsx(
-                        styles.sortableHeader,
-                        getAlignmentClassName(item.alignment),
-                        item.headerClassName,
-                      )}
-                      onClick={() => handleSort(item.key)}
-                      aria-label={`Sort by ${item.ariaLabel ?? (typeof item.label === "string" ? item.label : item.key)} ${getAriaSort(item)}`}
-                      data-testid={`sortable-header-${item.key}`}
-                    >
+          className={clsx(
+            "govuk-table",
+            styles.sortableTable,
+            colWidths && styles.fixed,
+          )}
+          style={{
+            width: "100%",
+            ...(colWidths && {
+              minWidth: head.reduce(
+                (total, col) => total + toMinWidth(colWidths[col.key]),
+                0,
+              ),
+            }),
+          }}
+        >
+          {colWidths && (
+            <colgroup>
+              {head.map((col) => (
+                <col
+                  key={col.key}
+                  style={
+                    colWidths[col.key]
+                      ? { width: toCssWidth(colWidths[col.key]!) }
+                      : undefined
+                  }
+                />
+              ))}
+            </colgroup>
+          )}
+          <thead className="govuk-table__head">
+            <tr className="govuk-table__row">
+              {head.map((item) => (
+                <th
+                  key={item.key}
+                  className={clsx(
+                    "govuk-table__header",
+                    getAlignmentClassName(item.alignment),
+                    item.headerClassName,
+                  )}
+                  style={
+                    colWidths?.[item.key]
+                      ? { width: toCssWidth(colWidths[item.key]!) }
+                      : undefined
+                  }
+                  {...(item?.sortable && { "aria-sort": getAriaSort(item) })}
+                >
+                  <div className={styles.clip}>
+                    {item.sortable ? (
+                      <button
+                        type="button"
+                        className={clsx(
+                          styles.sortableHeader,
+                          getAlignmentClassName(item.alignment),
+                          item.headerClassName,
+                        )}
+                        onClick={() => handleSort(item.key)}
+                        aria-label={`Sort by ${item.ariaLabel ?? (typeof item.label === "string" ? item.label : item.key)} ${getAriaSort(item)}`}
+                        data-testid={`sortable-header-${item.key}`}
+                      >
+                        <span className={styles.sortableHeaderLabel}>
+                          {renderHeaderLabel(item.label)}
+                        </span>
+                        {getSortIcon(item)}
+                      </button>
+                    ) : (
                       <span className={styles.sortableHeaderLabel}>
                         {renderHeaderLabel(item.label)}
                       </span>
-                      {getSortIcon(item)}
-                    </button>
-                  ) : (
-                    <span className={styles.sortableHeaderLabel}>
-                      {renderHeaderLabel(item.label)}
-                    </span>
-                  )}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="govuk-table__body">
-          {rows.map((row) => (
-            <tr
-              key={row.key}
-              className={clsx("govuk-table__row", row.rowClassName)}
-            >
-              {head.map((column) => (
-                <td
-                  key={column.key}
-                  className={clsx(
-                    "govuk-table__cell",
-                    getAlignmentClassName(column.alignment),
-                    column.cellClassName,
-                    fontSize,
-                  )}
-                  style={
-                    colWidths?.[column.key]
-                      ? { width: toCssWidth(colWidths[column.key]!) }
-                      : undefined
-                  }
-                  data-label={
-                    typeof column.label === "string"
-                      ? column.label
-                      : column.ariaLabel ?? column.key
-                  }
-                >
-                  <div className={styles.clip}>{row[column.key]}</div>
-                </td>
+                    )}
+                  </div>
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
+          </thead>
+          <tbody className="govuk-table__body">
+            {rows.map((row) => (
+              <tr
+                key={row.key}
+                className={clsx("govuk-table__row", row.rowClassName)}
+              >
+                {head.map((column) => (
+                  <td
+                    key={column.key}
+                    className={clsx(
+                      "govuk-table__cell",
+                      getAlignmentClassName(column.alignment),
+                      column.cellClassName,
+                      fontSize,
+                    )}
+                    style={
+                      colWidths?.[column.key]
+                        ? { width: toCssWidth(colWidths[column.key]!) }
+                        : undefined
+                    }
+                    data-label={
+                      typeof column.label === "string"
+                        ? column.label
+                        : column.ariaLabel ?? column.key
+                    }
+                  >
+                    <div className={styles.clip}>{row[column.key]}</div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
       {pagination || footerAction ? (
