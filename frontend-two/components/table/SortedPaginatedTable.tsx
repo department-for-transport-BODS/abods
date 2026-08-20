@@ -39,8 +39,7 @@ export interface SortedPaginatedTableProps<T> {
   paginationNoun?: string;
   paginationAlignment?: "left" | "right";
   onSortChange?: (key: string | null, order: SortOrder) => void;
-  colWidths?: Partial<Record<string, string>>;
-  colMinWidths?: Partial<Record<string, number>>;
+  colWidths?: Partial<Record<string, string | number>>;
   fontSize?: string;
 }
 
@@ -64,7 +63,6 @@ export const SortedPaginatedTable = <T,>({
   paginationAlignment = "right",
   onSortChange,
   colWidths,
-  colMinWidths,
   fontSize,
 }: SortedPaginatedTableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -160,7 +158,6 @@ export const SortedPaginatedTable = <T,>({
         pagination={!showEmptyMessage ? pagination : undefined}
         paginationAlignment={paginationAlignment}
         colWidths={colWidths}
-        colMinWidths={colMinWidths}
         footerAction={showEmptyMessage ? undefined : footerAction}
         fontSize={fontSize}
       />

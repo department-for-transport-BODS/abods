@@ -9,6 +9,13 @@ export type SortOrder = "asc" | "desc" | "none";
 // makes them scroll horizontally rather than squash.
 const MIN_COLUMN_WIDTH = 100;
 
+// A numeric width is in pixels and also acts as the column's minimum width.
+const toCssWidth = (width: string | number) =>
+  typeof width === "number" ? `${width}px` : width;
+
+const toMinWidth = (width: string | number | undefined) =>
+  typeof width === "number" ? width : MIN_COLUMN_WIDTH;
+
 export interface SortableTableHeadCell {
   key: string;
   label: ReactNode;
@@ -43,8 +50,7 @@ export interface SortableTableProps {
   title?: ReactNode;
   pagination?: SortableTablePagination;
   paginationAlignment?: "left" | "right";
-  colWidths?: Partial<Record<string, string>>;
-  colMinWidths?: Partial<Record<string, number>>;
+  colWidths?: Partial<Record<string, string | number>>;
   footerAction?: ReactNode;
   fontSize?: string;
 }
@@ -111,7 +117,6 @@ export const SortableTable = ({
   pagination,
   paginationAlignment = "right",
   colWidths,
-  colMinWidths,
   footerAction,
   fontSize,
 }: SortableTableProps): React.JSX.Element => {
@@ -147,8 +152,7 @@ export const SortableTable = ({
           width: "100%",
           ...(colWidths && {
             minWidth: head.reduce(
-              (total, col) =>
-                total + (colMinWidths?.[col.key] ?? MIN_COLUMN_WIDTH),
+              (total, col) => total + toMinWidth(colWidths[col.key]),
               0,
             ),
           }),
@@ -160,7 +164,9 @@ export const SortableTable = ({
               <col
                 key={col.key}
                 style={
-                  colWidths[col.key] ? { width: colWidths[col.key] } : undefined
+                  colWidths[col.key]
+                    ? { width: toCssWidth(colWidths[col.key]!) }
+                    : undefined
                 }
               />
             ))}
@@ -178,7 +184,7 @@ export const SortableTable = ({
                 )}
                 style={
                   colWidths?.[item.key]
-                    ? { width: colWidths[item.key] }
+                    ? { width: toCssWidth(colWidths[item.key]!) }
                     : undefined
                 }
                 {...(item?.sortable && { "aria-sort": getAriaSort(item) })}
@@ -228,7 +234,7 @@ export const SortableTable = ({
                   )}
                   style={
                     colWidths?.[column.key]
-                      ? { width: colWidths[column.key] }
+                      ? { width: toCssWidth(colWidths[column.key]!) }
                       : undefined
                   }
                   data-label={

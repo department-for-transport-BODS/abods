@@ -71,21 +71,15 @@ const columns = [
   },
 ];
 
-const OPERATOR_TABLE_COLUMN_WIDTHS = {
-  nocCode: "7%",
-  averageDelay: "10%",
-  onTimeRatio: "10%",
-  lateRatio: "10%",
-  earlyRatio: "10%",
-  sparkline: "28%",
-};
-
 // The widths ag-grid resolves for the Angular operator grid; the flex columns
 // fall back to its `defaultColDef.minWidth`.
-const OPERATOR_TABLE_COLUMN_MIN_WIDTHS = {
+const OPERATOR_TABLE_COLUMN_WIDTHS = {
   nocCode: 60,
   name: 200,
+  averageDelay: 100,
   onTimeRatio: 130,
+  lateRatio: 100,
+  earlyRatio: 100,
   sparkline: 350,
 };
 
@@ -375,7 +369,6 @@ export const OnTimeOperatorTable = ({
           getRowValue={getRowValue}
           renderRow={renderOperatorRow}
           colWidths={OPERATOR_TABLE_COLUMN_WIDTHS}
-          colMinWidths={OPERATOR_TABLE_COLUMN_MIN_WIDTHS}
           initialSortKey="name"
           initialSortOrder="asc"
           paginationNoun="operator"

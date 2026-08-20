@@ -183,21 +183,9 @@ const SERVICE_NUMERIC_COLUMN_KEYS = new Set<ServiceTableColumnKey>([
   "early",
 ]);
 
-const SERVICE_TABLE_COLUMN_WIDTHS = {
-  frequent: "60px",
-  service: "250px",
-  direction: "130px",
-  scheduledDepartures: "160px",
-  recordedDepartures: "130px",
-  averageDelay: "130px",
-  onTime: "130px",
-  late: "130px",
-  early: "130px",
-};
-
 // The widths ag-grid resolves for the Angular service grid: an explicit width, a
 // flex column's minWidth, or its maxWidth capping ag-grid's 200px default.
-const SERVICE_TABLE_COLUMN_MIN_WIDTHS = {
+const SERVICE_TABLE_COLUMN_WIDTHS = {
   frequent: 60,
   service: 250,
   direction: 130,
@@ -466,7 +454,6 @@ export const OnTimeServicesTable = ({
         emptyMessage="No service data found"
         onDisplayedDataChange={setDisplayedRows}
         colWidths={SERVICE_TABLE_COLUMN_WIDTHS}
-        colMinWidths={SERVICE_TABLE_COLUMN_MIN_WIDTHS}
         footerAction={
           <CsvExportButton
             filename={csvFilename}
