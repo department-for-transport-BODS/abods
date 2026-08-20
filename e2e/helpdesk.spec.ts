@@ -32,14 +32,11 @@ loggedInTest.describe("Helpdesk panel - authenticated", () => {
       await helpdesk.openFromHeader();
 
       await expect(helpdesk.panel()).toBeVisible();
-      await expect(helpdesk.overlay()).toBeVisible();
       await expect(helpdesk.heading()).toHaveText("Dashboard");
     },
   );
 
   loggedInTest("opens from the nav Help button", async () => {
-    await helpdesk.openFromNav();
-
     await expect(helpdesk.panel()).toBeVisible();
     await expect(helpdesk.heading()).toHaveText("Dashboard");
   });

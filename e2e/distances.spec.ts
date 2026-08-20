@@ -36,31 +36,11 @@ loggedInTest.describe("Distance Page - Authenticated", () => {
 
   loggedInTest("renders the distances filter panel", async () => {
     await expect(distances.filterPanel().getByText("Date Range")).toBeVisible();
-    await expect(
-      distances
-        .filterPanel()
-        .getByRole("button", { name: /^All areas(\s+▼)?$/i }),
-    ).toBeVisible();
-    await expect(
-      distances
-        .filterPanel()
-        .getByRole("button", { name: /^All organisations(\s+▼)?$/i }),
-    ).toBeVisible();
-    await expect(
-      distances
-        .filterPanel()
-        .getByRole("button", { name: /^All operators(\s+▼)?$/i }),
-    ).toBeVisible();
-    await expect(
-      distances
-        .filterPanel()
-        .getByRole("button", { name: /^All licenses(\s+▼)?$/i }),
-    ).toBeVisible();
-    await expect(
-      distances
-        .filterPanel()
-        .getByRole("button", { name: /^All services(\s+▼)?$/i }),
-    ).toBeVisible();
+    await expect(distances.adminAreaFilter()).toBeVisible();
+    await expect(distances.organisationsFilter()).toBeVisible();
+    await expect(distances.operatorsFilter()).toBeVisible();
+    await expect(distances.licensesFilter()).toBeVisible();
+    await expect(distances.servicesFilter()).toBeVisible();
   });
 
   loggedInTest("renders the distances table", async () => {

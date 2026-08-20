@@ -289,7 +289,11 @@ const OtpStats = ({
   );
 
   return (
-    <div className={styles.vehicleJourneysOtpStats}>
+    <div
+      className={styles.vehicleJourneysOtpStats}
+      role="group"
+      aria-label="Journey performance statistics"
+    >
       <Stat
         id="vehicle-journeys-on-time"
         className={styles.vehicleJourneysOtpStat}
