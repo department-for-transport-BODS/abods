@@ -41,6 +41,7 @@ export interface SortedPaginatedTableProps<T> {
   onSortChange?: (key: string | null, order: SortOrder) => void;
   colWidths?: Partial<Record<string, string | number>>;
   fontSize?: string;
+  scrollable?: boolean;
 }
 
 export const SortedPaginatedTable = <T,>({
@@ -64,6 +65,7 @@ export const SortedPaginatedTable = <T,>({
   onSortChange,
   colWidths,
   fontSize,
+  scrollable,
 }: SortedPaginatedTableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortKey, setSortKey] = useState<string | null>(initialSortKey);
@@ -160,6 +162,7 @@ export const SortedPaginatedTable = <T,>({
         colWidths={colWidths}
         footerAction={showEmptyMessage ? undefined : footerAction}
         fontSize={fontSize}
+        scrollable={scrollable}
       />
       {showEmptyMessage && (
         <div className="govuk-body govuk-!-margin-top-4 govuk-!-margin-bottom-4 text-center">

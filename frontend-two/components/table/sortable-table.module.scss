@@ -20,6 +20,12 @@
   max-width: 100%;
   overflow: hidden;
 }
+.tableScroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .sortableTable .sortableHeader {
   display: flex;
   position: relative;

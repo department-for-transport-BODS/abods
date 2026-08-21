@@ -176,6 +176,12 @@ describe("OnTimeServicePage", () => {
   });
 
   it("renders service heading and back link when service data is available", async () => {
+    mockQuery = {
+      nocCode: "ABCD",
+      lineId: "LINE1",
+      preset: "lastMonth",
+      direction: "Inbound",
+    };
     render(<OnTimeServicePage />);
 
     await waitFor(() => {
@@ -190,7 +196,10 @@ describe("OnTimeServicePage", () => {
     );
     const backLink = screen.getByRole("link", { name: /All Services/i });
 
-    expect(backLink).toHaveAttribute("href", "/on-time/ABCD");
+    expect(backLink).toHaveAttribute(
+      "href",
+      "/on-time/ABCD?preset=lastMonth&direction=Inbound",
+    );
     expect(backLink.parentElement).toHaveClass("page__back-link");
   });
 

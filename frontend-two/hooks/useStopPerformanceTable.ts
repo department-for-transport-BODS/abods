@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { StopPerformanceRow } from "@/types/stop-analysis";
+import { formatPrecisePercentage } from "@/utils/maths";
 
 export type DisplayMode = "percentage" | "count" | "time";
 
@@ -11,7 +12,7 @@ export const DISPLAY_MODE_OPTIONS: { value: DisplayMode; label: string }[] = [
 
 export const formatPercent = (value: number | undefined | null): string => {
   if (value == null || isNaN(value) || !isFinite(value)) return "-";
-  return `${(value * 100).toFixed(1)}%`;
+  return formatPrecisePercentage(value);
 };
 
 export const formatSeconds = (

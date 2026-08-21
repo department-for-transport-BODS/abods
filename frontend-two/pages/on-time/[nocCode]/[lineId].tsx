@@ -509,13 +509,19 @@ const OnTimeServicePage = () => {
   const serviceTitle = data.serviceInfo
     ? `${data.serviceInfo.serviceNumber} - ${data.serviceInfo.serviceName}`
     : lineId;
+  const allServicesQuery = { ...router.query };
+  delete allServicesQuery.nocCode;
+  delete allServicesQuery.lineId;
 
   return (
     <BaseLayout
       title={`${serviceTitle}: Analyse Bus Open Data`}
       backLink={
         <Link
-          href={`/on-time/${encodeURIComponent(nocCode)}`}
+          href={{
+            pathname: `/on-time/${encodeURIComponent(nocCode)}`,
+            query: allServicesQuery,
+          }}
           className="govuk-back-link"
         >
           All Services

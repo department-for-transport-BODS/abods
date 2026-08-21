@@ -507,6 +507,7 @@ export const OnTimeStopsTable = ({
           />
         }
         fontSize="govuk-!-font-size-16"
+        scrollable
       />
     </div>
   );

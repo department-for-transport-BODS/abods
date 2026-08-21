@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { DistancesListQuery } from "../../src/generated/graphql";
 import { SortedPaginatedTable } from "../table/SortedPaginatedTable";
 import type { SortableTableRow } from "../table/SortableTable";
+import { formatPercentage } from "@/utils/maths";
 
 type DistanceData = DistancesListQuery["distances"][number];
 
@@ -52,7 +53,7 @@ function renderRow(row: DistanceData): SortableTableRow {
   const avlDistance = row.avlDistance ? row.avlDistance / 1000 : null;
   const avlPercent =
     distance && avlDistance != null
-      ? `${((avlDistance / distance) * 100).toFixed(1)}%`
+      ? formatPercentage(avlDistance / distance)
       : "-";
 
   return {
@@ -85,7 +86,7 @@ export const DistanceTable = ({ data }: DistanceTableProps) => {
 
     const avlPercent =
       totalDistance > 0
-        ? `${((totalAvlDistance / totalDistance) * 100).toFixed(1)}%`
+        ? formatPercentage(totalAvlDistance / totalDistance)
         : "-";
 
     return {

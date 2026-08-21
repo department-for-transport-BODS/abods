@@ -11,6 +11,7 @@ import {
   PunctualityOverview,
   onTimeService,
 } from "@/services/on-time/on-time.service";
+import { formatPrecisePercentage } from "@/utils/maths";
 
 interface OtpThresholdModalProps {
   open: boolean;
@@ -29,13 +30,8 @@ const ratio = (
   return value / completed;
 };
 
-const percentFormatter = new Intl.NumberFormat("en-GB", {
-  style: "percent",
-  maximumFractionDigits: 2,
-});
-
 const formatRatio = (value: number | null, fallback: string): string =>
-  value == null ? fallback : percentFormatter.format(value);
+  value == null ? fallback : formatPrecisePercentage(value);
 
 interface ComparisonRow {
   key: string;
