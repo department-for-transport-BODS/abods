@@ -101,9 +101,9 @@ describe("StopAnalysisTable", () => {
     );
 
     expect(screen.getByRole("radio", { name: "Percentage" })).toBeChecked();
-    expect(screen.getByTestId("metric-onTime")).toHaveTextContent("75.0%");
-    expect(screen.getByTestId("metric-early")).toHaveTextContent("25.0%");
-    expect(screen.getByTestId("metric-late")).toHaveTextContent("25.0%");
+    expect(screen.getByTestId("metric-onTime")).toHaveTextContent("75%");
+    expect(screen.getByTestId("metric-early")).toHaveTextContent("25%");
+    expect(screen.getByTestId("metric-late")).toHaveTextContent("25%");
 
     await user.click(screen.getByRole("radio", { name: "Count" }));
     expect(screen.getByRole("radio", { name: "Count" })).toBeChecked();

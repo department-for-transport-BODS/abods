@@ -1,8 +1,7 @@
 import { Duration } from "luxon";
-import {
-  formatPercentage as formatAngularStylePercentage,
-  getRatio,
-} from "../maths";
+import { formatPercentage, getRatio } from "../maths";
+
+export { formatPercentage };
 
 export type OnTimeDisplayMode = "percentage" | "count" | "time";
 
@@ -179,11 +178,6 @@ export function normaliseDirection(
   return value;
 }
 
-export function formatPercentage(ratio: number | null | undefined): string {
-  if (ratio == null) return "-";
-  return `${(ratio * 100).toFixed(1)}%`;
-}
-
 /**
  * Formats a duration in seconds as mm:ss.
  * @param seconds - the value in seconds (may be negative)
@@ -267,12 +261,7 @@ export function getMetricSortValue(
   }
 }
 
-export function formatExportPercentage(
-  ratio: number | null | undefined,
-): string {
-  if (ratio === undefined || ratio === null) return "-";
-  return formatAngularStylePercentage(ratio);
-}
+export const formatExportPercentage = formatPercentage;
 
 export function formatAverageSecondsForExport(
   value: number | null | undefined,

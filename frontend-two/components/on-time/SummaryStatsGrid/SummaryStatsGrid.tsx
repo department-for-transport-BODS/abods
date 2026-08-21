@@ -3,6 +3,7 @@ import styles from "./summary-stats-grid.module.scss";
 import { Duration } from "luxon";
 import { SummaryStatWithTooltip } from "@/components/shared/SummaryStat/SummaryStatWithTooltip";
 import { TooltipList } from "@/components/shared/Tooltip";
+import { formatPrecisePercentage } from "@/utils/maths";
 import { clsx } from "clsx";
 
 interface SummaryStatsGridProps {
@@ -28,14 +29,9 @@ const formatDelay = (delay: number | null): string => {
   );
 };
 
-const percentFormatter = new Intl.NumberFormat("en-GB", {
-  style: "percent",
-  maximumFractionDigits: 2,
-});
-
 const formatPercentage = (value: number | null, total: number): string => {
   if (value == null || total <= 0) return "-";
-  return percentFormatter.format(value / total);
+  return formatPrecisePercentage(value / total);
 };
 
 const formatIncompletePercentage = (
@@ -50,7 +46,7 @@ const formatIncompletePercentage = (
     return "-";
   }
 
-  return percentFormatter.format(value / totalStopDepartures);
+  return formatPrecisePercentage(value / totalStopDepartures);
 };
 
 const formatCount = (value: number | null): string => {

@@ -26,8 +26,21 @@ export const stdDeviation = (
     ),
   );
 
-export const formatPercentage = (ratio: number | null | undefined): string => {
-  if (ratio == null) return "-";
-  const percentage = Math.round(ratio * 1000) / 10;
-  return `${Number.isInteger(percentage) ? percentage.toFixed(0) : percentage.toFixed(1)}%`;
-};
+// Angular formats grid percentages with `percent: '1.0-1'` and summary/panel
+// percentages with `percent: '1.0-2'`; neither pads trailing zeros.
+const gridPercentageFormatter = new Intl.NumberFormat("en-GB", {
+  style: "percent",
+  maximumFractionDigits: 1,
+});
+
+const precisePercentageFormatter = new Intl.NumberFormat("en-GB", {
+  style: "percent",
+  maximumFractionDigits: 2,
+});
+
+export const formatPercentage = (ratio: number | null | undefined): string =>
+  ratio == null ? "-" : gridPercentageFormatter.format(ratio);
+
+export const formatPrecisePercentage = (
+  ratio: number | null | undefined,
+): string => (ratio == null ? "-" : precisePercentageFormatter.format(ratio));
