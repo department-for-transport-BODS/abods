@@ -137,7 +137,7 @@ jobs:
 
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully built uploaded"
 
-  frontend-v2:
+  frontend-two:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'dev' && 'dev' || 'sandbox' }}
     needs: validation
@@ -163,30 +163,30 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-frontend-v2-build
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-frontend-two-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: get frontend v2 deployment values
+      - name: get frontend-two deployment values
         id: get-values
         run: |
           stack_name=$(yq -r '."${{ env.RC_ENV }}".deploy.parameters.stack_name' ../abods-api/samconfig.yaml)
 
           echo "stack-name=${stack_name}" >> "$GITHUB_OUTPUT"
-          echo "frontend-bucket-v2-name=$( \
+          echo "frontend-bucket-name=$( \
             aws cloudformation describe-stacks \
               --stack-name "$stack_name" \
-              --query 'Stacks[0].Outputs[?OutputKey==`FrontendBucketV2Name`].OutputValue' \
+              --query 'Stacks[0].Outputs[?OutputKey==`FrontendBucketName`].OutputValue' \
               --output text \
           )" >> "$GITHUB_OUTPUT"
           echo "cloudfront-distribution-id=$( \
             aws cloudformation describe-stacks \
               --stack-name "$stack_name" \
-              --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionV2Id`].OutputValue' \
+              --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
               --output text \
           )" >> "$GITHUB_OUTPUT"
 
-      - name: build and deploy frontend v2 for ${{ env.RC_ENV }}
+      - name: build and deploy frontend-two for ${{ env.RC_ENV }}
         env:
           CI: ""
         run: |
@@ -241,9 +241,9 @@ jobs:
           npm ci
           NEXT_GRAPHQL_API_BASE_URL="$graphql_api_url" npm run build
 
-          echo "[INFO] Uploading application component (FRONTEND V2) for ${RC_ENV^^}"
-          aws s3 rm --recursive "${{ steps.get-values.outputs.frontend-bucket-v2-name }}"
-          aws s3 sync out/ "${{ steps.get-values.outputs.frontend-bucket-v2-name }}/" --delete
+          echo "[INFO] Uploading application component (FRONTEND-TWO) for ${RC_ENV^^}"
+          aws s3 rm --recursive "${{ steps.get-values.outputs.frontend-bucket-name }}"
+          aws s3 sync out/ "${{ steps.get-values.outputs.frontend-bucket-name }}/" --delete
 
           echo "[INFO] Executing invalidation against CloudFront Distribution Id ${{ steps.get-values.outputs.cloudfront-distribution-id }}"
           invalidation_id=$(aws cloudfront create-invalidation --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --paths '/*' --output json \
@@ -252,7 +252,7 @@ jobs:
           echo "[INFO] Waiting for invalidation to complete..."
           aws cloudfront wait invalidation-completed --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --id "$invalidation_id"
 
-          echo "[INFO] Application component (FRONTEND V2) successfully deployed for ${RC_ENV^^}"
+          echo "[INFO] Application component (FRONTEND-TWO) successfully deployed for ${RC_ENV^^}"
 
   commit-and-tag:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'dev') }}
@@ -260,7 +260,7 @@ jobs:
     needs:
       - validation
       - backend
-      - frontend-v2
+      - frontend-two
 
     permissions:
       contents: write
@@ -288,7 +288,7 @@ jobs:
     needs:
       - validation
       - backend
-      - frontend-v2
+      - frontend-two
       - commit-and-tag
 
     permissions:
