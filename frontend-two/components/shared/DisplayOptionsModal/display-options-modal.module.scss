@@ -1,0 +1,12 @@
+@use "../../../styles/govuk-module" as *;
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+}
+
+.showAllLink {
+  color: govuk-functional-colour(link);
+  text-decoration: underline;
+}

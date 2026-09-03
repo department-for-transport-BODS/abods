@@ -1,0 +1,51 @@
+@use "../settings/settings" as *;
+
+$popup-arrow-size: 9px;
+$popup-background: govuk-colour("black");
+$popup-colour: govuk-colour("white");
+
+.mapboxgl-popup.gds-popup {
+  .mapboxgl-popup-tip {
+    border-width: $popup-arrow-size;
+  }
+
+  &.mapboxgl-popup-anchor-top,
+  &.mapboxgl-popup-anchor-top-left,
+  &.mapboxgl-popup-anchor-top-right {
+    > .mapboxgl-popup-tip {
+      border-bottom-color: $popup-background;
+      margin-bottom: -1px;
+    }
+  }
+  &.mapboxgl-popup-anchor-bottom,
+  &.mapboxgl-popup-anchor-bottom-left,
+  &.mapboxgl-popup-anchor-bottom-right {
+    > .mapboxgl-popup-tip {
+      border-top-color: $popup-background;
+      margin-top: -1px;
+    }
+  }
+  &.mapboxgl-popup-anchor-left {
+    > .mapboxgl-popup-tip {
+      border-right-color: $popup-background;
+      margin-right: -1px;
+    }
+  }
+  &.mapboxgl-popup-anchor-right {
+    > .mapboxgl-popup-tip {
+      border-left-color: $popup-background;
+      margin-left: -1px;
+    }
+  }
+  > .mapboxgl-popup-content {
+    @include govuk-font(16);
+    background-color: $popup-background;
+    border: 0 none;
+    color: $popup-colour;
+    box-shadow: none;
+    border-radius: 0;
+    outline: 0;
+    padding: govuk-spacing(2);
+    pointer-events: none;
+  }
+}

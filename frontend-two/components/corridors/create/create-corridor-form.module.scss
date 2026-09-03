@@ -1,0 +1,10 @@
+@use "../../../styles/govuk-module" as *;
+.corridorStopColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.searchPanel {
+  width: 100%;
+  max-width: 50ex;
+}

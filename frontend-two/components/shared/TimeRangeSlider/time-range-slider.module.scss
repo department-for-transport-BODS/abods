@@ -1,0 +1,23 @@
+@use "../../../styles/govuk-module" as *;
+
+.textboxes {
+  display: flex;
+  width: 100%;
+
+  > * {
+    width: 50%;
+    min-width: 0;
+  }
+
+  > *:first-child {
+    margin-right: govuk-spacing(6);
+  }
+
+  :global(.govuk-input__wrapper) {
+    width: 100%;
+  }
+
+  input {
+    width: 100%;
+  }
+}

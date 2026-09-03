@@ -1,0 +1,118 @@
+@use "../../styles/govuk-module" as *;
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(10rem, auto) minmax(18rem, 1fr) minmax(
+      18rem,
+      1fr
+    );
+  gap: govuk-spacing(4);
+  align-items: end;
+  margin-bottom: govuk-spacing(5);
+
+  :global(.govuk-form-group) {
+    margin-bottom: 0;
+  }
+}
+
+.operator,
+.service {
+  min-width: 0;
+
+  > * {
+    width: 100%;
+  }
+}
+
+.loading {
+  margin-top: govuk-spacing(4);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: govuk-spacing(2);
+}
+
+.errorIcon {
+  flex-shrink: 0;
+  color: govuk-functional-colour(error);
+}
+
+.journeySearchNav {
+  display: flex;
+  align-items: center;
+  gap: govuk-spacing(3);
+  justify-content: flex-end;
+  margin-left: auto;
+  margin-bottom: govuk-spacing(5);
+  width: fit-content;
+
+  :global(.govuk-pagination__prev),
+  :global(.govuk-pagination__next) {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  :global(.govuk-pagination__link) {
+    display: inline-flex;
+    align-items: center;
+    gap: govuk-spacing(2);
+    color: govuk-functional-colour(link);
+    font-weight: normal;
+    text-decoration: underline;
+
+    &:hover {
+      color: govuk-functional-colour(link-hover);
+    }
+
+    &:focus {
+      color: govuk-functional-colour(text);
+    }
+  }
+
+  :global(.govuk-pagination__link-title) {
+    font-weight: 700;
+  }
+
+  :global(.govuk-pagination__icon) {
+    fill: currentColor;
+    flex: 0 0 auto;
+  }
+}
+
+.journeySearchNavDate {
+  padding-left: govuk-spacing(1);
+  padding-right: govuk-spacing(1);
+  @include govuk-font(19);
+}
+
+.journeySearchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: govuk-spacing(2);
+  margin-bottom: govuk-spacing(5);
+}
+
+.journeySearchGridTime {
+  display: inline-block;
+  padding: govuk-spacing(1) 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.journeySearchGridSkeleton {
+  margin-top: govuk-spacing(3);
+}
+
+.journeySearchGridSkeletonItem {
+  height: 1.5rem;
+  background: govuk-colour("black", $variant: "tint-95");
+}
+
+@media (max-width: 900px) {
+  .controls {
+    grid-template-columns: 1fr;
+  }
+}

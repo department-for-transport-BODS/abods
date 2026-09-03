@@ -1,0 +1,82 @@
+@use "../../styles/govuk-module" as *;
+.stopAnalysisMap {
+  position: relative;
+  margin-bottom: govuk-spacing(4);
+
+  :global(.mapboxgl-popup),
+  :global(.mapboxgl-popup-content) {
+    pointer-events: none;
+  }
+}
+.container {
+  width: 100%;
+  height: 500px;
+}
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  z-index: 2;
+  pointer-events: none;
+  p {
+    font-size: 48px;
+    text-shadow: 0 0 10px black;
+    color: govuk-colour("black");
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  z-index: 2;
+}
+.legend {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: govuk-spacing(3);
+  align-items: center;
+  position: absolute;
+  bottom: govuk-spacing(4);
+  left: govuk-spacing(4);
+  background: govuk-colour("white");
+  padding: govuk-spacing(3);
+  border-radius: 4px;
+  @include govuk-font(16);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.dotHigh {
+  background-color: govuk-colour("teal");
+}
+.dotMed {
+  background-color: govuk-colour("yellow");
+}
+.dotLow {
+  background-color: govuk-colour("red");
+}
+.dotNoData {
+  background-color: govuk-colour("black", $variant: "tint-80");
+}

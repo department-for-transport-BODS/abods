@@ -1,0 +1,60 @@
+@use "../styles/govuk-module" as *;
+.controls {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  > *:last-child {
+    margin-bottom: govuk-spacing(3);
+  }
+}
+.layout {
+  display: flex;
+  flex-direction: column;
+}
+.performance {
+  margin-bottom: govuk-spacing(6);
+  min-width: 0;
+}
+.vehiclesStatus {
+  margin-bottom: govuk-spacing(6);
+}
+.feedStatusLink {
+  @include govuk-font(19);
+  text-align: right;
+}
+@include bp($tablet) {
+  .feeds {
+    display: flex;
+  }
+  .vehiclesStatus,
+  .feedAlerts {
+    flex-basis: 50%;
+  }
+  .vehiclesStatus {
+    margin-right: govuk-spacing(6);
+    margin-bottom: 0;
+  }
+}
+@include bp($xlg-desktop) {
+  .layout {
+    flex-direction: row;
+  }
+  .performance {
+    flex: 1;
+    margin-right: govuk-spacing(6);
+    margin-bottom: 0;
+  }
+  .feeds {
+    flex-direction: column;
+    flex-basis: 383px;
+  }
+  .vehiclesStatus {
+    margin-bottom: govuk-spacing(6);
+  }
+  .vehiclesStatus,
+  .feedAlerts {
+    flex-basis: auto;
+    margin-right: 0;
+  }
+}

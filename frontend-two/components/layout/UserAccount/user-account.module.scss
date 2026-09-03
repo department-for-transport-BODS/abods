@@ -1,0 +1,107 @@
+@use "../../../styles/govuk-module" as *;
+
+.userAccount {
+  margin-bottom: govuk-spacing(4);
+  @include govuk-font(19);
+}
+
+.inviteButton {
+  display: inline-flex;
+  width: 100%;
+  @include govuk-font(19);
+  padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  white-space: nowrap;
+  margin-bottom: 8px;
+
+  span {
+    margin-left: govuk-spacing(2);
+    white-space: nowrap;
+  }
+
+  div {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+
+    svg {
+      color: govuk-functional-colour(link);
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  &:focus {
+    svg {
+      color: govuk-functional-colour(focus-text);
+    }
+  }
+}
+
+.menuContainer {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  width: 100%;
+  @include govuk-font(19);
+  padding: govuk-spacing(1) govuk-spacing(1) govuk-spacing(1) 13px;
+  align-items: center;
+
+  svg {
+    color: govuk-functional-colour(link);
+    width: 20px;
+    height: 20px;
+    margin-right: govuk-spacing(2);
+  }
+
+  &:focus {
+    svg {
+      color: govuk-functional-colour(focus-text);
+    }
+  }
+}
+
+.menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background-color: govuk-colour("white");
+  border: 1px solid govuk-functional-colour(border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: govuk-spacing(1);
+  z-index: 100;
+
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    list-style: none;
+
+    button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: govuk-spacing(2) govuk-spacing(3);
+      @include govuk-font(19);
+      color: govuk-functional-colour(link);
+
+      &:hover {
+        background-color: govuk-colour("black", $variant: "tint-95");
+      }
+
+      &:focus {
+        outline: 3px solid govuk-functional-colour(focus);
+        outline-offset: 0;
+        color: govuk-functional-colour(focus-text);
+        background-color: govuk-functional-colour(focus);
+      }
+    }
+  }
+}

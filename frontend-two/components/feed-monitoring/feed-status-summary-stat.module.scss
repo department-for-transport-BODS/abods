@@ -1,0 +1,40 @@
+@use "../../styles/govuk-module" as *;
+.feedStatusSummaryStat {
+  background: govuk-functional-colour(body-background);
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid govuk-functional-colour(border);
+}
+.title {
+  @include govuk-font(19);
+  margin-top: 1rem;
+  margin-bottom: govuk-spacing(4);
+  color: govuk-functional-colour(secondary-text);
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.value {
+  @include govuk-font($size: 36, $weight: bold);
+}
+.valueActive {
+  color: govuk-colour("green");
+}
+.valueInactive {
+  color: govuk-functional-colour(error);
+}
+.check {
+  width: 36px;
+  height: 36px;
+  filter: invert(27%) sepia(89%) saturate(1000%) hue-rotate(120deg)
+    brightness(90%);
+}
+.cross {
+  width: 36px;
+  height: 36px;
+  filter: invert(24%) sepia(82%) saturate(4000%) hue-rotate(350deg)
+    brightness(85%);
+}

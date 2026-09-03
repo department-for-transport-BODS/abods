@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
       - sandbox
+      - abods-two-next-js
 
 permissions: read-all
 

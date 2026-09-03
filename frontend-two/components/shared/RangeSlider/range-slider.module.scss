@@ -1,0 +1,89 @@
+@use "../../../styles/govuk-module" as *;
+
+// Reproduces the appearance of the Angular app's noUiSlider:
+// square track, black border, tall narrow square thumbs.
+
+$_track-height: govuk-spacing(4);
+$_thumb-width: 15px;
+$_thumb-height: 40px;
+
+.slider {
+  position: relative;
+  height: $_thumb-height;
+  margin-top: govuk-spacing(2);
+  margin-bottom: govuk-spacing(4);
+}
+
+.track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: $_track-height;
+  background: govuk-colour("white");
+  border: 2px solid govuk-colour("black");
+  border-radius: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  transform: translateY(-50%);
+}
+
+.selected {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: govuk-colour("black");
+  outline: 3px solid govuk-colour("white");
+  outline-offset: -4px;
+}
+
+.input {
+  appearance: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: $_thumb-height;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+
+  &::-webkit-slider-runnable-track {
+    appearance: none;
+    height: $_track-height;
+    background: transparent;
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: $_thumb-width;
+    height: $_thumb-height;
+    border-radius: 0;
+    border: 2px solid govuk-colour("black");
+    background: govuk-colour("white");
+    cursor: pointer;
+    pointer-events: auto;
+    margin-top: calc((#{$_track-height} - #{$_thumb-height}) / 2);
+    box-shadow: none;
+  }
+
+  &::-moz-range-track {
+    height: $_track-height;
+    background: transparent;
+  }
+
+  &::-moz-range-thumb {
+    width: $_thumb-width;
+    height: $_thumb-height;
+    border-radius: 0;
+    border: 2px solid govuk-colour("black");
+    background: govuk-colour("white");
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
