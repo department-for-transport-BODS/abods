@@ -293,26 +293,6 @@ Resources:
         - Key: backup_plan
           Value: bods-backup
 
-  FrontendBucketV2:
-    Type: AWS::S3::Bucket
-    Condition: IsNonProd
-    Properties:
-      # checkov:skip=CKV_AWS_18:Just contains front end resources, so not concerned about access logs
-      # checkov:skip=CKV_AWS_21:No need for versioning, we should re-run CI to recreate anything
-      BucketName: !Sub "${ProjectName}-${Environment}-deployment-frontend-v2"
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      VersioningConfiguration:
-        Status: !Sub "${VersioningConfiguration}"
-      Tags:
-        - Key: backup
-          Value: !Sub "${BackupEnabled}"
-        - Key: backup_plan
-          Value: bods-backup
-
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Condition: IsNotLocal
@@ -335,33 +315,11 @@ Resources:
                   - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
                   - Distribution: !Ref CloudFrontDistribution
 
-  FrontendBucketV2Policy:
-    Type: AWS::S3::BucketPolicy
-    Condition: IsNonProd
-    Properties:
-      Bucket: !Ref FrontendBucketV2
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: AllowCloudFrontServicePrincipal
-            Effect: Allow
-            Principal:
-              Service: "cloudfront.amazonaws.com"
-            Action: "s3:GetObject"
-            Resource: !Sub
-              - "arn:aws:s3:::${Bucket}/*"
-              - Bucket: !Ref FrontendBucketV2
-            Condition:
-              StringEquals:
-                aws:SourceArn: !Sub
-                  - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
-                  - Distribution: !Ref CloudFrontDistributionV2
-
-  CloudFrontRewriteFunctionV2:
+  CloudFrontRewriteFunction:
     Type: AWS::CloudFront::Function
-    Condition: IsNonProd
+    Condition: IsNotLocal
     Properties:
-      Name: !Sub "${ProjectName}-${Environment}-rewrite-v2"
+      Name: !Sub "${ProjectName}-${Environment}-rewrite"
       AutoPublish: true
       FunctionConfig:
         Comment: Rewrite extensionless frontend routes to static index documents
@@ -464,6 +422,9 @@ Resources:
             - OPTIONS
           OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # Managed-CORS-S3Origin
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimised
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt CloudFrontRewriteFunction.FunctionARN
         CacheBehaviors:
           - TargetOriginId: frontendBucket
             PathPattern: "/freshdesk/*"
@@ -502,96 +463,12 @@ Resources:
             ResponseCode: 200
             ResponsePagePath: "/index.html"
 
-  CloudFrontDistributionV2:
-    Type: AWS::CloudFront::Distribution
-    Condition: IsNonProd
-    Properties:
-      # checkov:skip=CKV_AWS_68:We should set up a WAF later
-      DistributionConfig:
-        Enabled: true
-        Comment: !Sub "${ProjectName}-${Environment}-cdn-v2"
-        ViewerCertificate:
-          # checkov:skip=CKV_AWS_174:We are using the default CloudFront certificate for internal testing, which defaults to TLSv1 regardless of the minimum protocol version specified
-          CloudFrontDefaultCertificate: true
-        Origins:
-          - Id: frontendBucketV2
-            DomainName: !GetAtt FrontendBucketV2.RegionalDomainName
-            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControlV2.Id
-            S3OriginConfig:
-              OriginAccessIdentity: ""
-          - Id: backendApi
-            DomainName: !Sub "${GraphQlApi}.execute-api.${AWS::Region}.amazonaws.com"
-            OriginPath: !Sub "/${Environment}"
-            CustomOriginConfig:
-              OriginProtocolPolicy: https-only
-        DefaultRootObject: index.html
-        DefaultCacheBehavior:
-          TargetOriginId: frontendBucketV2
-          ViewerProtocolPolicy: redirect-to-https
-          AllowedMethods:
-            - GET
-            - HEAD
-            - OPTIONS
-          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # Managed-CORS-S3Origin
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimised
-          FunctionAssociations:
-            - EventType: viewer-request
-              FunctionARN: !GetAtt CloudFrontRewriteFunctionV2.FunctionARN
-        CacheBehaviors:
-          - TargetOriginId: frontendBucketV2
-            PathPattern: "/freshdesk/*"
-            ViewerProtocolPolicy: redirect-to-https
-            AllowedMethods:
-              - GET
-              - HEAD
-            OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # Managed-CORS-S3Origin
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimised
-            FunctionAssociations:
-              - EventType: viewer-request
-                FunctionARN: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/function/checkcookie/arn}}"
-          - TargetOriginId: backendApi
-            PathPattern: "/api/*"
-            DefaultTTL: 0
-            MinTTL: 0
-            MaxTTL: 0
-            ViewerProtocolPolicy: https-only
-            AllowedMethods:
-              - GET
-              - HEAD
-              - OPTIONS
-              - PUT
-              - POST
-              - PATCH
-              - DELETE
-            CachePolicyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/backendcachepolicy/id}}" # CachingDisabledWithAuth
-            OriginRequestPolicyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/originrequestpolicy/id}}" # CustomCookiesPolicy
-            ResponseHeadersPolicyId: !Sub "{{resolve:ssm:/${ProjectName}/shared/cloudfront/responseheaderspolicy/id}}" # CustomHeadersPolicy
-        Logging:
-          Bucket: !Sub "${ProjectName}-shared-cdn-logging-${AWS::AccountId}.s3.amazonaws.com"
-          Prefix: !Sub "${Environment}-v2"
-        CustomErrorResponses:
-          - ErrorCode: 403
-            ErrorCachingMinTTL: 10
-            ResponseCode: 200
-            ResponsePagePath: "/index.html"
-
   CloudFrontOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
         Name: !Sub ${ProjectName}-${Environment}-cdn-oac
         Description: !Sub "CloudFront access control used for access to ${ProjectName}-${Environment}-deployment-frontend S3 bucket"
-        OriginAccessControlOriginType: s3
-        SigningBehavior: always
-        SigningProtocol: sigv4
-
-  CloudFrontOriginAccessControlV2:
-    Type: AWS::CloudFront::OriginAccessControl
-    Condition: IsNonProd
-    Properties:
-      OriginAccessControlConfig:
-        Name: !Sub ${ProjectName}-${Environment}-cdn-v2-oac
-        Description: !Sub "CloudFront access control used for access to ${ProjectName}-${Environment}-deployment-frontend-v2 S3 bucket"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -624,20 +501,6 @@ Outputs:
     Value: !Sub
       - "https://${CloudFrontDomainName}"
       - CloudFrontDomainName: !Sub "{{resolve:ssm:/${ProjectName}/${Environment}/route53/hostedzone/name}}"
-  CloudFrontDistributionV2Id:
-    Condition: IsNonProd
-    Description: "CloudFront Distribution V2 ID"
-    Value: !Ref CloudFrontDistributionV2
-  CloudFrontDistributionV2Url:
-    Condition: IsNonProd
-    Description: "CloudFront Distribution V2 Domain Name URL"
-    Value: !Sub
-      - "https://${CloudFrontDomainName}"
-      - CloudFrontDomainName: !GetAtt CloudFrontDistributionV2.DomainName
   FrontendBucketName:
     Description: "Name of Frontend S3 Bucket"
     Value: !Sub "s3://${FrontendBucket}"
-  FrontendBucketV2Name:
-    Condition: IsNonProd
-    Description: "Name of Frontend V2 S3 Bucket"
-    Value: !Sub "s3://${FrontendBucketV2}"
