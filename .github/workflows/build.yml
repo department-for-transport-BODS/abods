@@ -163,7 +163,7 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-frontend-two-build
+          role-session-name: ${{ vars.PROJECT_NAME }}-${{ env.RC_ENV }}-frontend-build
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 

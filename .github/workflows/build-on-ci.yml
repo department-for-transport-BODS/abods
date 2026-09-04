@@ -80,7 +80,7 @@ jobs:
         run: |
           sam build
 
-  build-frontend-two:
+  build-frontend:
     runs-on: ubuntu-latest
     defaults:
       run:
