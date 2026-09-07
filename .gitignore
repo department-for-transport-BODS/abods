@@ -27,3 +27,18 @@ generated_api_secrets/
 /abods-api/src/kysely.ts
 /frontend/coverage/
 /abods-api/coverage/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/coverage/playwright/
+/.nyc_output/
+/coverage/
+.nyc_output/
+/e2e/.auth/
+
+# .agents
+.agents
+skills-lock.json

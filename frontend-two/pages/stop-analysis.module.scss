@@ -1,0 +1,27 @@
+@use "../styles/govuk-module" as *;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.extraFilter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: govuk-spacing(4);
+  padding: govuk-spacing(2) 0;
+}
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: govuk-spacing(2);
+  min-height: 108px;
+}
+.refineButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}

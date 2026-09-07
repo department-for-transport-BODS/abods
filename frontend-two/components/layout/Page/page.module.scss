@@ -1,0 +1,21 @@
+@use "../../../styles/govuk-module" as *;
+
+.page {
+  min-width: 0;
+}
+
+.backLink {
+  @include bp($desktop) {
+    padding-left: govuk-spacing(4);
+  }
+}
+
+.mainWrapper {
+  @include bp($desktop) {
+    padding-left: govuk-spacing(4);
+  }
+}
+
+.headerTitle {
+  margin-bottom: 0;
+}

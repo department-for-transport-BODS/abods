@@ -1,0 +1,69 @@
+@use "../../../styles/govuk-module" as *;
+
+.list {
+  padding: 0;
+  margin: 0 0 govuk-spacing(2);
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+}
+
+.listItem {
+  margin-bottom: govuk-spacing(2);
+  margin-right: govuk-spacing(2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  background: govuk-colour("white");
+  border: 1px solid govuk-colour("black");
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.label {
+  @include govuk-font(16, $weight: bold);
+}
+
+.value {
+  @include govuk-font(16);
+}
+
+.remove {
+  border: 0;
+  padding: 3px;
+  margin: 0;
+  background: transparent;
+  color: govuk-colour("black");
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+
+  &:hover {
+    color: govuk-functional-colour(link-hover);
+  }
+
+  &:focus-visible {
+    @include govuk-focused-text;
+    outline: 3px solid govuk-functional-colour(focus);
+  }
+}
+
+.removeIcon {
+  display: inline-flex;
+  width: 1.5rem;
+  height: 1.5rem;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}

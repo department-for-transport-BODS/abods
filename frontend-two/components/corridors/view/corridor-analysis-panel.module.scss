@@ -1,0 +1,14 @@
+@use "../../../styles/govuk-module" as *;
+.chartWrapper {
+  background: govuk-colour("black", $variant: "tint-95");
+  padding-bottom: govuk-spacing(3);
+}
+.hideOutliers {
+  display: flex;
+  flex-direction: row-reverse;
+  padding-right: govuk-spacing(3);
+  margin-top: govuk-spacing(2);
+  :global(.govuk-form-group) {
+    margin-bottom: 0;
+  }
+}

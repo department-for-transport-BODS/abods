@@ -1,0 +1,18 @@
+@use "../../styles/govuk-module" as *;
+.corridorsGridSearch {
+  position: relative;
+  display: inline-block;
+}
+.icon {
+  position: absolute;
+  left: govuk-spacing(2);
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: govuk-colour("black", $variant: "tint-25");
+}
+.input {
+  padding-left: govuk-spacing(5);
+}

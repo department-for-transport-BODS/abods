@@ -1,0 +1,22 @@
+  <svg class="spinner__icon" width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+    <circle
+      stroke="#b1b4b6"
+      fill="none"
+      stroke-width="5"
+      stroke-linecap="round"
+      cx="25"
+      cy="25"
+      r="22.5"
+    ></circle>
+    <circle
+      stroke="#1d70b8"
+      fill="none"
+      stroke-width="5"
+      stroke-linecap="square"
+      stroke-dasharray="100"
+      stroke-dashoffset="50"
+      cx="25"
+      cy="25"
+      r="22.5"
+    ></circle>
+  </svg>

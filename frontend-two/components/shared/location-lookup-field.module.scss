@@ -1,0 +1,130 @@
+@use "../../styles/govuk-module" as *;
+
+.search {
+  position: relative;
+}
+
+.results {
+  position: absolute;
+  z-index: 100;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border: 2px solid govuk-colour("black");
+  border-top: 0;
+  background: govuk-colour("white");
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding-right: govuk-spacing(9);
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: govuk-spacing(2);
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 3px solid govuk-colour("black", $variant: "tint-80");
+  border-bottom: 3px solid govuk-colour("black", $variant: "tint-80");
+  transform: translateY(-60%) rotate(45deg);
+  pointer-events: none;
+}
+
+.chevronOpen {
+  transform: translateY(-35%) rotate(-135deg);
+}
+
+.hint {
+  padding: govuk-spacing(2);
+  @include govuk-font(16);
+  color: govuk-functional-colour(secondary-text);
+}
+
+.loading {
+  padding: govuk-spacing(2);
+  @include govuk-font(16);
+}
+
+.option {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid govuk-colour("black", $variant: "tint-95");
+  background: govuk-colour("white");
+  padding: govuk-spacing(2);
+  cursor: pointer;
+  @include govuk-font(16);
+  &:hover {
+    background: govuk-colour("black", $variant: "tint-95");
+  }
+}
+
+.optionContext {
+  display: inline;
+  margin-left: govuk-spacing(1);
+  @include govuk-font(16);
+  color: govuk-functional-colour(secondary-text);
+}
+
+.selected {
+  display: flex;
+  align-items: center;
+  cursor: text;
+  user-select: none;
+  overflow: hidden;
+  padding-right: govuk-spacing(9);
+  position: relative;
+  &:focus-within {
+    outline: 3px solid govuk-functional-colour(focus);
+    outline-offset: 0;
+  }
+  &:hover {
+    border-color: govuk-colour("black");
+  }
+}
+
+.overlayInput {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: govuk-functional-colour(text);
+  outline: 0;
+  padding: inherit;
+  font-size: inherit;
+  cursor: text;
+}
+
+.selectedText {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clear {
+  position: absolute;
+  top: 50%;
+  right: govuk-spacing(6);
+  transform: translateY(-50%);
+  padding: 0 govuk-spacing(1);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  @include govuk-font(16);
+  font-weight: $govuk-font-weight-bold;
+  color: govuk-functional-colour(secondary-text);
+  line-height: 1;
+  &:hover {
+    color: govuk-functional-colour(text);
+  }
+}

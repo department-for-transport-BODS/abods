@@ -1,0 +1,824 @@
+import { clsx } from "clsx";
+import styles from "./stop-analysis.module.scss";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import useSWR from "swr";
+import { DateTime } from "luxon";
+import type { FeatureCollection, Feature } from "geojson";
+import bbox from "@turf/bbox";
+import flip from "@turf/flip";
+import { feature } from "@turf/helpers";
+import { BaseLayout } from "@/components/layout/BaseLayout";
+import { ErrorSummary } from "@/components/form/ErrorSummary";
+import { useRequireAuth } from "@/hooks/useAuth";
+import { useConfig } from "@/contexts/ConfigContext";
+import { useHelpdesk } from "@/contexts/HelpdeskContext";
+import { ErrorInfo } from "@/types";
+import {
+  Direction,
+  StopPerformanceRow,
+  StopTypeOption,
+} from "@/types/stop-analysis";
+import {
+  BoundingBoxInputType as BoundingBox,
+  DayOfWeekFlagsInputType as DayOfWeekFlags,
+} from "@/src/generated/graphql";
+import { stopAnalysisService } from "@/services/stop-analysis/stop-analysis.service";
+import { StopAnalysisFilters as FiltersPanel } from "@/components/stop-analysis/StopAnalysisFilters";
+import { RefineResultsButton } from "@/components/shared/RefineResults/RefineResultsButton";
+import {
+  RefineResultsFilterValues,
+  performanceFiltersToRefineResults,
+} from "@/components/shared/RefineResults/RefineResultsFilters";
+import { StopAnalysisMap } from "@/components/stop-analysis/StopAnalysisMap";
+import { StopAnalysisTable } from "@/components/stop-analysis/StopAnalysisTable";
+import {
+  MatchType,
+  MatchType as GqlMatchType,
+  PerformanceFiltersInputType,
+  StopAnalysisQueryVariables,
+  StopStatistics,
+} from "../src/generated/graphql";
+import { FilterChips } from "@/components/on-time/FilterChips/FilterChips";
+import { Period } from "@/utils/date-range";
+import { formatDateToISODateString } from "@/utils/date-formatter";
+import { LoadingDots } from "@/components/shared/LoadingDots";
+import { operatorsService } from "@/services/operator.service";
+
+const MAX_BOUND_SPAN = 0.5;
+const EMPTY_DIRECTION_SELECTION = "none";
+
+const DEFAULT_TO = DateTime.local().startOf("day");
+const DEFAULT_FROM = DateTime.local().startOf("day").minus({ days: 7 });
+
+const DAY_KEY_TO_QUERY = {
+  Mon: "monday",
+  Tue: "tuesday",
+  Wed: "wednesday",
+  Thu: "thursday",
+  Fri: "friday",
+  Sat: "saturday",
+  Sun: "sunday",
+} as const;
+
+function getPresetWindow(preset: Period, today: DateTime) {
+  const yesterday = today.minus({ days: 1 });
+
+  switch (preset) {
+    case "last7":
+      return { from: today.minus({ days: 7 }), to: yesterday };
+    case "last28":
+      return { from: today.minus({ days: 28 }), to: yesterday };
+    case "monthToDate":
+      return { from: today.startOf("month"), to: yesterday };
+    case "lastMonth": {
+      const from = today.minus({ months: 1 }).startOf("month");
+      return { from, to: from.plus({ months: 1 }).minus({ days: 1 }) };
+    }
+  }
+}
+
+const refineValuesToDayOfWeekQuery = (
+  dayOfWeekFlags: RefineResultsFilterValues["dayOfWeekFlags"],
+): string | undefined => {
+  const selectedDays = Object.entries(dayOfWeekFlags)
+    .filter(([, enabled]) => enabled)
+    .map(([day]) => DAY_KEY_TO_QUERY[day as keyof typeof DAY_KEY_TO_QUERY]);
+
+  return selectedDays.length === 7 ? undefined : selectedDays.join(",");
+};
+
+const refineValuesToStopFiltersQuery = (
+  values: RefineResultsFilterValues,
+): Record<string, string | undefined> => ({
+  dayOfWeek: refineValuesToDayOfWeekQuery(values.dayOfWeekFlags),
+  startTime: values.startTime === "00:00" ? undefined : values.startTime,
+  endTime: values.endTime === "23:59" ? undefined : values.endTime,
+});
+
+function parseArrayParam(param: string | string[] | undefined): string[] {
+  if (!param) return [];
+  return Array.isArray(param) ? param : [param];
+}
+
+function parseDirectionParam(
+  param: string | string[] | undefined,
+): Direction[] {
+  const values = parseArrayParam(param);
+  if (values.length === 1 && values[0] === EMPTY_DIRECTION_SELECTION) {
+    return [];
+  }
+  return values.length > 0 ? (values as Direction[]) : ["Inbound", "Outbound"];
+}
+
+function parseStringParam(
+  param: string | string[] | undefined,
+): string | undefined {
+  if (!param) return undefined;
+  return Array.isArray(param) ? param[0] : param;
+}
+
+function parseDayOfWeekFlags(
+  param: string | string[] | undefined,
+): DayOfWeekFlags | undefined {
+  const raw = parseStringParam(param);
+  if (!raw) return undefined;
+  const days = raw.split(",");
+  return {
+    monday: days.includes("monday"),
+    tuesday: days.includes("tuesday"),
+    wednesday: days.includes("wednesday"),
+    thursday: days.includes("thursday"),
+    friday: days.includes("friday"),
+    saturday: days.includes("saturday"),
+    sunday: days.includes("sunday"),
+  };
+}
+
+function parseBoundingBox(
+  query: Record<string, string | string[] | undefined>,
+): BoundingBox | undefined {
+  const minLat = parseFloat(parseStringParam(query.minLatitude) ?? "");
+  const maxLat = parseFloat(parseStringParam(query.maxLatitude) ?? "");
+  const minLon = parseFloat(parseStringParam(query.minLongitude) ?? "");
+  const maxLon = parseFloat(parseStringParam(query.maxLongitude) ?? "");
+  if ([minLat, maxLat, minLon, maxLon].some(isNaN)) return undefined;
+  return {
+    minLatitude: minLat,
+    maxLatitude: maxLat,
+    minLongitude: minLon,
+    maxLongitude: maxLon,
+  };
+}
+
+function withinBounds(newBounds: BoundingBox, bounds: BoundingBox): boolean {
+  return (
+    newBounds.minLongitude >= bounds.minLongitude &&
+    newBounds.minLatitude >= bounds.minLatitude &&
+    newBounds.maxLongitude <= bounds.maxLongitude &&
+    newBounds.maxLatitude <= bounds.maxLatitude
+  );
+}
+
+function getDividedValueOrUndefined(
+  numerator: number | null | undefined,
+  denominator: number | null | undefined,
+): number | undefined {
+  if (numerator == null || denominator == null) return undefined;
+  if (denominator === 0) return 0;
+  return numerator / denominator;
+}
+
+function processStopsToRows(
+  stops: StopStatistics[],
+  stopType: StopTypeOption,
+  bounds: BoundingBox,
+): StopPerformanceRow[] {
+  const filtered = stops.filter(
+    (s) =>
+      (stopType !== "TimingPoints" || s.timingPoint) &&
+      s.latitude >= bounds.minLatitude &&
+      s.latitude <= bounds.maxLatitude &&
+      s.longitude >= bounds.minLongitude &&
+      s.longitude <= bounds.maxLongitude,
+  );
+
+  return filtered
+    .map(
+      (x): StopPerformanceRow => ({
+        stopId: x.atcoCode,
+        stopName: x.stopName,
+        localityName: x.localityName,
+        adminAreaName: x.adminAreaName,
+        timingPoint: x.timingPoint,
+        latitude: x.latitude,
+        longitude: x.longitude,
+        direction: x.direction ?? null,
+        scheduledDepartures: x.scheduledDepartures,
+        actualDepartures: x.completedDepartures,
+        onTime: x.onTime,
+        early: x.early,
+        late: x.late,
+        onTimeRatio: x.completedDepartures
+          ? x.onTime / x.completedDepartures
+          : 0,
+        earlyRatio: x.completedDepartures ? x.early / x.completedDepartures : 0,
+        lateRatio: x.completedDepartures ? x.late / x.completedDepartures : 0,
+        completedRatio: x.scheduledDepartures
+          ? x.completedDepartures / x.scheduledDepartures
+          : 0,
+        averageDelay: getDividedValueOrUndefined(
+          x.averageDelay,
+          x.countDelayed,
+        ),
+        averageScheduled:
+          stopType === "TimingPoints"
+            ? x.averageScheduledTimingPoint
+            : x.averageScheduled,
+        averageActual:
+          stopType === "TimingPoints"
+            ? x.averageActualTimingPoint
+            : x.averageActual,
+        onTimeInSeconds: getDividedValueOrUndefined(
+          x.onTimeInSeconds,
+          x.onTime,
+        ),
+        earlyInSeconds: getDividedValueOrUndefined(x.earlyInSeconds, x.early),
+        lateInSeconds: getDividedValueOrUndefined(x.lateInSeconds, x.late),
+      }),
+    )
+    .sort((a, b) => a.stopName.localeCompare(b.stopName));
+}
+
+function aggregateStopsForMap(
+  stops: StopStatistics[],
+  stopType: StopTypeOption,
+  bounds: BoundingBox,
+): StopStatistics[] {
+  const filtered = stops.filter(
+    (s) =>
+      (stopType !== "TimingPoints" || s.timingPoint) &&
+      s.latitude >= bounds.minLatitude &&
+      s.latitude <= bounds.maxLatitude &&
+      s.longitude >= bounds.minLongitude &&
+      s.longitude <= bounds.maxLongitude,
+  );
+
+  // Combine timing point and non-timing point records for same ATCO code
+  const aggregated = filtered.reduce(
+    (acc, cur) => {
+      if (!acc[cur.atcoCode]) {
+        acc[cur.atcoCode] = { ...cur };
+        return acc;
+      }
+      const existing = acc[cur.atcoCode];
+      acc[cur.atcoCode] = {
+        ...existing,
+        timingPoint: existing.timingPoint || cur.timingPoint,
+        onTime: existing.onTime + cur.onTime,
+        early: existing.early + cur.early,
+        late: existing.late + cur.late,
+        completedDepartures:
+          existing.completedDepartures + cur.completedDepartures,
+        scheduledDepartures:
+          existing.scheduledDepartures + cur.scheduledDepartures,
+        totalDelay: existing.totalDelay + cur.totalDelay,
+      };
+      return acc;
+    },
+    {} as Record<string, StopStatistics>,
+  );
+
+  return Object.values(aggregated);
+}
+
+function computeAdminAreaGeoJSON(
+  adminAreas: { id: string; name: string; shape: string }[],
+  selectedIds: string[],
+): FeatureCollection {
+  const areas =
+    selectedIds.length > 0
+      ? adminAreas.filter((a) => selectedIds.includes(a.id))
+      : adminAreas;
+
+  return {
+    type: "FeatureCollection",
+    features: areas
+      .map((area) => {
+        try {
+          const flipped = flip(
+            feature(JSON.parse(area.shape), {
+              id: area.id,
+              name: area.name,
+            }),
+            { mutate: true },
+          );
+          return {
+            type: "Feature" as const,
+            id: area.id,
+            properties: { id: area.id, name: area.name },
+            geometry: flipped.geometry,
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean) as Feature[],
+  };
+}
+
+export { computeAdminAreaGeoJSON };
+
+export const mergeStopAnalysisQuery = (
+  currentQuery: Record<string, string | string[] | undefined>,
+  updates: Record<string, string | string[] | undefined>,
+  fallbackStopType?: StopTypeOption,
+) => {
+  const nextQuery = { ...currentQuery, ...updates };
+
+  if (!Object.prototype.hasOwnProperty.call(updates, "stopType")) {
+    const currentStopType =
+      parseStringParam(currentQuery.stopType) ?? fallbackStopType;
+    if (currentStopType) {
+      nextQuery.stopType = currentStopType;
+    }
+  }
+
+  return nextQuery;
+};
+
+export const pruneStopAnalysisSelections = (
+  adminAreaIds: string[],
+  operatorIds: string[],
+  lineIds: string[],
+  operators: Array<{ operatorId: string; adminAreaIds: string[] }>,
+  lines: Array<{ id: string; adminAreaIds: number[] }>,
+) => {
+  const selectedAdminAreaIds = new Set(adminAreaIds);
+  const availableOperatorIds = operators
+    .filter(
+      (operator) =>
+        selectedAdminAreaIds.size === 0 ||
+        operator.adminAreaIds.some((adminAreaId) =>
+          selectedAdminAreaIds.has(adminAreaId),
+        ),
+    )
+    .map((operator) => operator.operatorId);
+
+  const nextOperatorIds = operatorIds.filter((operatorId) =>
+    availableOperatorIds.includes(operatorId),
+  );
+  const operatorSelectionChanged =
+    nextOperatorIds.length !== operatorIds.length;
+
+  const availableLineIds = lines
+    .filter(
+      (line) =>
+        selectedAdminAreaIds.size === 0 ||
+        line.adminAreaIds.some((adminAreaId) =>
+          selectedAdminAreaIds.has(adminAreaId.toString()),
+        ),
+    )
+    .map((line) => line.id);
+
+  const nextLineIds = operatorSelectionChanged
+    ? []
+    : lineIds.filter((lineId) => availableLineIds.includes(lineId));
+
+  return { operatorIds: nextOperatorIds, lineIds: nextLineIds };
+};
+
+const StopAnalysisPage = () => {
+  useRequireAuth();
+  const { config } = useConfig();
+  const { loadData } = useHelpdesk();
+  const router = useRouter();
+
+  useEffect(() => {
+    loadData("stopAnalysis", "Stop analysis");
+  }, [loadData]);
+  const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastFetchedBoundsRef = useRef<BoundingBox>();
+  const lastFetchedFilterSignatureRef = useRef<string>("");
+  const [cachedStopData, setCachedStopData] = useState<StopStatistics[]>([]);
+  const [locationSelectionRequest, setLocationSelectionRequest] = useState(0);
+  const [locationSelection, setLocationSelection] = useState<{
+    center?: [number, number];
+    bbox?: [number, number, number, number];
+  }>();
+  const [focusedStop, setFocusedStop] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const stopTypeRef = useRef<StopTypeOption>("TimingPoints");
+
+  // Read filter state from URL
+  const fromTimestamp =
+    parseStringParam(router.query.fromTimestamp) ?? DEFAULT_FROM.toISO()!;
+  const toTimestamp =
+    parseStringParam(router.query.toTimestamp) ?? DEFAULT_TO.toISO()!;
+  const matchType = (parseStringParam(router.query.matchType) ??
+    GqlMatchType.Evidenced) as MatchType;
+  const stopType = (parseStringParam(router.query.stopType) ??
+    "TimingPoints") as StopTypeOption;
+  stopTypeRef.current = stopType;
+  const adminAreaIds = parseArrayParam(router.query.adminAreaIds);
+  const operatorIds = parseArrayParam(router.query.operatorIds);
+  const lineIds = parseArrayParam(router.query.lineIds);
+  const dayOfWeekFlags = parseDayOfWeekFlags(router.query.dayOfWeek);
+  const startTime = parseStringParam(router.query.startTime);
+  const endTime = parseStringParam(router.query.endTime);
+  const directions = parseDirectionParam(router.query.direction);
+
+  const bounds = parseBoundingBox(router.query);
+  // compute spans as absolute values to be robust
+  const boundingBoxTooBig = bounds
+    ? Math.abs(bounds.maxLongitude - bounds.minLongitude) >= MAX_BOUND_SPAN ||
+      Math.abs(bounds.maxLatitude - bounds.minLatitude) >= MAX_BOUND_SPAN
+    : true;
+  // Update URL params (shallow — no page reload)
+  const updateQuery = useCallback(
+    (updates: Record<string, string | string[] | undefined>) => {
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: mergeStopAnalysisQuery(
+            router.query,
+            updates,
+            stopTypeRef.current,
+          ),
+        },
+        undefined,
+        { shallow: true },
+      );
+    },
+    [router],
+  );
+  const updateQueryRef = useRef(updateQuery);
+  updateQueryRef.current = updateQuery;
+
+  // Fetch reference data
+  const { data: operators } = useSWR("sa-operators", () =>
+    operatorsService.fetchOperators(),
+  );
+
+  const { data: adminAreas } = useSWR("sa-admin-areas", () =>
+    operatorsService.fetchAdminAreas(),
+  );
+
+  const { data: lines } = useSWR(
+    operatorIds.length > 0
+      ? ["sa-lines", operatorIds.join(","), fromTimestamp, toTimestamp]
+      : null,
+    () => operatorsService.fetchLines(operatorIds, fromTimestamp, toTimestamp),
+  );
+
+  // Fetch stop analysis data (only when bounds are small enough)
+  const filters: StopAnalysisQueryVariables | null = useMemo(
+    () =>
+      bounds && !boundingBoxTooBig
+        ? {
+            adminAreaIds,
+            boundingBox: bounds,
+            fromTimestamp,
+            toTimestamp,
+            operatorIds,
+            lineIds,
+            matchType,
+            dayOfWeekFlags,
+            startTime,
+            endTime,
+          }
+        : null,
+    [
+      adminAreaIds,
+      boundingBoxTooBig,
+      bounds,
+      dayOfWeekFlags,
+      endTime,
+      fromTimestamp,
+      lineIds,
+      matchType,
+      operatorIds,
+      startTime,
+      toTimestamp,
+    ],
+  );
+
+  const stopFilterSignature = useMemo(
+    () =>
+      JSON.stringify({
+        adminAreaIds,
+        fromTimestamp,
+        toTimestamp,
+        operatorIds,
+        lineIds,
+        matchType,
+        dayOfWeekFlags,
+        startTime,
+        endTime,
+      }),
+    [
+      adminAreaIds,
+      dayOfWeekFlags,
+      endTime,
+      fromTimestamp,
+      lineIds,
+      matchType,
+      operatorIds,
+      startTime,
+      toTimestamp,
+    ],
+  );
+
+  const shouldFetchStops =
+    !!filters &&
+    !(
+      lastFetchedBoundsRef.current &&
+      withinBounds(filters.boundingBox, lastFetchedBoundsRef.current) &&
+      stopFilterSignature === lastFetchedFilterSignatureRef.current
+    );
+
+  const {
+    data: stopData,
+    isLoading: stopsLoading,
+    error: stopsError,
+  } = useSWR(
+    filters && shouldFetchStops ? ["sa-stops", JSON.stringify(filters)] : null,
+    async () => {
+      const result = await stopAnalysisService.fetchStopAnalysis(filters!);
+      lastFetchedBoundsRef.current = filters!.boundingBox;
+      lastFetchedFilterSignatureRef.current = stopFilterSignature;
+      setCachedStopData(result);
+      return result;
+    },
+  );
+
+  const effectiveStopData = useMemo(
+    () => (filters ? stopData ?? cachedStopData : []),
+    [filters, stopData, cachedStopData],
+  );
+
+  // Derive table rows and map features from raw data
+  const tableRows = useMemo(
+    () =>
+      effectiveStopData && bounds
+        ? processStopsToRows(effectiveStopData, stopType, bounds)
+        : [],
+    [effectiveStopData, stopType, bounds],
+  );
+
+  const mapStops = useMemo(
+    () =>
+      effectiveStopData && bounds
+        ? aggregateStopsForMap(effectiveStopData, stopType, bounds)
+        : [],
+    [effectiveStopData, stopType, bounds],
+  );
+
+  const visibleAdminAreaIds = useMemo(() => {
+    if (adminAreaIds.length > 0) return adminAreaIds;
+    if (operatorIds.length === 0) return [];
+
+    return [
+      ...new Set(
+        (operators ?? [])
+          .filter((operator) => operatorIds.includes(operator.operatorId))
+          .flatMap((operator) => operator.adminAreaIds),
+      ),
+    ];
+  }, [adminAreaIds, operatorIds, operators]);
+
+  const adminAreaGeoJSON = useMemo(
+    () => computeAdminAreaGeoJSON(adminAreas ?? [], visibleAdminAreaIds),
+    [adminAreas, visibleAdminAreaIds],
+  );
+
+  const selectedAdminAreaBounds = useMemo(() => {
+    if (visibleAdminAreaIds.length === 0) return null;
+    if (adminAreaGeoJSON.features.length === 0) return null;
+
+    const [minLongitude, minLatitude, maxLongitude, maxLatitude] =
+      bbox(adminAreaGeoJSON);
+
+    return {
+      minLongitude,
+      minLatitude,
+      maxLongitude,
+      maxLatitude,
+    };
+  }, [adminAreaGeoJSON, visibleAdminAreaIds]);
+
+  // Error state
+  const errors: ErrorInfo[] =
+    stopsError && !stopsLoading
+      ? [
+          {
+            id: "load-error",
+            errorMessage:
+              "Unable to load stop analysis data. Please try again later.",
+          },
+        ]
+      : [];
+
+  // Handlers
+  const handleBoundsChange = useCallback((newBounds: BoundingBox) => {
+    if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
+    boundsDebounceRef.current = setTimeout(() => {
+      updateQueryRef.current({
+        minLatitude: String(newBounds.minLatitude),
+        maxLatitude: String(newBounds.maxLatitude),
+        minLongitude: String(newBounds.minLongitude),
+        maxLongitude: String(newBounds.maxLongitude),
+      });
+    }, 500);
+  }, []);
+
+  const handleAdminAreaClick = useCallback(
+    (adminAreaId: string) => {
+      if (adminAreaIds.length > 0) return;
+      updateQuery({ adminAreaIds: [adminAreaId] });
+    },
+    [adminAreaIds, updateQuery],
+  );
+
+  const handleAdminAreasChange = useCallback(
+    (values: string[]) => {
+      const nextSelection = pruneStopAnalysisSelections(
+        values,
+        operatorIds,
+        lineIds,
+        operators ?? [],
+        lines ?? [],
+      );
+
+      updateQuery({
+        adminAreaIds: values,
+        operatorIds: nextSelection.operatorIds,
+        lineIds: nextSelection.lineIds,
+      });
+    },
+    [lineIds, operatorIds, operators, lines, updateQuery],
+  );
+
+  const handleOperatorsChange = useCallback(
+    (values: string[]) => {
+      const hasDeselectedOperator = operatorIds.some(
+        (operatorId) => !values.includes(operatorId),
+      );
+
+      updateQuery({
+        operatorIds: values,
+        lineIds: hasDeselectedOperator ? [] : lineIds,
+      });
+    },
+    [lineIds, operatorIds, updateQuery],
+  );
+
+  const handleStopClick = useCallback((stop: StopPerformanceRow) => {
+    setFocusedStop({ latitude: stop.latitude, longitude: stop.longitude });
+  }, []);
+
+  const handleLocationSelect = useCallback(
+    (location: {
+      center?: [number, number];
+      bbox?: [number, number, number, number];
+    }) => {
+      setLocationSelection(location);
+      setLocationSelectionRequest((prev) => prev + 1);
+    },
+    [],
+  );
+
+  const activeRefineFilters: PerformanceFiltersInputType = {
+    ...(dayOfWeekFlags ? { dayOfWeekFlags } : {}),
+    ...(startTime ? { startTime } : {}),
+    ...(endTime ? { endTime } : {}),
+  };
+
+  const refineResultsInitialValues = useMemo(
+    () => performanceFiltersToRefineResults(activeRefineFilters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(dayOfWeekFlags), startTime, endTime],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
+    };
+  }, []);
+
+  return (
+    <BaseLayout title="Stop analysis - Analyse Bus Open Data">
+      <div>
+        <div className={styles.header}>
+          <h1 className="govuk-heading-xl">Stop Analysis</h1>
+          <div className={styles.extraFilter}>
+            <RefineResultsButton
+              isLoading={stopsLoading}
+              showPerformanceFilters={false}
+              buttonClassName={clsx(
+                "govuk-link",
+                "button-link",
+                styles.refineButton,
+              )}
+              initialValues={refineResultsInitialValues}
+              onApply={(values) =>
+                updateQuery(refineValuesToStopFiltersQuery(values))
+              }
+              onReset={() =>
+                updateQuery({
+                  dayOfWeek: undefined,
+                  startTime: undefined,
+                  endTime: undefined,
+                })
+              }
+            />
+            <FilterChips
+              filters={activeRefineFilters}
+              onFilterChange={(updated) =>
+                updateQuery({
+                  dayOfWeek: updated.dayOfWeekFlags
+                    ? Object.entries(updated.dayOfWeekFlags)
+                        .filter(([, v]) => v)
+                        .map(
+                          ([k]) =>
+                            DAY_KEY_TO_QUERY[
+                              k as keyof typeof DAY_KEY_TO_QUERY
+                            ],
+                        )
+                        .join(",")
+                    : undefined,
+                  startTime: updated.startTime ?? undefined,
+                  endTime: updated.endTime ?? undefined,
+                })
+              }
+            />
+          </div>
+        </div>
+
+        <div className="govuk-grid-row">
+          <div className="govuk-grid-column-two-thirds-from-desktop">
+            <ErrorSummary errors={errors} />
+          </div>
+        </div>
+
+        <FiltersPanel
+          fromTimestamp={fromTimestamp}
+          toTimestamp={toTimestamp}
+          adminAreaIds={adminAreaIds}
+          operatorIds={operatorIds}
+          lineIds={lineIds}
+          matchType={matchType}
+          stopType={stopType}
+          mapboxToken={config?.mapboxToken}
+          adminAreas={adminAreas ?? []}
+          operators={operators ?? []}
+          lines={lines ?? []}
+          onDateRangeChange={(from, to) =>
+            updateQuery({ fromTimestamp: from, toTimestamp: to })
+          }
+          onPresetChange={(preset: Period) => {
+            const range = getPresetWindow(
+              preset,
+              DateTime.local().startOf("day"),
+            );
+            updateQuery({
+              fromTimestamp: formatDateToISODateString(
+                range.from.startOf("day"),
+              ),
+              toTimestamp: formatDateToISODateString(
+                range.to.plus({ days: 1 }),
+              ),
+            });
+          }}
+          onAdminAreasChange={handleAdminAreasChange}
+          onOperatorsChange={handleOperatorsChange}
+          onLinesChange={(v) => updateQuery({ lineIds: v })}
+          onMatchTypeChange={(v) => updateQuery({ matchType: v })}
+          onStopTypeChange={(v) => updateQuery({ stopType: v })}
+          onLocationSelect={handleLocationSelect}
+        />
+
+        {config?.mapboxToken && config?.mapboxStyle && (
+          <StopAnalysisMap
+            mapboxToken={config.mapboxToken}
+            mapboxStyle={config.mapboxStyle}
+            mapboxSatelliteStyle={config.mapboxSatelliteStyle}
+            stops={mapStops}
+            loading={stopsLoading}
+            adminAreaShapes={adminAreaGeoJSON}
+            boundingBoxTooBig={boundingBoxTooBig}
+            initialBounds={bounds}
+            focusStop={focusedStop}
+            selectedAdminAreaBounds={selectedAdminAreaBounds}
+            locationSelection={locationSelection}
+            locationSelectionRequest={locationSelectionRequest}
+            onBoundsChange={handleBoundsChange}
+            onAdminAreaClick={handleAdminAreaClick}
+          />
+        )}
+        {stopsLoading ? (
+          <div className={clsx(styles.loadingState, "govuk-!-margin-top-4")}>
+            <LoadingDots />
+          </div>
+        ) : (
+          <StopAnalysisTable
+            data={tableRows}
+            errored={!!stopsError}
+            directions={directions}
+            showTotals
+            onDirectionsChange={(dirs) =>
+              updateQuery({
+                direction: dirs.length === 0 ? EMPTY_DIRECTION_SELECTION : dirs,
+              })
+            }
+            onStopNameClick={handleStopClick}
+          />
+        )}
+      </div>
+    </BaseLayout>
+  );
+};
+
+export default StopAnalysisPage;

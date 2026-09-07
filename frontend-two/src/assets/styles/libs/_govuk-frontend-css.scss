@@ -1,0 +1,47 @@
+// GOV.UK Frontend CSS without service-navigation.
+// That component emits `@media screen and (min-width: 0\0)`, an IE 9–11 hack
+// that Lightning CSS (Next.js) rejects as an invalid media query.
+// https://github.com/parcel-bundler/lightningcss/issues/542
+// https://frontend.design-system.service.gov.uk/import-css/#include-specific-parts-of-gov-uk-frontend-using-sass
+@use "govuk-frontend/dist/govuk/core";
+@use "govuk-frontend/dist/govuk/objects";
+
+@use "govuk-frontend/dist/govuk/components/accordion";
+@use "govuk-frontend/dist/govuk/components/back-link";
+@use "govuk-frontend/dist/govuk/components/breadcrumbs";
+@use "govuk-frontend/dist/govuk/components/button";
+@use "govuk-frontend/dist/govuk/components/character-count";
+@use "govuk-frontend/dist/govuk/components/checkboxes";
+@use "govuk-frontend/dist/govuk/components/cookie-banner";
+@use "govuk-frontend/dist/govuk/components/date-input";
+@use "govuk-frontend/dist/govuk/components/details";
+@use "govuk-frontend/dist/govuk/components/error-message";
+@use "govuk-frontend/dist/govuk/components/error-summary";
+@use "govuk-frontend/dist/govuk/components/exit-this-page";
+@use "govuk-frontend/dist/govuk/components/fieldset";
+@use "govuk-frontend/dist/govuk/components/file-upload";
+@use "govuk-frontend/dist/govuk/components/footer";
+@use "govuk-frontend/dist/govuk/components/generic-header";
+@use "govuk-frontend/dist/govuk/components/header";
+@use "govuk-frontend/dist/govuk/components/hint";
+@use "govuk-frontend/dist/govuk/components/input";
+@use "govuk-frontend/dist/govuk/components/inset-text";
+@use "govuk-frontend/dist/govuk/components/label";
+@use "govuk-frontend/dist/govuk/components/notification-banner";
+@use "govuk-frontend/dist/govuk/components/pagination";
+@use "govuk-frontend/dist/govuk/components/panel";
+@use "govuk-frontend/dist/govuk/components/password-input";
+@use "govuk-frontend/dist/govuk/components/phase-banner";
+@use "govuk-frontend/dist/govuk/components/radios";
+@use "govuk-frontend/dist/govuk/components/select";
+@use "govuk-frontend/dist/govuk/components/skip-link";
+@use "govuk-frontend/dist/govuk/components/summary-list";
+@use "govuk-frontend/dist/govuk/components/table";
+@use "govuk-frontend/dist/govuk/components/tabs";
+@use "govuk-frontend/dist/govuk/components/tag";
+@use "govuk-frontend/dist/govuk/components/task-list";
+@use "govuk-frontend/dist/govuk/components/textarea";
+@use "govuk-frontend/dist/govuk/components/warning-text";
+
+@use "govuk-frontend/dist/govuk/utilities";
+@use "govuk-frontend/dist/govuk/overrides";

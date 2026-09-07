@@ -1,0 +1,44 @@
+// -----------------------------------------------------------------------------
+// Spacing
+// -----------------------------------------------------------------------------
+//Any Custom spacing variables can go here
+
+// For spacing try to use the GDS spacing scale as defined here: https://design-system.service.gov.uk/styles/spacing/
+// e.g.govuk-!-margin-6 sets spacing of 30px on larger screens
+// Also listed here for convenience
+// GOV.UK Frontend spacing scale
+// Spacing unit	Large screens	Small screens
+// 9	60px	40px
+// 8	50px	30px
+// 7	40px	25px
+// 6	30px	20px
+// 5	25px	15px
+// 4	20px	15px
+// 3	15px	15px
+// 2	10px	10px
+// 1	5px	5px
+// 0	0	0
+
+// You can access GOV UK spacing using the helper https://frontend.design-system.service.gov.uk/sass-api-reference/#spacing
+
+// @import 'src/assets/helpers/helpers';
+
+// padding-bottom: govuk-spacing(5);
+
+// for responsive spacing:
+
+// @include govuk-responsive-margin($responsive-spacing-point, $direction: "all", $important: false, $adjustment: false);
+
+// EXAMPLE
+//
+// .element {
+//   @include govuk-responsive-margin(6, "left", $adjustment: 1px);
+// }
+
+// @include govuk-responsive-padding($responsive-spacing-point, $direction: "all", $important: false, $adjustment: false);
+
+// EXAMPLE
+//
+// .element {
+//   @include govuk-responsive-padding(6, "left", $adjustment: 1px);
+// }

@@ -1,0 +1,22 @@
+@use "../../../styles/govuk-module" as *;
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  background-color: govuk-colour("white");
+  border-top: 2px solid govuk-colour("black", $variant: "tint-80");
+}
+
+.title {
+  margin-top: govuk-spacing(4);
+  color: govuk-functional-colour(secondary-text);
+}
+
+.figure {
+  @include govuk-font($size: 36, $weight: bold);
+}
+
+.value {
+  border-bottom: 4px dotted govuk-colour("black");
+  cursor: help;
+}
