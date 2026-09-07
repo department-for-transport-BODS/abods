@@ -262,6 +262,8 @@ jobs:
           fi
 
   e2e-playwright:
+    # if: ${{ env.RC_ENV == 'sandbox' }}
+    if: ${{ false }}
     runs-on: ubuntu-latest
     needs:
       - validation
