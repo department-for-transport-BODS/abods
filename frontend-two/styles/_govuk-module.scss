@@ -1,0 +1,18 @@
+// Token + mixin API for CSS modules. Does not emit GOV.UK component CSS.
+
+@forward "govuk-frontend/dist/govuk/base" with (
+  $govuk-output-custom-properties: false
+);
+
+@forward "src/assets/styles/settings/rem-base";
+@forward "src/assets/styles/settings/layout";
+@forward "src/assets/styles/settings/breakpoints";
+@forward "src/assets/styles/settings/colours";
+@forward "src/assets/styles/settings/spacing";
+@forward "src/assets/styles/settings/typography";
+@forward "src/assets/styles/settings/z-index";
+@forward "src/assets/styles/settings/animations";
+@forward "src/assets/styles/helpers/bp";
+@forward "src/assets/styles/helpers/raas-colour";
+@forward "src/assets/styles/helpers/strip-unit";
+@forward "src/assets/styles/helpers/rem";

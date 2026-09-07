@@ -1,0 +1,7 @@
+@use "../../styles/govuk-module" as *;
+.sparklineWrapper {
+  background-color: govuk-functional-colour(template-background);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 4px 0;
+}

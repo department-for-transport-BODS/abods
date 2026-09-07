@@ -1,5 +1,8 @@
 # Getting started
 
+> [!IMPORTANT]  
+> This guide is for setting up the old Angular front end. If you want to work with the new Next.js front end, follow the [Getting Started Guide for Next.js](./getting-started-nextjs.md) instead.
+
 You can use https://mise.jdx.dev/ as a tool manager and task runner.
 If that is installed and on your PATH, you should be able to run `mise install` to install required tools.
 

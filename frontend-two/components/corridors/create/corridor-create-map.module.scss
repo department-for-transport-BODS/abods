@@ -1,0 +1,27 @@
+@use "../../../styles/govuk-module" as *;
+
+.mapRecentre {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  margin: 0 0 govuk-spacing(1) govuk-spacing(2);
+  border: 0;
+  border-radius: 0;
+  background: govuk-colour("white");
+  color: govuk-colour("blue");
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  cursor: pointer;
+  &:hover {
+    background: govuk-colour("black", $variant: "tint-95");
+  }
+}
+
+.mapRecentreIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

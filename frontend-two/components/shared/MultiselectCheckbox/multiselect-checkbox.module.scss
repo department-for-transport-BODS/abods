@@ -1,0 +1,146 @@
+@use "../../../styles/govuk-module" as *;
+
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.triggerWrap {
+  position: relative;
+}
+
+.selectionSummary {
+  position: absolute;
+  top: 50%;
+  left: govuk-spacing(2);
+  transform: translateY(-50%);
+  @include govuk-font($size: 19, $line-height: 1.25);
+  color: govuk-colour("black");
+  pointer-events: none;
+  z-index: 1;
+  max-width: 50%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.trigger {
+  text-align: left;
+  width: 100%;
+  padding-right: govuk-spacing(6);
+}
+
+.triggerPlaceholder {
+  color: govuk-functional-colour(secondary-text);
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: govuk-spacing(2);
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 3px solid govuk-colour("black", $variant: "tint-80");
+  border-bottom: 3px solid govuk-colour("black", $variant: "tint-80");
+  transform: translateY(-60%) rotate(45deg);
+  pointer-events: none;
+}
+
+.chevronOpen {
+  transform: translateY(-35%) rotate(-135deg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+  background: govuk-colour("black", $variant: "tint-95");
+  padding: govuk-spacing(2);
+  margin-bottom: govuk-spacing(1);
+  @include govuk-font($size: 19, $line-height: 1.25);
+}
+
+.headerLabel {
+  margin: 0;
+  @include govuk-font($size: 19, $weight: bold);
+}
+
+.headerAction {
+  margin-left: auto;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 200;
+  background: govuk-colour("white");
+  border: 1px solid govuk-colour("black");
+  border-radius: 0;
+  padding: govuk-spacing(1);
+  width: 100%;
+  max-height: 230px;
+  overflow-y: auto;
+}
+
+.options {
+  padding: 0 govuk-spacing(1) govuk-spacing(1);
+
+  :global(.govuk-checkboxes__label) {
+    @include govuk-font($size: 19, $line-height: 1.25);
+  }
+
+  :global(.govuk-checkboxes--small .govuk-checkboxes__label:before) {
+    top: 10px;
+  }
+
+  :global(.govuk-checkboxes--small .govuk-checkboxes__label:after) {
+    top: 17px;
+  }
+}
+
+.optionsSingle {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.option {
+  cursor: pointer;
+
+  &:hover,
+  &:focus-within {
+    :global(
+        .govuk-checkboxes__input:not(:disabled)
+          + .govuk-checkboxes__label:before
+      ) {
+      box-shadow: 0 0 0 10px govuk-colour("black", $variant: "tint-80");
+    }
+  }
+}
+
+.optionButton {
+  @include govuk-font($size: 19, $line-height: 1.25);
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: govuk-spacing(1);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: govuk-functional-colour(brand);
+    color: govuk-colour("white");
+    outline: 0;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}

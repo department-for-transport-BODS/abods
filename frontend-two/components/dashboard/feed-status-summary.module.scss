@@ -1,0 +1,37 @@
+@use "../../styles/govuk-module" as *;
+.feedStatusSummary {
+  width: 100%;
+  margin-bottom: govuk-spacing(2);
+  tr {
+    vertical-align: top;
+  }
+  th,
+  td {
+    padding: 0 0 govuk-spacing(3) govuk-spacing(2);
+  }
+  th {
+    @include govuk-font(16);
+    color: govuk-functional-colour(secondary-text);
+  }
+  td {
+    @include govuk-font(19);
+  }
+  td.status {
+    padding-left: 0;
+    padding-top: 2px;
+  }
+}
+.heading {
+  text-align: right;
+  @include govuk-typography-weight-regular();
+}
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  @include govuk-font(19);
+  margin-top: govuk-spacing(4);
+}
+.operatorMuted {
+  color: govuk-functional-colour(secondary-text);
+  @include govuk-font(16);
+}

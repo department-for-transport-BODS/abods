@@ -1,0 +1,32 @@
+{
+  "apiUrl": "http://localhost:3000",
+  "bodsBaseUrl": "https://data.bus-data.dft.gov.uk",
+  "envName": "local",
+  "analyticsId": "",
+  "mapboxToken": "",
+  "mapboxStyle": "mapbox://styles/mapbox/streets-v11",
+  "mapboxSatelliteStyle": "mapbox://styles/mapbox/satellite-v9",
+  "vehicleJourneys": {
+    "validDateRange": {
+      "offsetISO": "PT0H",
+      "durationISO": "P6M"
+    }
+  },
+  "otp": false,
+  "defaultCookiePolicy": false,
+  "freshdesk": {
+    "apiUrl": "/freshdesk",
+    "folders": {
+      "dashboard": "43000590095",
+      "feedMonitoring": "43000590096",
+      "otp": "43000590097",
+      "vehicleJourneys": "43000590098",
+      "corridors": "43000590099",
+      "organisation": "43000590100",
+      "dataMonitoring": "43000590101",
+      "serviceMonitoring": "43000590102",
+      "stopAnalysis": "43000590103",
+      "distances": "43000590104"
+    }
+  }
+}

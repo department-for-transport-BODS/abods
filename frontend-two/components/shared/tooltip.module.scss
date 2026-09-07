@@ -1,0 +1,36 @@
+@use "../../styles/govuk-module" as *;
+
+.tooltip {
+  color: inherit;
+  display: inline-block;
+
+  &:global(.govuk-link),
+  &:global(.button-link) {
+    color: govuk-functional-colour(link);
+
+    &:hover:not(:focus) {
+      color: govuk-functional-colour(link-hover);
+    }
+  }
+}
+
+.underline {
+  border-bottom: 2px dotted currentColor;
+}
+
+.selectable {
+  user-select: text;
+}
+
+.list {
+  margin: 0;
+  padding-left: govuk-spacing(4);
+
+  li {
+    margin-bottom: govuk-spacing(1);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
