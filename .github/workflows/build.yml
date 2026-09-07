@@ -167,6 +167,25 @@ jobs:
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
+      - name: get deployment values
+        id: get-values
+        run: |
+          stack_name=$(yq -r '."${{ env.RC_ENV }}".deploy.parameters.stack_name' ../abods-api/samconfig.yaml)
+
+          echo "frontend-bucket-name=$( \
+            aws cloudformation describe-stacks \
+              --stack-name "$stack_name" \
+              --query 'Stacks[0].Outputs[?OutputKey==`FrontendBucketName`].OutputValue' \
+              --output text \
+          )" >> "$GITHUB_OUTPUT"
+
+          echo "cloudfront-distribution-id=$( \
+            aws cloudformation describe-stacks \
+              --stack-name "$stack_name" \
+              --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
+              --output text \
+          )" >> "$GITHUB_OUTPUT"
+
       - name: build frontend-two for ${{ env.RC_ENV }}
         env:
           CI: ""
@@ -232,6 +251,20 @@ jobs:
             --sse aws:kms --sse-kms-key-id "$RC_DST_KMS_KEY_ID"
 
           echo "[INFO] Application component (FRONTEND-TWO) with version ${VERSION} successfully built and uploaded for ${RC_ENV^^}"
+
+      - name: deploy frontend-two for ${{ env.RC_ENV }}
+        run: |
+          aws s3 rm --recursive "${{ steps.get-values.outputs.frontend-bucket-name }}"
+          aws s3 sync out/ "${{ steps.get-values.outputs.frontend-bucket-name }}/" --delete
+
+          echo "[INFO] Executing invalidation against CloudFront Distribution Id ${{ steps.get-values.outputs.cloudfront-distribution-id }}"
+          invalidation_id=$(aws cloudfront create-invalidation --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --paths '/*' --output json \
+            | jq -r '.Invalidation.Id')
+
+          echo "[INFO] Waiting for invalidation to complete..."
+          aws cloudfront wait invalidation-completed --distribution-id ${{ steps.get-values.outputs.cloudfront-distribution-id }} --id "$invalidation_id"
+
+          echo "[INFO] Application component (FRONTEND-TWO) successfully deployed for ${RC_ENV^^}"
 
   commit-and-tag:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'dev') }}
