@@ -18,6 +18,11 @@
   font-weight: $govuk-font-weight-bold;
 }
 
+// Higher specificity than Tooltip's own `.tooltip { display: inline-block }`, whichever loads last, so the value always stacks under the label
+.stat :global(.unbuttoned) {
+  display: block;
+}
+
 .valueTooltip {
   border-bottom: 4px dotted;
 }
