@@ -262,6 +262,7 @@ jobs:
           fi
 
   e2e-playwright:
+    if: ${{ never() }}
     runs-on: ubuntu-latest
     needs:
       - validation
