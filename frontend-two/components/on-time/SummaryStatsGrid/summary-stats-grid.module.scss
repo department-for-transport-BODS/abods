@@ -1,0 +1,38 @@
+@use "../../../styles/govuk-module" as *;
+
+.grid {
+  display: grid;
+  gap: govuk-spacing(4);
+  width: 100%;
+  margin-bottom: govuk-spacing(4);
+
+  .stat {
+    margin-bottom: 0;
+  }
+}
+
+.item {
+  min-width: 0;
+  overflow: visible;
+  position: relative;
+}
+
+@media (min-width: 30em) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.gridCompact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 64em) {
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .gridCompact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

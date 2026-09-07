@@ -1,0 +1,127 @@
+@use "../../styles/govuk-module" as *;
+.content {
+  position: relative;
+  width: 100%;
+  min-height: 108px;
+}
+.contentLoading {
+  .data {
+    visibility: hidden;
+  }
+}
+.data {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  @include govuk-font(19);
+  padding: 0;
+  td {
+    padding: 0 govuk-spacing(4) govuk-spacing(2) 0;
+    vertical-align: top;
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+.service {
+  :global(.govuk-link) {
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+.colService {
+  width: auto;
+}
+.colOperator {
+  width: 12.5rem;
+}
+.colStat {
+  width: 6.3rem;
+}
+.colTrend {
+  width: 7.2rem;
+}
+.operator {
+  color: govuk-functional-colour(text);
+  :global(.unbuttoned) {
+    color: govuk-functional-colour(text);
+  }
+}
+.operatorText {
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.stat,
+.trend {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.link {
+  text-decoration: none;
+}
+.trend {
+  text-align: right;
+}
+.noData,
+.loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: inherit;
+  width: 100%;
+  min-height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.appPerformanceRanking {
+  width: 100%;
+}
+@include bp($to-tablet) {
+  .data {
+    table-layout: auto;
+    td {
+      padding-right: govuk-spacing(2);
+    }
+  }
+  .colService,
+  .colOperator,
+  .colStat,
+  .colTrend {
+    width: auto;
+  }
+  .service,
+  .operator {
+    min-width: 0;
+  }
+}
+.tabsList {
+  list-style: none;
+  margin: 0 0 govuk-spacing(3);
+  padding: 0;
+  display: flex;
+}
+.tabsListItem {
+  @include govuk-font(19);
+  color: govuk-functional-colour(link);
+  cursor: pointer;
+  &:not(:last-child) {
+    margin-right: govuk-spacing(7);
+  }
+  &:focus {
+    outline: none;
+  }
+  &:focus-visible {
+    outline: 3px solid transparent;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
+    border-bottom: 4px solid govuk-functional-colour(focus-text);
+    text-decoration: none;
+  }
+}
+.tabsListItemSelected {
+  font-weight: $govuk-font-weight-bold;
+  border-bottom: govuk-functional-colour(link) 4px solid;
+}

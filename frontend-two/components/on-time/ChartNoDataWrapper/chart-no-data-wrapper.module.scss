@@ -1,0 +1,43 @@
+@use "../../../styles/govuk-module" as *;
+
+.container {
+  display: block;
+  width: 100%;
+}
+
+.container > :global(.app-box) {
+  width: 100%;
+}
+
+.content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: govuk-spacing(1);
+  margin-bottom: govuk-spacing(3);
+}
+
+.chart {
+  display: none;
+}
+
+.chartLoaded {
+  display: flex;
+  width: 100%;
+}
+
+.errorIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: govuk-colour("orange");
+}

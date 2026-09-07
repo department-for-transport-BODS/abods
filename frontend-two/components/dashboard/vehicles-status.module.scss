@@ -1,0 +1,15 @@
+@use "../../styles/govuk-module" as *;
+.stats {
+  display: flex;
+  gap: govuk-spacing(6);
+  > * {
+    flex: 1 1 0;
+    margin-bottom: 0;
+  }
+}
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  @include govuk-font(19);
+  margin-top: govuk-spacing(4);
+}

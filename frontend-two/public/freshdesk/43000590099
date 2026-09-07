@@ -1,0 +1,102 @@
+[
+  {
+    "id": 43000700840,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:49:11Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Corridors",
+    "updated_at": "2025-02-17T13:07:00Z",
+    "description": "<p dir=\"ltr\">The corridor feature allows you to create a custom route along which you can analyse bus speeds and performance across different times, days, and services.</p><p>Travel times are calculated based on the recorded departure times at the first and last stops in the corridor.</p>",
+    "description_text": "The corridor feature allows you to create a custom route along which you can analyse bus speeds and performance across different times, days, and services. Travel times are calculated based on the recorded departure times at the first and last stops in the corridor.",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 4,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700841,
+    "type": 1,
+    "status": 1,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:49:29Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Length of Time",
+    "updated_at": "2025-02-17T13:07:00Z",
+    "description": "<p>Corridor data is only available for periods older than 24 hours.</p>",
+    "description_text": "Corridor data is only available for periods older than 24 hours.",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 0,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700842,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T09:49:46Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Speed",
+    "updated_at": "2025-02-17T13:07:00Z",
+    "description": "<p>Speed metrics are calculated using tracks data from the timetable, and journey time. If tracks data is not uploaded to BODS, distance is estimated using a straight-line measurement between subsequent stops.</p>",
+    "description_text": "Speed metrics are calculated using tracks data from the timetable, and journey time. If tracks data is not uploaded to BODS, distance is estimated using a straight-line measurement between subsequent stops.",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 0,
+    "suggested": 0,
+    "feedback_count": 0
+  },
+  {
+    "id": 43000700867,
+    "type": 1,
+    "status": 2,
+    "agent_id": 43185124930,
+    "created_at": "2023-04-27T13:41:23Z",
+    "category_id": 43000371971,
+    "folder_id": 43000590099,
+    "title": "Missing Transits",
+    "updated_at": "2025-02-17T13:07:00Z",
+    "description": "<p dir=\"ltr\">These are journeys included in the provided schedules but for which no departure was recorded at the first or last stop in the corridor.</p>",
+    "description_text": "These are journeys included in the provided schedules but for which no departure was recorded at the first or last stop in the corridor.",
+    "seo_data": {
+      "meta_title": "",
+      "meta_description": ""
+    },
+    "tags": [],
+    "attachments": [],
+    "cloud_files": [],
+    "thumbs_up": 0,
+    "thumbs_down": 0,
+    "hits": 0,
+    "suggested": 0,
+    "feedback_count": 0
+  }
+]

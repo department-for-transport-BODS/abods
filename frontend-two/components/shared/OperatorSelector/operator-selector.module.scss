@@ -1,0 +1,240 @@
+@use "../../../styles/govuk-module" as *;
+
+.operatorSelector {
+  display: flex;
+  align-items: center;
+}
+
+.label {
+  display: inline-block;
+  padding-right: 5px;
+}
+
+.selector {
+  min-width: 0;
+  max-width: 420px;
+}
+
+.gdsSelect {
+  position: relative;
+}
+
+.gdsSelectFocused {
+  .container {
+    outline: inherit;
+    outline-offset: inherit;
+    color: govuk-functional-colour(focus-text);
+    background-color: govuk-functional-colour(focus);
+    box-shadow:
+      0 -2px govuk-functional-colour(focus),
+      0 0 2px govuk-functional-colour(focus),
+      0 4px govuk-functional-colour(focus-text) !important;
+  }
+
+  .input input {
+    color: govuk-functional-colour(focus-text);
+  }
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  border: none;
+  border-radius: 0;
+  @include govuk-font(24);
+  font-weight: $font-weight-bold;
+  color: govuk-functional-colour(link);
+  padding: 0;
+  max-width: inherit;
+  min-height: inherit;
+
+  &:hover {
+    box-shadow: none;
+  }
+}
+
+.valueContainer {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.value {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  margin-right: govuk-spacing(2);
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input {
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 2px;
+  padding-left: 5px;
+  overflow: hidden;
+
+  input {
+    width: 2px;
+    min-width: 2px;
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    background: transparent;
+    @include govuk-font(24);
+    font-weight: $font-weight-bold;
+    color: govuk-functional-colour(link);
+    caret-color: govuk-functional-colour(link);
+  }
+}
+
+.arrowWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  min-width: 20px;
+  cursor: pointer;
+}
+
+.arrow {
+  display: inline-block;
+  position: relative;
+  top: -3px;
+  border: solid govuk-colour("blue");
+  border-width: 0 2px 2px 0;
+  padding: 3px;
+  transform: rotate(45deg);
+}
+
+.gdsSelect:not(.gdsSelectOpen) {
+  .input input {
+    opacity: 0;
+    caret-color: transparent;
+  }
+}
+
+.gdsSelectOpen {
+  .arrow {
+    top: 1px;
+    transform: rotate(-135deg);
+  }
+}
+
+.gdsSelectOpen:not(.gdsSelectFiltering) {
+  .value {
+    margin-right: govuk-spacing(2);
+    max-width: none;
+    overflow: visible;
+    visibility: visible;
+  }
+
+  .input input {
+    width: 2px;
+    min-width: 2px;
+    opacity: 0;
+    caret-color: transparent;
+  }
+}
+
+.gdsSelectOpen.gdsSelectFiltering {
+  .input input {
+    opacity: 1;
+    caret-color: govuk-functional-colour(link);
+    width: 100%;
+    min-width: 120px;
+  }
+}
+
+.gdsSelectFiltering {
+  .value {
+    margin-right: 0;
+    max-width: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  background: govuk-colour("white");
+  border: 1px solid govuk-colour("black");
+  border-radius: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 400px;
+  margin-top: 2px;
+  padding: govuk-spacing(1);
+}
+
+.dropdownItems {
+  max-height: 230px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: govuk-colour("black", $variant: "tint-80") transparent;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: govuk-colour("black", $variant: "tint-80");
+    border: none;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.option {
+  white-space: normal;
+  padding: govuk-spacing(1);
+  @include govuk-font($size: 24, $line-height: 1.25);
+}
+
+.optionLabel {
+  color: govuk-functional-colour(text);
+  @include govuk-font($size: 24, $line-height: 1.25);
+  font-weight: $font-weight-normal;
+}
+
+.optionSelected {
+  background-color: transparent !important;
+  color: govuk-functional-colour(text) !important;
+
+  .optionLabel {
+    color: govuk-functional-colour(text) !important;
+    font-weight: $font-weight-normal;
+  }
+}
+
+.optionActive,
+.optionSelected.optionActive {
+  background-color: govuk-colour("blue") !important;
+
+  .optionLabel {
+    color: govuk-colour("white") !important;
+    font-weight: $font-weight-normal;
+  }
+}
+
+.option:not(.optionActive):not(.optionSelected):hover {
+  background-color: govuk-colour("black", $variant: "tint-95") !important;
+
+  .optionLabel {
+    color: govuk-functional-colour(text) !important;
+    font-weight: $font-weight-normal;
+  }
+}

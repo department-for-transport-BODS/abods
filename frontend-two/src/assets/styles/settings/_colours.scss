@@ -1,0 +1,40 @@
+@use "govuk-frontend/dist/govuk/helpers/colour" as *;
+
+// -----------------------------------------------------------------------------
+// Colors
+// -----------------------------------------------------------------------------
+// CUSTOM COLOURS - list any non GDS system colours here
+
+$raas-colours: (
+  heat: (
+    1: #ffd8ca,
+    2: #fbbaa4,
+    3: #f49c7f,
+    4: #ec7d5d,
+    5: #e15c3c,
+    6: #d4351c,
+  ),
+  on-time: (
+    base: govuk-colour("purple"),
+  ),
+  late: (
+    base: #e5c700,
+  ),
+  early: (
+    base: govuk-colour("magenta"),
+  ),
+  change: (
+    up: #dfeae5,
+    down: #f9dfdf,
+  ),
+  success: (
+    hover: #005a30,
+  ),
+  placeholder: (
+    base: #757575,
+  ),
+);
+
+// GDS colours: use govuk-functional-colour() for text/links/borders/focus/error/brand,
+// and govuk-colour("name") or govuk-colour("name", $variant: "tint-25") for the palette.
+// https://design-system.service.gov.uk/styles/colour/

@@ -1,0 +1,11 @@
+@use "../../styles/govuk-module" as *;
+.container {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+.item {
+  flex: 1;
+  min-width: 500px;
+}

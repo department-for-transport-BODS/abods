@@ -1,0 +1,19 @@
+@use "../settings/settings" as *;
+
+.linkified {
+  color: govuk-functional-colour(link);
+  &:hover {
+    color: govuk-functional-colour(link-hover);
+  }
+  &:active {
+    color: govuk-functional-colour(link-active);
+  }
+  &:focus {
+    color: govuk-functional-colour(focus-text);
+    background: govuk-functional-colour(focus);
+    box-shadow:
+      0 -2px govuk-functional-colour(focus),
+      0 0 2px govuk-functional-colour(focus),
+      0 4px govuk-functional-colour(focus-text);
+  }
+}
