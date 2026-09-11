@@ -4,7 +4,7 @@ import { AdminAreaService } from "./admin-area.service";
 import { of } from "rxjs";
 import { featureCollection } from "@turf/helpers";
 import { FeatureCollection, Polygon } from "geojson";
-import { BRITISH_ISLES_BBOX } from "src/app/shared/geo";
+import { EnglandAndWalesBoundingBox } from "src/app/shared/geo";
 import { AdminArea } from "./admin-area.service";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { SharedModule } from "../../shared/shared.module";
@@ -59,7 +59,7 @@ describe("AdminAreaMapComponent", () => {
     // eslint-disable-next-line jasmine/prefer-toHaveBeenCalledWith
     expect(adminAreaService.fetchAdminAreaBoundaries).toHaveBeenCalled();
     expect(spectator.component.adminAreas.features.length).toBe(0);
-    expect(spectator.component.bounds).toEqual(BRITISH_ISLES_BBOX);
+    expect(spectator.component.bounds).toEqual(EnglandAndWalesBoundingBox);
   });
 
   it("should recalculate bounds when adminAreaIds or adminAreas change", () => {
@@ -77,7 +77,7 @@ describe("AdminAreaMapComponent", () => {
 
     // eslint-disable-next-line jasmine/prefer-toHaveBeenCalledWith
     expect(spectator.component.recalculateBounds).toHaveBeenCalled();
-    expect(spectator.component.bounds).toEqual(BRITISH_ISLES_BBOX);
+    expect(spectator.component.bounds).toEqual(EnglandAndWalesBoundingBox);
 
     spectator.component.adminAreaIds = adminAreaIds;
     spectator.component.adminAreas = featureCollection<Polygon, AdminArea>([
