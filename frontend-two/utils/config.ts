@@ -6,6 +6,8 @@ export const version = versionJson;
 const REQUIRED_CONFIG_KEYS: (keyof ConfigObject)[] = [
   "apiUrl",
   "bodsBaseUrl",
+  "bodsPublishBaseUrl",
+  "bodsDataBaseUrl",
   "envName",
   "analyticsId",
   "mapboxToken",
