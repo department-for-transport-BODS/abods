@@ -159,6 +159,7 @@ describe("VehicleJourneysPage", () => {
       config: {
         apiUrl: "http://test-api",
         bodsBaseUrl: "",
+        bodsPublishBaseUrl: "",
         envName: "test",
         analyticsId: "",
         mapboxToken: "test-token",
