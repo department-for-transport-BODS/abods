@@ -47,7 +47,10 @@ export const UserAccount = () => {
   };
 
   const handleInviteClick = () => {
-    window.open(`${config?.bodsBaseUrl}/account/manage/invite/`, "_blank");
+    window.open(
+      `${config?.bodsPublishBaseUrl}/account/manage/invite/`,
+      "_blank",
+    );
   };
 
   return (

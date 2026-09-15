@@ -1,6 +1,8 @@
 {
   "apiUrl": "http://localhost:3000",
-  "bodsBaseUrl": "https://data.bus-data.dft.gov.uk",
+  "bodsBaseUrl": "https://bus-data.dft.gov.uk",
+  "bodsPublishBaseUrl": "https://publish.bus-data.dft.gov.uk",
+  "bodsDataBaseUrl": "https://data.bus-data.dft.gov.uk",
   "envName": "local",
   "analyticsId": "",
   "mapboxToken": "",
