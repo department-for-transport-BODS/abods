@@ -170,7 +170,7 @@ const LoginPage = () => {
               <h2 className="govuk-heading-m">Forgot your password?</h2>
               <a
                 className="govuk-link"
-                href={`${config?.bodsBaseUrl}/account/password/reset/`}
+                href={`${config?.bodsPublishBaseUrl}/account/password/reset/`}
               >
                 Reset your password
               </a>
