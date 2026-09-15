@@ -6,6 +6,8 @@ export interface ErrorInfo {
 export type ConfigObject = {
   apiUrl: string;
   bodsBaseUrl: string;
+  bodsPublishBaseUrl: string;
+  bodsDataBaseUrl: string;
   envName: string;
   analyticsId: string;
   mapboxToken: string;
