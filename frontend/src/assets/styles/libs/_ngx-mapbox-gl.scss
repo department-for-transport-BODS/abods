@@ -1,6 +1,8 @@
+@use "../settings/settings" as *;
+
 $popup-arrow-size: 9px;
 $popup-background: govuk-colour("black");
-$popup-colour: white;
+$popup-colour: govuk-colour("white");
 
 .mapboxgl-popup.gds-popup {
   .mapboxgl-popup-tip {

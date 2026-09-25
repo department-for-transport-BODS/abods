@@ -7,11 +7,7 @@ It provides the web interface and API layer for interacting with bus service dat
 
 ## 🚀 Tech Stack
 
-> [!IMPORTANT]  
-> This repo is currently in active development, and we are in the process migrating the front end to Next.js. The source code for the Next.js frontend is in the `frontend-two` directory, while the existing Angular frontend remains in `frontend` until the migration is complete.
-
-- **[Frontend](frontend):** Angular, TypeScript
-- **[Frontend V2](frontend-two):** Next.js, TypeScript
+- **[Frontend](frontend):** Next.js, TypeScript
 - **[API](abods-api):** GraphQL, Apollo Server/Client, TypeScript
 - **[Infrastructure](abods-api/template.yaml):** AWS SAM (Serverless Application Model)
 - **[CI/CD](.github):** GitHub Actions
@@ -19,9 +15,7 @@ It provides the web interface and API layer for interacting with bus service dat
 
 ## 🛠️ Getting Started
 
-To set up your local development environment to work with the new Next.js stack, follow the [Getting Started Guide](./docs/getting-started-nextjs.md).
-
-If you need to spin up the old Angular stack, follow the old [Getting Started Guide [OLD]](./docs/Getting%20Started.md).
+To set up your local development environment, follow the [Getting Started Guide](./docs/getting-started-nextjs.md).
 
 ### 📦 Deployment
 

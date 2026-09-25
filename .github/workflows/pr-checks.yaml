@@ -94,23 +94,23 @@ jobs:
           node-version-file: frontend/.nvmrc
 
       - name: Install
-        run: npm install
+        run: npm ci
 
       - name: Check for changes
         run: git diff --name-only --exit-code HEAD || (echo "It looks like the frontend lockfile hasn't been updated. Run 'npm install' in the frontend directory using the version in frontend/.nvmrc"; false)
 
       - name: Check types
         if: success() || failure()
-        run: npm run type-check
+        run: npm run typecheck
 
       - name: Run linters
         if: success() || failure()
-        run: npm run lint:check
+        run: npm run lint
 
       - name: Run tests
         if: success() || failure()
-        run: npm run test:ci
+        run: npm run test
 
       - name: Build frontend code
         if: success() || failure()
-        run: npm run build:production
+        run: npm run build

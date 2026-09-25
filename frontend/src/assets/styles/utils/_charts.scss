@@ -1,5 +1,4 @@
-@import "src/assets/styles/settings/settings";
-@import "src/assets/styles/helpers/helpers.scss";
+@use "../settings/settings" as *;
 
 // util styles for amchart styles to share
 

@@ -1,6 +1,6 @@
 # Getting started
 
-This is an updated getting started guide for the new Next.js version of the front end.
+This guide covers the Next.js front end.
 
 You can use https://mise.jdx.dev/ as a tool manager and task runner.
 If that is installed and on your PATH, you should be able to run `mise install` to install required tools.
@@ -32,9 +32,9 @@ Otherwise, follow the [official AWS instructions](https://docs.aws.amazon.com/sy
 
 Some configuration values (such as the Mapbox token) must be set manually for local development.
 
-A template file is provided at `frontend-two/public/config.example.json`. To set up your local config:
+A template file is provided at `frontend/public/config.example.json`. To set up your local config:
 
-1. Copy `frontend-two/public/config.example.json` to `frontend-two/public/config.json`.
+1. Copy `frontend/public/config.example.json` to `frontend/public/config.json`.
 2. Fill in the required values, such as your Mapbox token. You may need to ask a team member for a token you can use locally.
 
 > [!IMPORTANT]
@@ -42,11 +42,6 @@ A template file is provided at `frontend-two/public/config.example.json`. To set
 
 ## Running site locally
 
-Run `mise r start-next` to start a connection to the sandbox database, the API, and the new Next.js front end.
+Run `mise r start` to start a connection to the sandbox database, the API, and the Next.js front end.
 It will give you a link to open the UI in your browser after an initial build.
 
-### Run front end against deployed APIs
-
-With the old Angular front end it was possible to run it in a dev server, connected to the Sandbox API.
-
-Further investigation is needed to determine if this is possible with the new Next.js front end.

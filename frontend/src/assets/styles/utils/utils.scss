@@ -1,8 +1,8 @@
-@import "_button-link";
-@import "_charts";
-@import "_flex";
-@import "_linkified";
-@import "_spinner"; // spinner is globally styled so it's accessible by the spinner used while <app-root> is loading
-@import "_typography";
-@import "_unbuttoned";
-@import "_cursor";
+@use "button-link";
+@use "charts";
+@use "flex";
+@use "linkified";
+@use "spinner";
+@use "typography";
+@use "unbuttoned";
+@use "cursor";

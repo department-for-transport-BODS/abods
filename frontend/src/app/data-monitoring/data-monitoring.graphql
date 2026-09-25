@@ -1,6 +1,0 @@
-query dashboadEmbeddedUrl {
-  embeddedUrl {
-    enabled
-    url
-  }
-}
