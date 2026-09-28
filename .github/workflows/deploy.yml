@@ -118,7 +118,7 @@ jobs:
           [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="$RC_SRC/abods/releases/$VERSION" || rc_path="$RC_SRC/abods/releases-dev/$VERSION"
 
           rc_backend_path="$rc_path/backend"
-          rc_frontend_path="$rc_path/frontend-two/$RC_ENV"
+          rc_frontend_path="$rc_path/frontend/$RC_ENV"
 
           # Application validation
           # Frontend validation
@@ -190,7 +190,7 @@ jobs:
 
           echo "[INFO] Application component (BACKEND) with version ${VERSION} successfully deployed into ${RC_ENV^^}"
 
-  frontend-two:
+  frontend:
     runs-on: ubuntu-latest
     needs:
       - validation
@@ -206,11 +206,11 @@ jobs:
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: retrieve frontend-two for ${{ env.RC_ENV }}
+      - name: retrieve frontend for ${{ env.RC_ENV }}
         env:
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
-          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/frontend-two/$RC_ENV" || rc_path="abods/releases-dev/$VERSION/frontend-two/$RC_ENV"
+          [[ $VERSION =~ ^v[0-9]+(\.[0-9]+){2}$ ]] && rc_path="abods/releases/$VERSION/frontend/$RC_ENV" || rc_path="abods/releases-dev/$VERSION/frontend/$RC_ENV"
 
           mkdir dist/
           aws s3 cp s3://$RC_SRC/$rc_path/ dist/ --recursive
@@ -233,12 +233,12 @@ jobs:
               --output text \
           )" >> $GITHUB_OUTPUT
 
-      - name: clear frontend-two for ${{ env.RC_ENV }}
+      - name: clear frontend for ${{ env.RC_ENV }}
         run: |
           aws s3 rm --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}
           echo "[INFO] S3 Bucket for application component (FRONTEND-TWO) successfully cleared for ${RC_ENV^^}"
 
-      - name: deploy frontend-two for ${{ env.RC_ENV }}
+      - name: deploy frontend for ${{ env.RC_ENV }}
         env:
           VERSION: ${{ needs.validation.outputs.VERSION }}
         run: |
@@ -267,7 +267,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - validation
-      - frontend-two
+      - frontend
     environment: sandbox
     permissions:
       contents: read

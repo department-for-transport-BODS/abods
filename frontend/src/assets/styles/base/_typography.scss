@@ -1,5 +1,4 @@
-@import "src/assets/styles/settings/settings.scss";
-@import "src/assets/styles/helpers/helpers.scss";
+@use "../settings/settings" as *;
 // Base typography styles
 
 html {
