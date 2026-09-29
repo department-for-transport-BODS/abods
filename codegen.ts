@@ -4,18 +4,8 @@ import { DateResolver, DateTimeResolver, TimeResolver } from "graphql-scalars";
 const config: CodegenConfig = {
   overwrite: true,
   schema: "abods-api/schema.graphql",
-  documents: ["frontend/**/*.graphql", "frontend-two/**/*.graphql"],
+  documents: ["frontend/src/graphql/**/*.graphql"],
   generates: {
-    "frontend/src/generated/graphql.ts": {
-      plugins: [
-        "typescript",
-        "typescript-operations",
-        "typescript-apollo-angular",
-      ],
-    },
-    "frontend/graphql.schema.json": {
-      plugins: ["introspection"],
-    },
     "abods-api/src/types/generated.ts": {
       plugins: ["typescript", "typescript-resolvers"],
       config: {
@@ -29,7 +19,7 @@ const config: CodegenConfig = {
         },
       },
     },
-    "frontend-two/src/generated/graphql.ts": {
+    "frontend/src/generated/graphql.ts": {
       plugins: ["typescript-operations", "typed-document-node", "typescript"],
       config: {
         avoidOptionals: {
