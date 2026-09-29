@@ -190,7 +190,6 @@ describe("VehicleJourneysPage", () => {
         [-0.12, 51.5],
         [-0.13, 51.51],
       ],
-      __typename: "ServicePatternDistanceResult",
     });
   });
 
