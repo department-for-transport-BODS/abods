@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 button:focus {
   outline: 0;
 }

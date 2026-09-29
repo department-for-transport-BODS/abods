@@ -58,8 +58,6 @@ Parameters:
 
 Conditions:
   IsNotLocal: !Not [!Equals [!Ref Environment, "local"]]
-  IsNotProd: !Not [!Equals [!Ref Environment, "prod"]]
-  IsNonProd: !And [!Condition IsNotLocal, !Condition IsNotProd]
 
 Resources:
   ##############################################
