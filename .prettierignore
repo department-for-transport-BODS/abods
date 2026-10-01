@@ -5,6 +5,7 @@ package-lock.json
 # Generated code
 /abods-api/src/types/generated.ts
 /frontend/src/generated/graphql.ts
+/frontend/src/generated/schema.ts
 /frontend/graphql.schema.json
 /frontend/out
 

@@ -19,13 +19,28 @@ const config: CodegenConfig = {
         },
       },
     },
-    "frontend/src/generated/graphql.ts": {
-      plugins: ["typescript-operations", "typed-document-node", "typescript"],
+    "frontend/src/generated/schema.ts": {
+      plugins: ["typescript"],
       config: {
         avoidOptionals: {
           field: true,
           inputValue: false,
         },
+        defaultScalarType: "unknown",
+      },
+    },
+    "frontend/src/generated/graphql.ts": {
+      plugins: [
+        { add: { content: 'export * from "./schema";' } },
+        "typescript-operations",
+        "typed-document-node",
+      ],
+      config: {
+        avoidOptionals: {
+          field: true,
+          inputValue: false,
+        },
+        enumValues: "./schema",
         defaultScalarType: "unknown",
         skipTypeNameForRoot: true,
       },
