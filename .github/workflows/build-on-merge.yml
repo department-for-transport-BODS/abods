@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "main"
+      - "DBODS-1749-build-on-merge"
 
 permissions: {}
 
