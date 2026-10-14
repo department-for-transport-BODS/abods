@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - "main"
-      - "build-failure-validation"
+      - "build-failure-validation" # testing validation failures
 
 permissions: {}
 
