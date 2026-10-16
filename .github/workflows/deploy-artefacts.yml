@@ -1,0 +1,187 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      backend_artefact:
+        description: Backend prefix in bods-artefact-store
+        required: true
+        type: string
+      frontend_artefact:
+        description: Frontend prefix in bods-artefact-store
+        required: true
+        type: string
+      environment:
+        description: Target environment (sandbox only during testing)
+        required: true
+        type: string
+    secrets:
+      AWS_ROLE_TO_ASSUME:
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: abods-artefact-deploy-sandbox
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ARTEFACT_BUCKET: bods-artefact-store
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      version: ${{ steps.inputs.outputs.version }}
+    steps:
+      - name: validate deployment inputs
+        id: inputs
+        env:
+          BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
+          FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$BACKEND_ARTEFACT" || -z "$FRONTEND_ARTEFACT" || -z "$ENVIRONMENT" ]]; then
+            echo "::error::Backend artefact, frontend artefact and environment are required"
+            exit 1
+          fi
+          if [[ "$ENVIRONMENT" != "sandbox" ]]; then
+            echo "::error::Only the sandbox environment is supported during testing"
+            exit 1
+          fi
+          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_sandbox_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::Backend artefact must be abods_sandbox_vX.Y.Z"
+            exit 1
+          fi
+          version="${BASH_REMATCH[1]}"
+          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_sandbox_${version}" ]]; then
+            echo "::error::Frontend artefact must be abods_frontend_sandbox_${version}, matching the backend version and environment"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: configure aws credentials (artefact repository)
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: abods-deploy-artefacts-validation
+          role-skip-session-tagging: true
+
+      - name: validate release artefacts exist
+        env:
+          BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
+          FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
+        run: |
+          set -euo pipefail
+          for key in "$BACKEND_ARTEFACT/packaged.yaml" "$BACKEND_ARTEFACT/samconfig.yaml" "$BACKEND_ARTEFACT/build-info.json" \
+            "$FRONTEND_ARTEFACT/index.html" "$FRONTEND_ARTEFACT/config.json" "$FRONTEND_ARTEFACT/build-info.json"; do
+            if ! size=$(aws s3api head-object --bucket "$ARTEFACT_BUCKET" --key "$key" --query ContentLength --output text 2> "$RUNNER_TEMP/artefact-error"); then
+              if grep -Eq '\(404\)|Not Found|NoSuchKey' "$RUNNER_TEMP/artefact-error"; then
+                echo "::error::Required release file does not exist: s3://$ARTEFACT_BUCKET/$key"
+              else
+                echo "::error::Unable to access s3://$ARTEFACT_BUCKET/$key; check S3 permissions and AWS configuration"
+                cat "$RUNNER_TEMP/artefact-error" >&2
+              fi
+              exit 1
+            fi
+            if [[ "$size" == "0" ]]; then
+              echo "::error::Required release file is empty: $key"
+              exit 1
+            fi
+          done
+
+  deploy:
+    needs: validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: sandbox
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
+      FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
+      VERSION: ${{ needs.validation.outputs.version }}
+      PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+      DEPLOYMENT_BUCKET: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
+    steps:
+      - name: setup sam
+        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
+        with:
+          use-installer: true
+
+      - name: configure aws credentials (artefact repository)
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: abods-sandbox-artefacts-download
+          role-skip-session-tagging: true
+
+      - name: download release artefacts
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          aws s3 cp "s3://$ARTEFACT_BUCKET/$BACKEND_ARTEFACT/packaged.yaml" packaged.yaml
+          aws s3 cp "s3://$ARTEFACT_BUCKET/$BACKEND_ARTEFACT/samconfig.yaml" samconfig.yaml
+          aws s3 cp "s3://$ARTEFACT_BUCKET/$BACKEND_ARTEFACT/build-info.json" backend-build-info.json
+          aws s3 cp "s3://$ARTEFACT_BUCKET/$FRONTEND_ARTEFACT/" dist/ --recursive --only-show-errors
+          jq -e --arg version "$VERSION" '.version == $version' backend-build-info.json > /dev/null
+          jq -e --arg version "$VERSION" --arg commit "$(jq -r '.commit' backend-build-info.json)" \
+            '.version == $version and .environment == "sandbox" and (.commit | type == "string" and length > 0) and .commit == $commit' dist/build-info.json > /dev/null
+          jq -e '.envName == "sandbox"' dist/config.json > /dev/null
+
+      - name: configure aws credentials (sandbox)
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: abods-sandbox-artefacts-deploy
+          role-skip-session-tagging: true
+
+      - name: deploy backend
+        id: backend
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          stack_name=$(yq e '.sandbox.deploy.parameters.stack_name' samconfig.yaml)
+          if [[ ! "$stack_name" =~ ^[A-Za-z][A-Za-z0-9-]{0,127}$ ]]; then
+            echo "::error::Artefact samconfig.yaml has no valid sandbox stack name"
+            exit 1
+          fi
+          sam deploy \
+            --template-file packaged.yaml \
+            --config-file samconfig.yaml \
+            --config-env sandbox \
+            --stack-name "$stack_name" \
+            --region "$AWS_REGION" \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --s3-bucket "$DEPLOYMENT_BUCKET" \
+            --s3-prefix abods/deployments/sandbox \
+            --tags "BuiltFrom=$VERSION" "ProjectName=$PROJECT_NAME" "Environment=sandbox"
+          echo "stack_name=$stack_name" >> "$GITHUB_OUTPUT"
+
+      - name: deploy frontend and invalidate cache
+        working-directory: ${{ runner.temp }}
+        env:
+          STACK_NAME: ${{ steps.backend.outputs.stack_name }}
+        run: |
+          set -euo pipefail
+          aws cloudformation describe-stacks --stack-name "$STACK_NAME" --output json > stack.json
+          frontend_bucket=$(jq -er '.Stacks[0].Outputs[] | select(.OutputKey == "FrontendBucketName") | .OutputValue | select(startswith("s3://"))' stack.json)
+          distribution_id=$(jq -er '.Stacks[0].Outputs[] | select(.OutputKey == "CloudFrontDistributionId") | .OutputValue | select(length > 0)' stack.json)
+          aws s3 sync dist/ "$frontend_bucket/" --delete --exclude build-info.json --only-show-errors
+          aws s3 cp "$frontend_bucket/freshdesk/" "$frontend_bucket/freshdesk/" --recursive \
+            --metadata-directive REPLACE --content-type "text/html; charset=utf-8" --only-show-errors
+          invalidation_id=$(aws cloudfront create-invalidation --distribution-id "$distribution_id" \
+            --paths '/*' --query Invalidation.Id --output text)
+          aws cloudfront wait invalidation-completed --distribution-id "$distribution_id" --id "$invalidation_id"
+          echo "[INFO] Deployed $VERSION to sandbox"

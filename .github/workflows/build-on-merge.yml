@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "main"
+      - "DBODS-1750-deploy-workflow"
 
 permissions: {}
 
@@ -17,7 +18,7 @@ env:
   ARTEFACT_BUCKET: bods-artefact-store
   ARTEFACT_KMS_KEY_ID: alias/bods-artefact-store
   ARTEFACT_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-  TARGET_ENVS: "uat prod"
+  TARGET_ENVS: "sandbox"
 
 jobs:
   validation:
@@ -177,7 +178,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: validation
-    environment: ${{ matrix.env }}-build
+    environment: ${{ matrix.env == 'sandbox' && 'sandbox' || format('{0}-build', matrix.env) }}
     defaults:
       run:
         working-directory: frontend
@@ -262,3 +263,19 @@ jobs:
             --only-show-errors
 
           echo "[INFO] Frontend ${VERSION} for ${ENVIRONMENT^^} uploaded to s3://${ARTEFACT_BUCKET}/${prefix}/"
+
+  deploy:
+    needs:
+      - validation
+      - backend
+      - frontend
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy-artefacts.yml
+    with:
+      backend_artefact: abods_sandbox_${{ needs.validation.outputs.VERSION }}
+      frontend_artefact: abods_frontend_sandbox_${{ needs.validation.outputs.VERSION }}
+      environment: sandbox
+    secrets:
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
