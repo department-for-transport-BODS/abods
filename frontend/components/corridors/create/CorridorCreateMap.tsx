@@ -93,6 +93,8 @@ interface Props {
   otherStops?: CorridorStop[];
   nonOrgStops?: CorridorStop[];
   locationBounds?: mapboxgl.LngLatBounds | null;
+  // Must be false when matchingStops come from searching the map's own bounds, or each fit re-triggers the search
+  fitToMatchingStops?: boolean;
   showRecentre?: boolean;
   onSelectStop: (stop: CorridorStop) => void;
   onBoundsChange?: (bounds: mapboxgl.LngLatBounds | null) => void;
@@ -107,6 +109,7 @@ export const CorridorCreateMap = ({
   otherStops,
   nonOrgStops,
   locationBounds,
+  fitToMatchingStops = false,
   showRecentre = false,
   onSelectStop,
   onBoundsChange,
@@ -622,7 +625,7 @@ export const CorridorCreateMap = ({
     if (!map) return;
 
     if (corridorStops.length === 0) {
-      if (locationBounds || matchingStops.length === 0) return;
+      if (!fitToMatchingStops || matchingStops.length === 0) return;
 
       fitTo(map, boundsFromStops(matchingStops), {
         padding: 50,
@@ -637,7 +640,7 @@ export const CorridorCreateMap = ({
       maxZoom: 16,
       duration: 500,
     });
-  }, [matchingStops, corridorStops, locationBounds]);
+  }, [matchingStops, corridorStops, fitToMatchingStops]);
 
   useEffect(() => {
     const map = mapRef.current;
