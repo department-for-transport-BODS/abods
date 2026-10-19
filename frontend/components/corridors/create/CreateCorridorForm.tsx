@@ -533,6 +533,7 @@ export const CreateCorridorForm = ({
                 otherStops={otherStopsData?.orgStops}
                 nonOrgStops={otherStopsData?.nonOrgStops}
                 locationBounds={selectedLocationBounds}
+                fitToMatchingStops={isStopSearch}
                 showRecentre={showRecentre}
                 onSelectStop={addStop}
                 onBoundsChange={(bounds) => {

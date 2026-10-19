@@ -204,7 +204,7 @@ jobs:
 
           aws s3 cp --recursive out/ s3://$RC_DST/$rc_path/ --sse aws:kms --sse-kms-key-id "$RC_DST_KMS_KEY_ID"
 
-          echo "[INFO] Application component (FRONTEND-TWO) with version ${VERSION} successfully built and uploaded for ${ENVIRONMENT^^}"          
+          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully built and uploaded for ${ENVIRONMENT^^}"          
   
   commit-and-tag:
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && contains(github.ref, 'dev') }}
