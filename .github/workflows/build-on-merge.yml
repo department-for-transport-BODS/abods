@@ -17,7 +17,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ARTEFACT_BUCKET: bods-artefact-store
   ARTEFACT_KMS_KEY_ID: alias/bods-artefact-store
-  ARTEFACT_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  ARTEFACT_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
   TARGET_ENVS: "sandbox"
 
 jobs:
@@ -36,7 +36,7 @@ jobs:
       - name: validate artefact repository configuration
         run: |
           if [[ -z "$ARTEFACT_ROLE_ARN" ]]; then
-            echo "::error::Missing repository secret: AWS_ROLE_TO_ASSUME"
+            echo "::error::Missing repository secret: ARTEFACT_STORE_ROLE_ARN"
             exit 1
           fi
 
@@ -278,4 +278,4 @@ jobs:
       frontend_artefact: abods_frontend_sandbox_${{ needs.validation.outputs.VERSION }}
       environment: sandbox
     secrets:
-      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}

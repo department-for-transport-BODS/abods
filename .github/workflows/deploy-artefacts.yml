@@ -16,7 +16,7 @@ on:
         required: true
         type: string
     secrets:
-      AWS_ROLE_TO_ASSUME:
+      ARTEFACT_STORE_ROLE_ARN:
         required: true
 
 permissions: {}
@@ -70,7 +70,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
           role-session-name: abods-deploy-artefacts-validation
           role-skip-session-tagging: true
 
@@ -121,7 +121,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
           role-session-name: abods-sandbox-artefacts-download
           role-skip-session-tagging: true
 
