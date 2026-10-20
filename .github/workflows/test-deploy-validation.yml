@@ -1,0 +1,44 @@
+name: Test Deploy Validation
+
+on:
+  push:
+    branches:
+      - DBODS-1750-deploy-workflow
+    paths:
+      - .github/workflows/test-deploy-validation.yml
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validation-tests:
+    name: ${{ matrix.case }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - case: Missing backend
+            backend: ""
+            frontend: abods_frontend_sandbox_v999.999.999
+            environment: sandbox
+          - case: Missing frontend
+            backend: abods_sandbox_v999.999.999
+            frontend: ""
+            environment: sandbox
+          - case: Invalid environment
+            backend: abods_sandbox_v999.999.999
+            frontend: abods_frontend_sandbox_v999.999.999
+            environment: invalid
+          - case: Missing release
+            backend: abods_sandbox_v999.999.999
+            frontend: abods_frontend_sandbox_v999.999.999
+            environment: sandbox
+    uses: ./.github/workflows/deploy-artefacts.yml
+    with:
+      backend_artefact: ${{ matrix.backend }}
+      frontend_artefact: ${{ matrix.frontend }}
+      environment: ${{ matrix.environment }}
+    secrets:
+      ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
