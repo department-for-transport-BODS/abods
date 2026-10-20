@@ -1,5 +1,14 @@
 @use "../../../styles/govuk-module" as *;
 
+.helpdeskRow {
+  display: flex;
+  gap: govuk-spacing(2);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
 .helpdeskLink {
   display: inline-flex;
   align-items: center;
