@@ -1,5 +1,5 @@
 import styles from "./on-time.module.scss";
-import helpdeskStyles from "../../components/on-time/OnTimeHelpdesk/on-time-helpdesk-panel.module.scss";
+import helpdeskStyles from "../../components/on-time/OnTimeHelpdesk/on-time-helpdesk-button.module.scss";
 
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
@@ -438,7 +438,7 @@ const OnTimeIndexPage = () => {
                   <b>{formattedRecordedStopDepartures}</b> departures recorded
                 </p>
 
-                <div className={helpdeskStyles.container}>
+                <div className={helpdeskStyles.helpdeskRow}>
                   <OnTimeHelpdeskButton />
                   <OtpThresholdModalLink
                     params={operatorTableParams}
