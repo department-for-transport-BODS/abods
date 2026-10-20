@@ -307,6 +307,7 @@ describe("CorridorCreateMap", () => {
       <CorridorCreateMap
         corridorStops={[]}
         matchingStops={corridorStops}
+        fitToMatchingStops
         onSelectStop={vi.fn()}
         mapboxToken="test-token"
         mapboxStyle="mapbox://styles/test/street"
@@ -321,6 +322,32 @@ describe("CorridorCreateMap", () => {
         duration: 500,
       },
     );
+  });
+
+  it("does not fit to first-stop candidates found by searching the visible map area", () => {
+    const { rerender } = render(
+      <CorridorCreateMap
+        corridorStops={[]}
+        matchingStops={corridorStops}
+        fitToMatchingStops={false}
+        onSelectStop={vi.fn()}
+        mapboxToken="test-token"
+        mapboxStyle="mapbox://styles/test/street"
+      />,
+    );
+
+    rerender(
+      <CorridorCreateMap
+        corridorStops={[]}
+        matchingStops={[corridorStops[0]]}
+        fitToMatchingStops={false}
+        onSelectStop={vi.fn()}
+        mapboxToken="test-token"
+        mapboxStyle="mapbox://styles/test/street"
+      />,
+    );
+
+    expect(mapboxMock.methods.fitBounds).not.toHaveBeenCalled();
   });
 
   it("shows Re-centre after the user moves the map", async () => {
