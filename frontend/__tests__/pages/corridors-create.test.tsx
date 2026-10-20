@@ -194,6 +194,59 @@ describe("CorridorsCreatePage", () => {
     });
   });
 
+  it("does not re-run the location search when the map reports the selected location after zooming", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.type(
+      screen.getByLabelText("Location name or postcode"),
+      "SW1A 1AA",
+    );
+    await user.click(
+      await screen.findByRole("button", { name: "Test location" }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("1 matching stops")).toBeInTheDocument();
+    });
+    const [, searchedBounds] = mockQueryStops.mock.calls[0];
+
+    act(() => {
+      mapHarness.onBoundsChange?.(
+        searchedBounds as unknown as Parameters<
+          NonNullable<typeof mapHarness.onBoundsChange>
+        >[0],
+      );
+    });
+
+    expect(screen.getByText("1 matching stops")).toBeInTheDocument();
+    expect(mockQueryStops).toHaveBeenCalledTimes(1);
+  });
+
+  it("searches the selected location rather than a previously panned map area", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    act(() => {
+      mapHarness.onBoundsChange?.(fakeBounds(-3, -2.5));
+    });
+
+    await user.type(
+      screen.getByLabelText("Location name or postcode"),
+      "SW1A 1AA",
+    );
+    await user.click(
+      await screen.findByRole("button", { name: "Test location" }),
+    );
+
+    await waitFor(() => {
+      expect(mockQueryStops.mock.lastCall?.[1]?.toArray()).toEqual([
+        [-1.1, 52.9],
+        [-0.9, 53.1],
+      ]);
+    });
+  });
+
   it("shows error for a location search area that is too large", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
