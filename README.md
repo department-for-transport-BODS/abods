@@ -20,10 +20,3 @@ To set up your local development environment, follow the [Getting Started Guide]
 ### 📦 Deployment
 
 For instructions on deploying through the path to live, refer to the [Deployment Guide](./docs/Deployment.md).
-
-## 🔗 Useful Links
-
-- [ABODS Documentation](https://kpmgengineering.atlassian.net/wiki/spaces/BODS/pages/643596338/ABODS)
-- [Reusable Actions](https://github.com/KPMG-UK/pcoe-eng-github-actions-library)
-- [DPP Engineering Documentation](https://kpmgengineering.atlassian.net/wiki/spaces/DPPENG/overview?homepageId=352288946)
-- [Raise a request (CE/PE Portal)](https://kpmgengineering.atlassian.net/servicedesk/customer/portal/1/group/-1)
