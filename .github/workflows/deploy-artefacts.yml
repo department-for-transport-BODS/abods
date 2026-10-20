@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       environment:
-        description: Target environment (sandbox only during testing)
+        description: Target environment (uat only)
         required: true
         type: string
     secrets:
@@ -22,7 +22,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: abods-artefact-deploy-sandbox
+  group: abods-artefact-deploy-uat
   cancel-in-progress: false
 
 env:
@@ -51,17 +51,17 @@ jobs:
             echo "::error::Backend artefact, frontend artefact and environment are required"
             exit 1
           fi
-          if [[ "$ENVIRONMENT" != "sandbox" ]]; then
-            echo "::error::Only the sandbox environment is supported during testing"
+          if [[ "$ENVIRONMENT" != "uat" ]]; then
+            echo "::error::Only the uat environment is supported"
             exit 1
           fi
-          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_sandbox_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            echo "::error::Backend artefact must be abods_sandbox_vX.Y.Z"
+          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_uat_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::Backend artefact must be abods_uat_vX.Y.Z"
             exit 1
           fi
           version="${BASH_REMATCH[1]}"
-          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_sandbox_${version}" ]]; then
-            echo "::error::Frontend artefact must be abods_frontend_sandbox_${version}, matching the backend version and environment"
+          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_uat_${version}" ]]; then
+            echo "::error::Frontend artefact must be abods_frontend_uat_${version}, matching the backend version and environment"
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -98,7 +98,7 @@ jobs:
     needs: validation
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: sandbox
+    environment: uat
     permissions:
       id-token: write
       contents: read
@@ -119,7 +119,7 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
-          role-session-name: abods-sandbox-artefacts-download
+          role-session-name: abods-uat-artefacts-download
           role-skip-session-tagging: true
 
       - name: download release artefacts
@@ -132,15 +132,15 @@ jobs:
           aws s3 cp "s3://$ARTEFACT_BUCKET/$FRONTEND_ARTEFACT/" dist/ --recursive --only-show-errors
           jq -e --arg version "$VERSION" '.version == $version' backend-build-info.json > /dev/null
           jq -e --arg version "$VERSION" --arg commit "$(jq -r '.commit' backend-build-info.json)" \
-            '.version == $version and .environment == "sandbox" and (.commit | type == "string" and length > 0) and .commit == $commit' dist/build-info.json > /dev/null
-          jq -e '.envName == "sandbox"' dist/config.json > /dev/null
+            '.version == $version and .environment == "uat" and (.commit | type == "string" and length > 0) and .commit == $commit' dist/build-info.json > /dev/null
+          jq -e '.envName == "uat"' dist/config.json > /dev/null
 
-      - name: configure aws credentials (sandbox)
+      - name: configure aws credentials (uat)
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: abods-sandbox-artefacts-deploy
+          role-session-name: abods-uat-artefacts-deploy
           role-skip-session-tagging: true
 
       - name: deploy backend
@@ -149,10 +149,10 @@ jobs:
         with:
           template_file: ${{ runner.temp }}/packaged.yaml
           config_file: ${{ runner.temp }}/samconfig.yaml
-          config_environment: sandbox
+          config_environment: uat
           aws_region: ${{ env.AWS_REGION }}
           deployment_bucket: ${{ env.DEPLOYMENT_BUCKET }}
-          deployment_prefix: abods/deployments/sandbox
+          deployment_prefix: abods/deployments/uat
           project_name: ${{ env.PROJECT_NAME }}
           release_version: ${{ env.VERSION }}
 
@@ -179,4 +179,4 @@ jobs:
 
       - name: report deployment
         run: |
-          echo "[INFO] Deployed $VERSION to sandbox"
+          echo "[INFO] Deployed $VERSION to UAT"

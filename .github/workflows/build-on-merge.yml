@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - "main"
-      - "DBODS-1750-deploy-workflow"
 
 permissions: {}
 
@@ -18,7 +17,7 @@ env:
   ARTEFACT_BUCKET: bods-artefact-store
   ARTEFACT_KMS_KEY_ID: alias/bods-artefact-store
   ARTEFACT_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
-  TARGET_ENVS: "sandbox"
+  TARGET_ENVS: "uat prod"
 
 jobs:
   validation:
@@ -178,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: validation
-    environment: ${{ matrix.env == 'sandbox' && 'sandbox' || format('{0}-build', matrix.env) }}
+    environment: ${{ matrix.env }}-build
     defaults:
       run:
         working-directory: frontend
@@ -274,8 +273,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/deploy-artefacts.yml
     with:
-      backend_artefact: abods_sandbox_${{ needs.validation.outputs.VERSION }}
-      frontend_artefact: abods_frontend_sandbox_${{ needs.validation.outputs.VERSION }}
-      environment: sandbox
+      backend_artefact: abods_uat_${{ needs.validation.outputs.VERSION }}
+      frontend_artefact: abods_frontend_uat_${{ needs.validation.outputs.VERSION }}
+      environment: uat
     secrets:
       ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
