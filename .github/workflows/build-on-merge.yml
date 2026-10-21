@@ -16,7 +16,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ARTEFACT_BUCKET: bods-artefact-store
   ARTEFACT_KMS_KEY_ID: alias/bods-artefact-store
-  ARTEFACT_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  ARTEFACT_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
   TARGET_ENVS: "uat prod"
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
       - name: validate artefact repository configuration
         run: |
           if [[ -z "$ARTEFACT_ROLE_ARN" ]]; then
-            echo "::error::Missing repository secret: AWS_ROLE_TO_ASSUME"
+            echo "::error::Missing repository secret: ARTEFACT_STORE_ROLE_ARN"
             exit 1
           fi
 
@@ -262,3 +262,19 @@ jobs:
             --only-show-errors
 
           echo "[INFO] Frontend ${VERSION} for ${ENVIRONMENT^^} uploaded to s3://${ARTEFACT_BUCKET}/${prefix}/"
+
+  deploy:
+    needs:
+      - validation
+      - backend
+      - frontend
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy-artefacts.yml
+    with:
+      backend_artefact: abods_uat_${{ needs.validation.outputs.VERSION }}
+      frontend_artefact: abods_frontend_uat_${{ needs.validation.outputs.VERSION }}
+      environment: uat
+    secrets:
+      ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
