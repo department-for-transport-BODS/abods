@@ -75,7 +75,7 @@ jobs:
           role-skip-session-tagging: true
 
       - name: validate backend artefact exists
-        uses: department-for-transport-BODS/.github/actions/validate-artefact@311173b59a21c528c245c44935c7bc0288d8d1b0
+        uses: department-for-transport-BODS/.github/actions/validate-artefact@v1
         with:
           bucket: ${{ env.ARTEFACT_BUCKET }}
           prefix: ${{ inputs.backend_artefact }}
@@ -85,7 +85,7 @@ jobs:
             build-info.json
 
       - name: validate frontend artefact exists
-        uses: department-for-transport-BODS/.github/actions/validate-artefact@311173b59a21c528c245c44935c7bc0288d8d1b0
+        uses: department-for-transport-BODS/.github/actions/validate-artefact@v1
         with:
           bucket: ${{ env.ARTEFACT_BUCKET }}
           prefix: ${{ inputs.frontend_artefact }}
@@ -145,7 +145,7 @@ jobs:
 
       - name: deploy backend
         id: backend
-        uses: department-for-transport-BODS/.github/actions/sam-deploy-artefact@311173b59a21c528c245c44935c7bc0288d8d1b0
+        uses: department-for-transport-BODS/.github/actions/sam-deploy-artefact@v1
         with:
           template_file: ${{ runner.temp }}/packaged.yaml
           config_file: ${{ runner.temp }}/samconfig.yaml
@@ -170,7 +170,7 @@ jobs:
           echo "distribution_id=$distribution_id" >> "$GITHUB_OUTPUT"
 
       - name: deploy frontend and invalidate cache
-        uses: department-for-transport-BODS/.github/actions/deploy-static-frontend@311173b59a21c528c245c44935c7bc0288d8d1b0
+        uses: department-for-transport-BODS/.github/actions/deploy-static-frontend@v1
         with:
           export_directory: ${{ runner.temp }}/dist
           target_bucket: ${{ steps.frontend-targets.outputs.bucket }}
