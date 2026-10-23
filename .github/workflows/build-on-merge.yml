@@ -178,7 +178,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: validation
-    environment: ${{ matrix.env }}-build
+    environment: ${{ matrix.env }}
     defaults:
       run:
         working-directory: frontend
