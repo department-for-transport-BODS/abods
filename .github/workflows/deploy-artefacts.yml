@@ -1,6 +1,7 @@
 name: deploy artefacts
 
 on:
+  # checkov:skip=CKV_GHA_7:Manual deployment selects existing version-matched sandbox artefacts; this workflow does not build artefacts.
   workflow_dispatch:
     inputs:
       backend_artefact:
