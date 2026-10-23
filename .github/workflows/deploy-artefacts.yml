@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       backend_artefact:
-        description: Backend prefix in bods-artefact-store (abods_sandbox_vX.Y.Z)
+        description: Backend prefix in bods-artefact-store
         required: true
         type: string
       frontend_artefact:
-        description: Frontend prefix in bods-artefact-store (abods_frontend_sandbox_vX.Y.Z)
+        description: Frontend prefix in bods-artefact-store
         required: true
         type: string
       environment:
@@ -72,8 +72,8 @@ jobs:
             echo "::error::Only the sandbox environment is supported"
             exit 1
           fi
-          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_sandbox_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            echo "::error::Backend artefact must be abods_sandbox_vX.Y.Z"
+          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_backend_sandbox_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::Backend artefact must be abods_backend_sandbox_vX.Y.Z"
             exit 1
           fi
           version="${BASH_REMATCH[1]}"
