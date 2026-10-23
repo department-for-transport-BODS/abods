@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "sandbox"
+      - "new-workflows-sandbox"
 
 permissions: {}
 

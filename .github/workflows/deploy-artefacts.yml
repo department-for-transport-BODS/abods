@@ -45,6 +45,7 @@ concurrency:
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ARTEFACT_BUCKET: bods-artefact-store
+  ARTEFACT_MANIFEST_TABLE: bods-artefact-manifest
 
 jobs:
   validation:
@@ -193,6 +194,46 @@ jobs:
           target_bucket: ${{ steps.frontend-targets.outputs.bucket }}
           cloudfront_distribution_id: ${{ steps.frontend-targets.outputs.distribution_id }}
           html_prefix: freshdesk
+
+      - name: configure aws credentials (artefact manifest)
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
+          role-session-name: abods-sandbox-artefacts-manifest
+          role-skip-session-tagging: true
+
+      - name: record deployed artefact versions
+        working-directory: ${{ runner.temp }}
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg table "$ARTEFACT_MANIFEST_TABLE" \
+            --arg environment "$ENVIRONMENT" \
+            --arg backend "$BACKEND_ARTEFACT" \
+            --arg frontend "$FRONTEND_ARTEFACT" \
+            '{
+              TransactItems: ([
+                {component: "abods-backend", version: $backend},
+                {component: "abods-frontend", version: $frontend}
+              ] | map({
+                Update: {
+                  TableName: $table,
+                  Key: {
+                    service_artefact: {S: .component},
+                    environment: {S: $environment}
+                  },
+                  UpdateExpression: "SET #version = :version",
+                  ExpressionAttributeNames: {"#version": "version"},
+                  ExpressionAttributeValues: {":version": {S: .version}}
+                }
+              }))
+            }' > manifest-transaction.json
+          aws dynamodb transact-write-items \
+            --region eu-west-2 \
+            --cli-input-json file://manifest-transaction.json
 
       - name: report deployment
         run: |
