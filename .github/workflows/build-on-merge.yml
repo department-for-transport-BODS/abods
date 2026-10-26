@@ -1,10 +1,10 @@
 name: build on merge
-run-name: build on merge to main @ ${{ github.sha }}
+run-name: build on merge to sandbox @ ${{ github.sha }}
 
 on:
   push:
     branches:
-      - "main"
+      - "sandbox"
 
 permissions: {}
 
@@ -17,7 +17,7 @@ env:
   ARTEFACT_BUCKET: bods-artefact-store
   ARTEFACT_KMS_KEY_ID: alias/bods-artefact-store
   ARTEFACT_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
-  TARGET_ENVS: "uat prod"
+  TARGET_ENVS: "sandbox"
 
 jobs:
   validation:
@@ -59,7 +59,7 @@ jobs:
           fi
 
           if [[ "$version" == "$previous" ]]; then
-            echo "::error::VERSION has not been updated (still ${version}). Bump VERSION before merging to main"
+            echo "::error::VERSION has not been updated (still ${version}). Bump VERSION before merging to ${GITHUB_REF_NAME}"
             exit 1
           fi
 
@@ -86,7 +86,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
           for env in $TARGET_ENVS; do
-            for prefix in "abods_${env}_${VERSION}" "abods_frontend_${env}_${VERSION}"; do
+            for prefix in "abods_backend_${env}_${VERSION}" "abods_frontend_${env}_${VERSION}"; do
               count=$(aws s3api list-objects-v2 --bucket "$ARTEFACT_BUCKET" --prefix "${prefix}/" --max-keys 1 --query 'KeyCount' --output text)
               [[ "$count" == "0" ]] && continue
 
@@ -154,7 +154,7 @@ jobs:
             '{version: $version, commit: $commit, run: $run}' > build-info.json
 
           for env in $TARGET_ENVS; do
-            prefix="abods_${env}_${VERSION}"
+            prefix="abods_backend_${env}_${VERSION}"
 
             aws s3 cp build-info.json "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" \
               --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
@@ -177,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: validation
-    environment: ${{ matrix.env }}-build
+    environment: ${{ matrix.env }}
     defaults:
       run:
         working-directory: frontend
@@ -273,8 +273,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/deploy-artefacts.yml
     with:
-      backend_artefact: abods_uat_${{ needs.validation.outputs.VERSION }}
-      frontend_artefact: abods_frontend_uat_${{ needs.validation.outputs.VERSION }}
-      environment: uat
+      backend_artefact: abods_backend_sandbox_${{ needs.validation.outputs.VERSION }}
+      frontend_artefact: abods_frontend_sandbox_${{ needs.validation.outputs.VERSION }}
+      environment: sandbox
     secrets:
       ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}

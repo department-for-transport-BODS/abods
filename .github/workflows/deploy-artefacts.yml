@@ -1,6 +1,24 @@
-name: Deploy
+name: deploy artefacts
 
 on:
+  # checkov:skip=CKV_GHA_7:Manual deployment selects existing version-matched environment-specific artefacts; this workflow does not build artefacts.
+  workflow_dispatch:
+    inputs:
+      backend_artefact:
+        description: Backend prefix in bods-artefact-store
+        required: true
+        type: string
+      frontend_artefact:
+        description: Frontend prefix in bods-artefact-store
+        required: true
+        type: string
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - sandbox
+        default: sandbox
   workflow_call:
     inputs:
       backend_artefact:
@@ -12,7 +30,7 @@ on:
         required: true
         type: string
       environment:
-        description: Target environment (uat only)
+        description: Target environment
         required: true
         type: string
     secrets:
@@ -22,12 +40,13 @@ on:
 permissions: {}
 
 concurrency:
-  group: abods-artefact-deploy-uat
+  group: abods-artefact-deploy-${{ inputs.environment }}
   cancel-in-progress: false
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ARTEFACT_BUCKET: bods-artefact-store
+  ARTEFACT_MANIFEST_TABLE: bods-artefact-manifest
 
 jobs:
   validation:
@@ -51,17 +70,17 @@ jobs:
             echo "::error::Backend artefact, frontend artefact and environment are required"
             exit 1
           fi
-          if [[ "$ENVIRONMENT" != "uat" ]]; then
-            echo "::error::Only the uat environment is supported"
+          if [[ "$ENVIRONMENT" != "sandbox" ]]; then
+            echo "::error::Only the sandbox environment is currently supported"
             exit 1
           fi
-          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_uat_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            echo "::error::Backend artefact must be abods_uat_vX.Y.Z"
+          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_backend_${ENVIRONMENT}_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::Backend artefact must be abods_backend_${ENVIRONMENT}_vX.Y.Z"
             exit 1
           fi
           version="${BASH_REMATCH[1]}"
-          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_uat_${version}" ]]; then
-            echo "::error::Frontend artefact must be abods_frontend_uat_${version}, matching the backend version and environment"
+          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_${ENVIRONMENT}_${version}" ]]; then
+            echo "::error::Frontend artefact must be abods_frontend_${ENVIRONMENT}_${version}, matching the backend version and environment"
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -98,11 +117,12 @@ jobs:
     needs: validation
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: uat
+    environment: ${{ inputs.environment }}
     permissions:
       id-token: write
       contents: read
     env:
+      ENVIRONMENT: ${{ inputs.environment }}
       BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
       FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
       VERSION: ${{ needs.validation.outputs.version }}
@@ -119,7 +139,7 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
-          role-session-name: abods-uat-artefacts-download
+          role-session-name: abods-${{ env.ENVIRONMENT }}-artefacts-download
           role-skip-session-tagging: true
 
       - name: download release artefacts
@@ -131,16 +151,16 @@ jobs:
           aws s3 cp "s3://$ARTEFACT_BUCKET/$BACKEND_ARTEFACT/build-info.json" backend-build-info.json
           aws s3 cp "s3://$ARTEFACT_BUCKET/$FRONTEND_ARTEFACT/" dist/ --recursive --only-show-errors
           jq -e --arg version "$VERSION" '.version == $version' backend-build-info.json > /dev/null
-          jq -e --arg version "$VERSION" --arg commit "$(jq -r '.commit' backend-build-info.json)" \
-            '.version == $version and .environment == "uat" and (.commit | type == "string" and length > 0) and .commit == $commit' dist/build-info.json > /dev/null
-          jq -e '.envName == "uat"' dist/config.json > /dev/null
+          jq -e --arg version "$VERSION" --arg environment "$ENVIRONMENT" --arg commit "$(jq -r '.commit' backend-build-info.json)" \
+            '.version == $version and .environment == $environment and (.commit | type == "string" and length > 0) and .commit == $commit' dist/build-info.json > /dev/null
+          jq -e --arg environment "$ENVIRONMENT" '.envName == $environment' dist/config.json > /dev/null
 
-      - name: configure aws credentials (uat)
+      - name: configure aws credentials (${{ env.ENVIRONMENT }})
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
-          role-session-name: abods-uat-artefacts-deploy
+          role-session-name: abods-${{ env.ENVIRONMENT }}-artefacts-deploy
           role-skip-session-tagging: true
 
       - name: deploy backend
@@ -149,10 +169,10 @@ jobs:
         with:
           template_file: ${{ runner.temp }}/packaged.yaml
           config_file: ${{ runner.temp }}/samconfig.yaml
-          config_environment: uat
+          config_environment: ${{ env.ENVIRONMENT }}
           aws_region: ${{ env.AWS_REGION }}
           deployment_bucket: ${{ env.DEPLOYMENT_BUCKET }}
-          deployment_prefix: abods/deployments/uat
+          deployment_prefix: abods/deployments/${{ env.ENVIRONMENT }}
           project_name: ${{ env.PROJECT_NAME }}
           release_version: ${{ env.VERSION }}
 
@@ -177,6 +197,44 @@ jobs:
           cloudfront_distribution_id: ${{ steps.frontend-targets.outputs.distribution_id }}
           html_prefix: freshdesk
 
+      - name: configure aws credentials (artefact manifest)
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
+          role-session-name: abods-${{ env.ENVIRONMENT }}-artefacts-manifest
+          role-skip-session-tagging: true
+
+      - name: record deployed artefact versions
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg table "$ARTEFACT_MANIFEST_TABLE" \
+            --arg environment "$ENVIRONMENT" \
+            --arg backend "$BACKEND_ARTEFACT" \
+            --arg frontend "$FRONTEND_ARTEFACT" \
+            '{
+              TransactItems: ([
+                {component: "abods-backend", version: $backend},
+                {component: "abods-frontend", version: $frontend}
+              ] | map({
+                Update: {
+                  TableName: $table,
+                  Key: {
+                    service_artefact: {S: .component},
+                    environment: {S: $environment}
+                  },
+                  UpdateExpression: "SET #version = :version",
+                  ExpressionAttributeNames: {"#version": "version"},
+                  ExpressionAttributeValues: {":version": {S: .version}}
+                }
+              }))
+            }' > manifest-transaction.json
+          aws dynamodb transact-write-items \
+            --region eu-west-2 \
+            --cli-input-json file://manifest-transaction.json
+
       - name: report deployment
         run: |
-          echo "[INFO] Deployed $VERSION to UAT"
+          echo "[INFO] Deployed $VERSION to $ENVIRONMENT"
