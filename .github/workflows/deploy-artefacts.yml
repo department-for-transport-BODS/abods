@@ -13,7 +13,7 @@ on:
         required: true
         type: string
       environment:
-        description: Target environment (sandbox only)
+        description: Target environment
         required: true
         type: choice
         options:
