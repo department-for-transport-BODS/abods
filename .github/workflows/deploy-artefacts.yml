@@ -33,9 +33,18 @@ on:
         description: Target environment
         required: true
         type: string
+      source_environment:
+        description: Preceding environment when promoting deployed artefacts
+        required: false
+        default: ""
+        type: string
     secrets:
       ARTEFACT_STORE_ROLE_ARN:
         required: true
+      MAPBOX_TOKEN:
+        required: false
+      ANALYTICS_ID:
+        required: false
 
 permissions: {}
 
@@ -57,6 +66,7 @@ jobs:
       contents: read
     outputs:
       version: ${{ steps.inputs.outputs.version }}
+      artefact_environment: ${{ steps.inputs.outputs.artefact_environment }}
     steps:
       - name: validate deployment inputs
         id: inputs
@@ -64,26 +74,42 @@ jobs:
           BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
           FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
           ENVIRONMENT: ${{ inputs.environment }}
+          SOURCE_ENVIRONMENT: ${{ inputs.source_environment }}
         run: |
           set -euo pipefail
           if [[ -z "$BACKEND_ARTEFACT" || -z "$FRONTEND_ARTEFACT" || -z "$ENVIRONMENT" ]]; then
             echo "::error::Backend artefact, frontend artefact and environment are required"
             exit 1
           fi
-          if [[ "$ENVIRONMENT" != "sandbox" ]]; then
-            echo "::error::Only the sandbox environment is currently supported"
+          case "$ENVIRONMENT" in
+            sandbox|dev|test|uat) ;;
+            *)
+              echo "::error::Only sandbox, dev, test and uat deployments are supported"
+              exit 1
+              ;;
+          esac
+          if [[ -n "$SOURCE_ENVIRONMENT" ]]; then
+            case "$SOURCE_ENVIRONMENT:$ENVIRONMENT" in
+              sandbox:dev|dev:test|test:uat) ;;
+              *) echo "::error::Promotion must follow sandbox -> dev -> test -> uat"; exit 1 ;;
+            esac
+          fi
+          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_backend_(sandbox|dev|test|uat)_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::Backend artefact must be abods_backend_ENVIRONMENT_vX.Y.Z"
             exit 1
           fi
-          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_backend_${ENVIRONMENT}_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            echo "::error::Backend artefact must be abods_backend_${ENVIRONMENT}_vX.Y.Z"
+          artefact_environment="${BASH_REMATCH[1]}"
+          version="${BASH_REMATCH[2]}"
+          if [[ -z "$SOURCE_ENVIRONMENT" && "$artefact_environment" != "$ENVIRONMENT" ]]; then
+            echo "::error::Direct deployment artefacts must match the target environment"
             exit 1
           fi
-          version="${BASH_REMATCH[1]}"
-          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_${ENVIRONMENT}_${version}" ]]; then
-            echo "::error::Frontend artefact must be abods_frontend_${ENVIRONMENT}_${version}, matching the backend version and environment"
+          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_${artefact_environment}_${version}" ]]; then
+            echo "::error::Frontend artefact must match the backend version and build environment"
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "artefact_environment=$artefact_environment" >> "$GITHUB_OUTPUT"
 
       - name: configure aws credentials (artefact repository)
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -123,12 +149,19 @@ jobs:
       contents: read
     env:
       ENVIRONMENT: ${{ inputs.environment }}
+      ARTEFACT_ENVIRONMENT: ${{ needs.validation.outputs.artefact_environment }}
       BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
       FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
       VERSION: ${{ needs.validation.outputs.version }}
       PROJECT_NAME: ${{ vars.PROJECT_NAME }}
       DEPLOYMENT_BUCKET: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
     steps:
+      - name: checkout configuration generator
+        if: ${{ inputs.source_environment != '' }}
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
       - name: setup sam
         uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
         with:
@@ -151,9 +184,28 @@ jobs:
           aws s3 cp "s3://$ARTEFACT_BUCKET/$BACKEND_ARTEFACT/build-info.json" backend-build-info.json
           aws s3 cp "s3://$ARTEFACT_BUCKET/$FRONTEND_ARTEFACT/" dist/ --recursive --only-show-errors
           jq -e --arg version "$VERSION" '.version == $version' backend-build-info.json > /dev/null
-          jq -e --arg version "$VERSION" --arg environment "$ENVIRONMENT" --arg commit "$(jq -r '.commit' backend-build-info.json)" \
+          jq -e --arg version "$VERSION" --arg environment "$ARTEFACT_ENVIRONMENT" --arg commit "$(jq -r '.commit' backend-build-info.json)" \
             '.version == $version and .environment == $environment and (.commit | type == "string" and length > 0) and .commit == $commit' dist/build-info.json > /dev/null
-          jq -e --arg environment "$ENVIRONMENT" '.envName == $environment' dist/config.json > /dev/null
+          jq -e --arg environment "$ARTEFACT_ENVIRONMENT" '.envName == $environment' dist/config.json > /dev/null
+
+      - name: download backend objects for replication
+        if: ${{ inputs.source_environment != '' }}
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          aws s3 cp "s3://$ARTEFACT_BUCKET/$BACKEND_ARTEFACT/" backend/ --recursive --only-show-errors
+          cp packaged.yaml "$GITHUB_WORKSPACE/packaged.yaml"
+
+      - name: retarget packaged backend bucket
+        if: ${{ inputs.source_environment != '' }}
+        uses: mikefarah/yq@1b9b4ac5187171d2e5e3129be0cfa827c7f9d53d # v4.53.3
+        with:
+          cmd: >-
+            yq -i '
+              (.. | select(tag == "!!str")) |= sub("s3://" + strenv(ARTEFACT_BUCKET) + "/"; "s3://" + strenv(DEPLOYMENT_BUCKET) + "/") |
+              (.. | select(tag == "!!map") | select(.S3Bucket == strenv(ARTEFACT_BUCKET)) | .S3Bucket) = strenv(DEPLOYMENT_BUCKET) |
+              (.. | select(tag == "!!map") | select(.Bucket == strenv(ARTEFACT_BUCKET)) | .Bucket) = strenv(DEPLOYMENT_BUCKET)
+            ' packaged.yaml
 
       - name: configure aws credentials (${{ env.ENVIRONMENT }})
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -162,6 +214,38 @@ jobs:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
           role-session-name: abods-${{ env.ENVIRONMENT }}-artefacts-deploy
           role-skip-session-tagging: true
+
+      - name: generate promoted frontend configuration
+        if: ${{ inputs.source_environment != '' }}
+        working-directory: ${{ runner.temp }}
+        env:
+          MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+          MAPBOX_STYLE: mapbox://styles/${{ vars.MAPBOX_STYLE }}
+          MAPBOX_SATELLITE_STYLE: mapbox://styles/${{ vars.MAPBOX_SATELLITE_STYLE }}
+          ANALYTICS_ID: ${{ secrets.ANALYTICS_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p public
+          bash "$GITHUB_WORKSPACE/scripts/generate-frontend-config.sh"
+          mv public/config.json dist/config.json
+          jq --arg environment "$ENVIRONMENT" '.environment = $environment' dist/build-info.json > build-info.json
+          mv build-info.json dist/build-info.json
+
+      - name: replicate promoted artefacts to deployment bucket
+        if: ${{ inputs.source_environment != '' }}
+        working-directory: ${{ runner.temp }}
+        env:
+          DEPLOYMENT_KMS_KEY_ID: ${{ vars.DEPLOYMENT_ARTEFACTS_KMS_KEY_ID }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOYMENT_BUCKET:?Deployment bucket is required}"
+          : "${DEPLOYMENT_KMS_KEY_ID:?Deployment KMS key is required}"
+          cp "$GITHUB_WORKSPACE/packaged.yaml" packaged.yaml
+          cp packaged.yaml backend/packaged.yaml
+          aws s3 cp backend/ "s3://$DEPLOYMENT_BUCKET/$BACKEND_ARTEFACT/" --recursive \
+            --sse aws:kms --sse-kms-key-id "$DEPLOYMENT_KMS_KEY_ID" --only-show-errors
+          aws s3 cp dist/ "s3://$DEPLOYMENT_BUCKET/$FRONTEND_ARTEFACT/" --recursive \
+            --sse aws:kms --sse-kms-key-id "$DEPLOYMENT_KMS_KEY_ID" --only-show-errors
 
       - name: deploy backend
         id: backend
