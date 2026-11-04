@@ -27,7 +27,6 @@ jobs:
     permissions:
       id-token: write
     outputs:
-      source_environment: ${{ steps.source.outputs.environment }}
       backend_artefact: ${{ steps.manifest.outputs.backend }}
       frontend_artefact: ${{ steps.manifest.outputs.frontend }}
     steps:
@@ -53,17 +52,37 @@ jobs:
           role-session-name: abods-promote-manifest
           role-skip-session-tagging: true
 
-      - name: resolve deployed source artefacts
+      - name: read deployed source backend
+        id: backend-manifest
+        uses: department-for-transport-BODS/.github/actions/read-artefact-manifest@v1
+        with:
+          table: bods-artefact-manifest
+          service_artefact: abods-backend
+          environment: ${{ steps.source.outputs.environment }}
+          region: eu-west-2
+
+      - name: read deployed source frontend
+        id: frontend-manifest
+        uses: department-for-transport-BODS/.github/actions/read-artefact-manifest@v1
+        with:
+          table: bods-artefact-manifest
+          service_artefact: abods-frontend
+          environment: ${{ steps.source.outputs.environment }}
+          region: eu-west-2
+
+      - name: validate deployed source artefacts
         id: manifest
         env:
           SOURCE_ENVIRONMENT: ${{ steps.source.outputs.environment }}
+          BACKEND_ARTEFACT: ${{ steps.backend-manifest.outputs.version }}
+          FRONTEND_ARTEFACT: ${{ steps.frontend-manifest.outputs.version }}
         run: |
           set -euo pipefail
           for component in backend frontend; do
-            key=$(jq -cn --arg component "abods-$component" --arg environment "$SOURCE_ENVIRONMENT" \
-              '{service_artefact: {S: $component}, environment: {S: $environment}}')
-            artefact=$(aws dynamodb get-item --table-name bods-artefact-manifest \
-              --consistent-read --key "$key" --output json | jq -er '.Item.version.S')
+            artefact="$BACKEND_ARTEFACT"
+            if [[ "$component" == frontend ]]; then
+              artefact="$FRONTEND_ARTEFACT"
+            fi
             if [[ ! "$artefact" =~ ^abods_${component}_(sandbox|dev|test|uat)_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
               echo "::error::Invalid $component artefact in the $SOURCE_ENVIRONMENT manifest"
               exit 1
@@ -87,7 +106,7 @@ jobs:
     with:
       backend_artefact: ${{ needs.resolve.outputs.backend_artefact }}
       frontend_artefact: ${{ needs.resolve.outputs.frontend_artefact }}
-      source_environment: ${{ needs.resolve.outputs.source_environment }}
+      is_promotion: true
       environment: ${{ inputs.environment }}
     secrets:
       ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}

@@ -33,11 +33,11 @@ on:
         description: Target environment
         required: true
         type: string
-      source_environment:
-        description: Preceding environment when promoting deployed artefacts
+      is_promotion:
+        description: Retarget and replicate existing artefacts for the target environment
         required: false
-        default: ""
-        type: string
+        default: false
+        type: boolean
     secrets:
       ARTEFACT_STORE_ROLE_ARN:
         required: true
@@ -74,7 +74,7 @@ jobs:
           BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
           FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
           ENVIRONMENT: ${{ inputs.environment }}
-          SOURCE_ENVIRONMENT: ${{ inputs.source_environment }}
+          IS_PROMOTION: ${{ inputs.is_promotion }}
         run: |
           set -euo pipefail
           if [[ -z "$BACKEND_ARTEFACT" || -z "$FRONTEND_ARTEFACT" || -z "$ENVIRONMENT" ]]; then
@@ -88,19 +88,13 @@ jobs:
               exit 1
               ;;
           esac
-          if [[ -n "$SOURCE_ENVIRONMENT" ]]; then
-            case "$SOURCE_ENVIRONMENT:$ENVIRONMENT" in
-              sandbox:dev|dev:test|test:uat) ;;
-              *) echo "::error::Promotion must follow sandbox -> dev -> test -> uat"; exit 1 ;;
-            esac
-          fi
           if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_backend_(sandbox|dev|test|uat)_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             echo "::error::Backend artefact must be abods_backend_ENVIRONMENT_vX.Y.Z"
             exit 1
           fi
           artefact_environment="${BASH_REMATCH[1]}"
           version="${BASH_REMATCH[2]}"
-          if [[ -z "$SOURCE_ENVIRONMENT" && "$artefact_environment" != "$ENVIRONMENT" ]]; then
+          if [[ "$IS_PROMOTION" != true && "$artefact_environment" != "$ENVIRONMENT" ]]; then
             echo "::error::Direct deployment artefacts must match the target environment"
             exit 1
           fi
@@ -157,7 +151,7 @@ jobs:
       DEPLOYMENT_BUCKET: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
     steps:
       - name: checkout configuration generator
-        if: ${{ inputs.source_environment != '' }}
+        if: ${{ inputs.is_promotion }}
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
@@ -189,7 +183,7 @@ jobs:
           jq -e --arg environment "$ARTEFACT_ENVIRONMENT" '.envName == $environment' dist/config.json > /dev/null
 
       - name: download backend objects for replication
-        if: ${{ inputs.source_environment != '' }}
+        if: ${{ inputs.is_promotion }}
         working-directory: ${{ runner.temp }}
         run: |
           set -euo pipefail
@@ -197,7 +191,7 @@ jobs:
           cp packaged.yaml "$GITHUB_WORKSPACE/packaged.yaml"
 
       - name: retarget packaged backend bucket
-        if: ${{ inputs.source_environment != '' }}
+        if: ${{ inputs.is_promotion }}
         uses: mikefarah/yq@1b9b4ac5187171d2e5e3129be0cfa827c7f9d53d # v4.53.3
         with:
           cmd: >-
@@ -216,7 +210,7 @@ jobs:
           role-skip-session-tagging: true
 
       - name: generate promoted frontend configuration
-        if: ${{ inputs.source_environment != '' }}
+        if: ${{ inputs.is_promotion }}
         working-directory: ${{ runner.temp }}
         env:
           MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
@@ -232,7 +226,7 @@ jobs:
           mv build-info.json dist/build-info.json
 
       - name: replicate promoted artefacts to deployment bucket
-        if: ${{ inputs.source_environment != '' }}
+        if: ${{ inputs.is_promotion }}
         working-directory: ${{ runner.temp }}
         env:
           DEPLOYMENT_KMS_KEY_ID: ${{ vars.DEPLOYMENT_ARTEFACTS_KMS_KEY_ID }}
@@ -290,34 +284,16 @@ jobs:
           role-skip-session-tagging: true
 
       - name: record deployed artefact versions
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -euo pipefail
-          jq -n \
-            --arg table "$ARTEFACT_MANIFEST_TABLE" \
-            --arg environment "$ENVIRONMENT" \
-            --arg backend "$BACKEND_ARTEFACT" \
-            --arg frontend "$FRONTEND_ARTEFACT" \
-            '{
-              TransactItems: ([
-                {component: "abods-backend", version: $backend},
-                {component: "abods-frontend", version: $frontend}
-              ] | map({
-                Update: {
-                  TableName: $table,
-                  Key: {
-                    service_artefact: {S: .component},
-                    environment: {S: $environment}
-                  },
-                  UpdateExpression: "SET #version = :version",
-                  ExpressionAttributeNames: {"#version": "version"},
-                  ExpressionAttributeValues: {":version": {S: .version}}
-                }
-              }))
-            }' > manifest-transaction.json
-          aws dynamodb transact-write-items \
-            --region eu-west-2 \
-            --cli-input-json file://manifest-transaction.json
+        uses: department-for-transport-BODS/.github/actions/write-artefact-manifest@v1
+        with:
+          table: ${{ env.ARTEFACT_MANIFEST_TABLE }}
+          environment: ${{ env.ENVIRONMENT }}
+          region: eu-west-2
+          artefacts: |
+            {
+              "abods-backend": ${{ toJSON(inputs.backend_artefact) }},
+              "abods-frontend": ${{ toJSON(inputs.frontend_artefact) }}
+            }
 
       - name: report deployment
         run: |
