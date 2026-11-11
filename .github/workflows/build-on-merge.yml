@@ -85,20 +85,20 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
-          for env in $TARGET_ENVS; do
-            for prefix in "abods_backend_${env}_${VERSION}" "abods_frontend_${env}_${VERSION}"; do
-              count=$(aws s3api list-objects-v2 --bucket "$ARTEFACT_BUCKET" --prefix "${prefix}/" --max-keys 1 --query 'KeyCount' --output text)
-              [[ "$count" == "0" ]] && continue
+          for prefix in \
+            "abods_backend_${VERSION}" "abods_frontend_${VERSION}" \
+            "abods_backend_sandbox_${VERSION}" "abods_frontend_sandbox_${VERSION}"; do
+            count=$(aws s3api list-objects-v2 --bucket "$ARTEFACT_BUCKET" --prefix "${prefix}/" --max-keys 1 --query 'KeyCount' --output text)
+            [[ "$count" == "0" ]] && continue
 
-              # A matching commit means this is a re-run of a partially failed build, so overwriting is safe
-              built_from=$(aws s3 cp "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" - 2>/dev/null | jq -r '.commit // empty' || true)
-              if [[ "$built_from" == "$GITHUB_SHA" ]]; then
-                echo "[INFO] ${prefix} was started by this commit, allowing re-run"
-              else
-                echo "::error::Version ${VERSION} has already been used (${prefix} exists). Increment VERSION to build a new release"
-                exit 1
-              fi
-            done
+            # A matching commit means this is a re-run of a partially failed build, so overwriting is safe
+            built_from=$(aws s3 cp "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" - 2>/dev/null | jq -r '.commit // empty' || true)
+            if [[ "$built_from" == "$GITHUB_SHA" ]]; then
+              echo "[INFO] ${prefix} was started by this commit, allowing re-run"
+            else
+              echo "::error::Version ${VERSION} has already been used (${prefix} exists). Increment VERSION to build a new release"
+              exit 1
+            fi
           done
 
           echo "[INFO] Version ${VERSION} is available for: ${TARGET_ENVS}"
@@ -153,25 +153,23 @@ jobs:
             --arg run "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
             '{version: $version, commit: $commit, run: $run}' > build-info.json
 
-          for env in $TARGET_ENVS; do
-            prefix="abods_backend_${env}_${VERSION}"
+          prefix="abods_backend_${VERSION}"
 
-            aws s3 cp build-info.json "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" \
-              --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
+          aws s3 cp build-info.json "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" \
+            --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
 
-            sam package \
-              --s3-bucket "$ARTEFACT_BUCKET" \
-              --s3-prefix "$prefix" \
-              --kms-key-id "$ARTEFACT_KMS_KEY_ID" \
-              --output-template-file packaged.yaml
+          sam package \
+            --s3-bucket "$ARTEFACT_BUCKET" \
+            --s3-prefix "$prefix" \
+            --kms-key-id "$ARTEFACT_KMS_KEY_ID" \
+            --output-template-file packaged.yaml
 
-            aws s3 cp packaged.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/packaged.yaml" \
-              --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
-            aws s3 cp samconfig.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/samconfig.yaml" \
-              --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
+          aws s3 cp packaged.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/packaged.yaml" \
+            --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
+          aws s3 cp samconfig.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/samconfig.yaml" \
+            --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
 
-            echo "[INFO] Backend ${VERSION} uploaded to s3://${ARTEFACT_BUCKET}/${prefix}/"
-          done
+          echo "[INFO] Backend ${VERSION} uploaded to s3://${ARTEFACT_BUCKET}/${prefix}/"
 
   frontend:
     runs-on: ubuntu-latest
@@ -244,7 +242,7 @@ jobs:
         env:
           ENVIRONMENT: ${{ matrix.env }}
         run: |
-          prefix="abods_frontend_${ENVIRONMENT}_${VERSION}"
+          prefix="abods_frontend_${VERSION}"
 
           jq -n \
             --arg version "$VERSION" \
@@ -273,8 +271,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/deploy-artefacts.yml
     with:
-      backend_artefact: abods_backend_sandbox_${{ needs.validation.outputs.VERSION }}
-      frontend_artefact: abods_frontend_sandbox_${{ needs.validation.outputs.VERSION }}
+      backend_artefact: abods_backend_${{ needs.validation.outputs.VERSION }}
+      frontend_artefact: abods_frontend_${{ needs.validation.outputs.VERSION }}
       environment: sandbox
     secrets:
       ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
