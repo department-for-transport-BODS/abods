@@ -127,6 +127,7 @@ export const CorridorCreateMap = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const lastFitBoundsRef = useRef<mapboxgl.LngLatBounds | null>(null);
+  const lastFitReportsTargetRef = useRef(false);
   const mapboxStyleRef = useRef(mapboxStyle);
   const mapboxSatelliteStyleRef = useRef(mapboxSatelliteStyle);
 
@@ -400,15 +401,23 @@ export const CorridorCreateMap = ({
     }
   };
 
-  // Records the target so Re-centre can return here
+  // Records the target so Re-centre can return here. With reportTarget, onBoundsChange
+  // receives the target rather than the padded viewport, so a location search isn't re-run
+  // with different bounds once the zoom finishes.
   const fitTo = (
     map: mapboxgl.Map,
     bounds: mapboxgl.LngLatBounds,
     options: mapboxgl.FitBoundsOptions,
+    reportTarget = false,
   ) => {
     lastFitBoundsRef.current = bounds;
+    lastFitReportsTargetRef.current = reportTarget;
     setMoveCounter(0);
-    map.fitBounds(bounds, options);
+    if (reportTarget) {
+      map.fitBounds(bounds, options, { reportedBounds: bounds });
+    } else {
+      map.fitBounds(bounds, options);
+    }
   };
 
   const fitCorridorBounds = (map: mapboxgl.Map) => {
@@ -451,9 +460,12 @@ export const CorridorCreateMap = ({
         fitCorridorBounds(map);
       })();
 
-      map.on("moveend", () => {
+      map.on("moveend", (e) => {
+        const { reportedBounds } = e as typeof e & {
+          reportedBounds?: mapboxgl.LngLatBounds;
+        };
         setMoveCounter((count) => count + 1);
-        onBoundsChangeRef.current?.(map.getBounds());
+        onBoundsChangeRef.current?.(reportedBounds ?? map.getBounds());
       });
 
       map.on("style.load", () => {
@@ -675,7 +687,7 @@ export const CorridorCreateMap = ({
     const map = mapRef.current;
     if (!map || !locationBounds || corridorStops.length > 0) return;
 
-    fitTo(map, locationBounds, { padding: 60, maxZoom: 14 });
+    fitTo(map, locationBounds, { padding: 60, maxZoom: 14 }, true);
   }, [corridorStops.length, locationBounds]);
 
   const switchStyle = (style: "default" | "satellite") => {
@@ -694,11 +706,12 @@ export const CorridorCreateMap = ({
     const map = mapRef.current;
     if (!map || !lastFitBoundsRef.current) return;
 
-    fitTo(map, lastFitBoundsRef.current, {
-      padding: 50,
-      maxZoom: 16,
-      duration: 500,
-    });
+    fitTo(
+      map,
+      lastFitBoundsRef.current,
+      { padding: 50, maxZoom: 16, duration: 500 },
+      lastFitReportsTargetRef.current,
+    );
   };
 
   return (
