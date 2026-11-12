@@ -67,7 +67,6 @@ jobs:
     outputs:
       version: ${{ steps.inputs.outputs.version }}
       artefact_environment: ${{ steps.inputs.outputs.artefact_environment }}
-      already_deployed: ${{ steps.current-deployment.outputs.already_deployed }}
     steps:
       - name: validate deployment inputs
         id: inputs
@@ -89,24 +88,18 @@ jobs:
               exit 1
               ;;
           esac
-          if [[ "$BACKEND_ARTEFACT" =~ ^abods_backend_(sandbox|dev|test|uat)_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            artefact_environment="${BASH_REMATCH[1]}"
-            artefact_suffix="${artefact_environment}_${BASH_REMATCH[2]}"
-            version="${BASH_REMATCH[2]}"
-          elif [[ "$BACKEND_ARTEFACT" =~ ^abods_backend_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            artefact_environment=sandbox
-            artefact_suffix="${BASH_REMATCH[1]}"
-            version="${BASH_REMATCH[1]}"
-          else
-            echo "::error::Backend artefact must be abods_backend_vX.Y.Z"
+          if [[ ! "$BACKEND_ARTEFACT" =~ ^abods_backend_(sandbox|dev|test|uat)_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::Backend artefact must be abods_backend_ENVIRONMENT_vX.Y.Z"
             exit 1
           fi
+          artefact_environment="${BASH_REMATCH[1]}"
+          version="${BASH_REMATCH[2]}"
           if [[ "$IS_PROMOTION" != true && "$artefact_environment" != "$ENVIRONMENT" ]]; then
             echo "::error::Direct deployment artefacts must match the target environment"
             exit 1
           fi
-          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_${artefact_suffix}" ]]; then
-            echo "::error::Frontend artefact must match the backend version and artefact naming format"
+          if [[ "$FRONTEND_ARTEFACT" != "abods_frontend_${artefact_environment}_${version}" ]]; then
+            echo "::error::Frontend artefact must match the backend version and build environment"
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -140,40 +133,8 @@ jobs:
             config.json
             build-info.json
 
-      - name: check target deployment manifest
-        id: current-deployment
-        env:
-          BACKEND_ARTEFACT: ${{ inputs.backend_artefact }}
-          FRONTEND_ARTEFACT: ${{ inputs.frontend_artefact }}
-          ENVIRONMENT: ${{ inputs.environment }}
-        run: |
-          set -euo pipefail
-
-          manifest_version() {
-            local service_artefact="$1"
-            local key
-            key=$(jq -cn --arg service_artefact "$service_artefact" --arg environment "$ENVIRONMENT" \
-              '{service_artefact: {S: $service_artefact}, environment: {S: $environment}}')
-            aws dynamodb get-item \
-              --table-name "$ARTEFACT_MANIFEST_TABLE" \
-              --region eu-west-2 \
-              --consistent-read \
-              --key "$key" \
-              --output json | jq -r '.Item.version.S // empty'
-          }
-
-          deployed_backend=$(manifest_version abods-backend)
-          deployed_frontend=$(manifest_version abods-frontend)
-          if [[ "$deployed_backend" == "$BACKEND_ARTEFACT" && "$deployed_frontend" == "$FRONTEND_ARTEFACT" ]]; then
-            echo "already_deployed=true" >> "$GITHUB_OUTPUT"
-            echo "[INFO] $ENVIRONMENT already has the requested backend and frontend artefacts; skipping deployment"
-          else
-            echo "already_deployed=false" >> "$GITHUB_OUTPUT"
-          fi
-
   deploy:
     needs: validation
-    if: ${{ needs.validation.outputs.already_deployed != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment: ${{ inputs.environment }}

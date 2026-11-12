@@ -83,12 +83,11 @@ jobs:
             if [[ "$component" == frontend ]]; then
               artefact="$FRONTEND_ARTEFACT"
             fi
-            if [[ "$artefact" =~ ^abods_${component}_((sandbox|dev|test|uat)_)?(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-              version="${BASH_REMATCH[3]}"
-            else
+            if [[ ! "$artefact" =~ ^abods_${component}_(sandbox|dev|test|uat)_(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
               echo "::error::Invalid $component artefact in the $SOURCE_ENVIRONMENT manifest"
               exit 1
             fi
+            version="${BASH_REMATCH[2]}"
             if [[ "$component" == backend ]]; then
               backend_version="$version"
             elif [[ "$version" != "$backend_version" ]]; then

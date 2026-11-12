@@ -34,7 +34,7 @@ Promotion follows `sandbox -> dev -> test -> uat`. The workflow reads the preced
 
 Artefacts are copied from `bods-artefact-store` into the target environment's `DEPLOYMENT_ARTEFACTS_S3_BUCKET`, including packaged backend objects. The SAM template is updated to reference that bucket. Frontend runtime configuration is generated using the target environment's SSM parameters and GitHub configuration. The backend and frontend are deployed and the CloudFront cache is invalidated before the target's DynamoDB manifest entries are updated together.
 
-Promotion deploys the same release version to each environment without rebuilding it. The SAM template is updated to use the target environment's S3 deployment bucket, and the frontend runtime configuration is generated for that environment.
+The manifest retains the original artefact identifiers, including their build-environment prefix, so subsequent promotions use the same immutable source artefacts. A failed deployment does not advance the manifest; inspect or rerun the deployment if infrastructure was partially updated.
 
 Each target GitHub environment must provide `AWS_ACCOUNT_ID`, `AWS_ASSUME_ROLE_NAME`, `DEPLOYMENT_ARTEFACTS_S3_BUCKET`, `DEPLOYMENT_ARTEFACTS_KMS_KEY_ID`, `PROJECT_NAME`, `MAPBOX_STYLE` and `MAPBOX_SATELLITE_STYLE`, plus the `MAPBOX_TOKEN` and `ANALYTICS_ID` secrets. The repository must provide `AWS_REGION` and the `ARTEFACT_STORE_ROLE_ARN` secret. The artefact-store role needs S3/KMS read access and DynamoDB read/write access in `eu-west-2`; target roles need deployment-bucket S3/KMS access and the existing SAM, SSM and CloudFront permissions.
 
