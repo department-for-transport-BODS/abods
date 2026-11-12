@@ -203,8 +203,6 @@ export const getJourney: QueryResolvers["journey"] = async (
 
 export const getServicePatternDistanceGeom: QueryResolvers["getServicePatternDistanceGeom"] =
   async (_parent, args, context): Promise<ServicePatternDistanceResult> => {
-    await requireUserSession(context);
-
     const query = context.kysely
       .selectFrom("transmodel_vehiclejourney")
       .innerJoin(
