@@ -6,48 +6,43 @@ This guide describes the deployment process across all environments in our CI/CD
 
 We maintain 5 environments in our deployment pipeline:
 
-| Environment | Branch                                                                                                   | Purpose                 | Notes                           |
-| ----------- | -------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------- |
-| `sandbox`   | `sandbox`                                                                                                | Development testing     | Primary development environment |
-| `dev`       | None (Promote workflow)                                                                                  | Development             | Promoted from sandbox           |
-| `test`      | None (Promote workflow)                                                                                  | Testing                 | Promoted from dev               |
-| `uat`       | None (Promote workflow)                                                                                  | User Acceptance Testing | Promoted from test              |
-| `prod`      | None (deployed using [GitHub Releases](https://github.com/department-for-transport-BODS/abods/releases)) | Production              | Live environment                |
+| Environment | Branch                                                                                                  | Purpose                 | Notes                           |
+| ----------- | ------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------- |
+| `sandbox`   | `sandbox`                                                                                               | Development testing     | Primary development environment |
+| `dev`       | `dev`                                                                                                   | Development             | Currently underutilized         |
+| `test`      | `test`                                                                                                  | Testing                 | Currently underutilized         |
+| `uat`       | `main`                                                                                                  | User Acceptance Testing | Pre-production verification     |
+| `prod`      | None (deployed using [Github Releases](https://github.com/department-for-transport-BODS/abods/releases) | Production              | Live environment                |
 
 ## Deployment to Sandbox
 
-The sandbox branch is the default branch and our primary development branch. Merging a pull request triggers **build on merge**, which builds artefacts in `bods-artefact-store` and deploys them using **deploy artefacts**. Increment [VERSION](../VERSION) before merging. The sandbox-only manual **deploy artefacts** workflow can also redeploy matching backend and frontend artefacts.
+The sandbox branch is the default branch, and our primary development branch. When Pull Requests are merged to sandbox, deployment will be triggered
+
+To test changes before merging a PR. Use the [build application](https://github.com/department-for-transport-BODS/abods/actions/workflows/build.yml) GitHub Action for your desired branch.
 
 > [!IMPORTANT]
 > Database migrations will not be applied automatically in sandbox - you must connect to the database and run changes manually
 
 ## Standard Deployment Process (Path to Live)
 
-### Promote to DEV, TEST and UAT
+### Step 1: Update VERSION File
 
-1. Open the [Promote workflow](https://github.com/department-for-transport-BODS/abods/actions/workflows/promote.yml) and select **Run workflow** on the default branch.
-2. Select **Target environment**: `dev`, `test` or `uat`.
-3. Approve the target GitHub environment deployment if approval is required.
-4. Wait for success before promoting to the next environment.
+Before deploying beyond dev, increment the version number in the [VERSION](../VERSION) file.
 
-Promotion follows `sandbox -> dev -> test -> uat`. The workflow reads the preceding environment's deployed backend and frontend artefact identifiers from `bods-artefact-manifest`; it does not select a version from the checked-out branch or rebuild application code. Both components must have matching versions and build commits.
+Quick method: Edit directly in the [GitHub UI](https://github.com/department-for-transport-BODS/abods/edit/sandbox/VERSION)
 
-Artefacts are copied from `bods-artefact-store` into the target environment's `DEPLOYMENT_ARTEFACTS_S3_BUCKET`, including packaged backend objects. The SAM template is updated to reference that bucket. Frontend runtime configuration is generated using the target environment's SSM parameters and GitHub configuration. The backend and frontend are deployed and the CloudFront cache is invalidated before the target's DynamoDB manifest entries are updated together.
+### Step 2: Deploy to Each Environment
 
-Promotion deploys the same release version to each environment without rebuilding it. The SAM template is updated to use the target environment's S3 deployment bucket, and the frontend runtime configuration is generated for that environment.
-
-Each target GitHub environment must provide `AWS_ACCOUNT_ID`, `AWS_ASSUME_ROLE_NAME`, `DEPLOYMENT_ARTEFACTS_S3_BUCKET`, `DEPLOYMENT_ARTEFACTS_KMS_KEY_ID`, `PROJECT_NAME`, `MAPBOX_STYLE` and `MAPBOX_SATELLITE_STYLE`, plus the `MAPBOX_TOKEN` and `ANALYTICS_ID` secrets. The repository must provide `AWS_REGION` and the `ARTEFACT_STORE_ROLE_ARN` secret. The artefact-store role needs S3/KMS read access and DynamoDB read/write access in `eu-west-2`; target roles need deployment-bucket S3/KMS access and the existing SAM, SSM and CloudFront permissions.
-
-`sandbox` and production are not promotion targets. The legacy **deploy application** workflow now handles production only; branch pushes and `automated-deploy-dev` dispatches no longer deploy non-production environments. Existing build workflows are unchanged, and manual deployments through **deploy artefacts** remain sandbox-only.
+> [!WARNING]
+> When deploying to most environments, we create a PR for visibility, but must merge them **OFFLINE** and push the result.
+> The PR UI is configured to require squash-and-merge which will cause conflicts on future deployments.
+> Required checks still need to pass before you are allowed to push the merge.
 
 #### Deploy to DEV
 
-After UAT approval, merge the approved sandbox code into the `dev` branch to build production release artefacts. This step does not deploy to the DEV environment; use the Promote workflow above for that.
-
-1. Ensure the [VERSION](../VERSION) has not already been used for a release build.
-2. Create a [sandbox → dev PR](https://github.com/department-for-transport-BODS/abods/compare/dev...sandbox?quick_pull=1&title=sandbox+-%3E+dev).
-3. Wait for checks to pass.
-4. **Merge offline** using:
+1. Create a [sandbox → dev PR](https://github.com/department-for-transport-BODS/abods/compare/dev...sandbox?quick_pull=1&title=sandbox+-%3E+dev)
+2. Wait for checks to pass
+3. **Merge offline** using:
 
    ```bash
    # Save any local changes
@@ -62,20 +57,62 @@ After UAT approval, merge the approved sandbox code into the `dev` branch to bui
    ```
 
 > [!IMPORTANT]
->
-> Wait for the **build application** workflow to complete before deploying to production. It creates the production deployment artefacts and a tag based on the [VERSION](../VERSION) file.
+> You must wait for the build to complete before deploying to subsequent environments.
+> Deployment assets are created here.
+
+The pipeline will create a tag based on the VERSION file that will be used in the production deployment.
+
+#### Deploy to TEST
+
+1. Create a [dev → test PR](https://github.com/department-for-transport-BODS/abods/compare/test...dev?quick_pull=1&title=dev+-%3E+test)
+2. Wait for checks to pass
+3. **Merge offline** using:
+
+   ```bash
+   # Save any local changes
+   git stash push -m "Unfinished changes before deploy"
+
+   # Update test branch
+   git checkout test
+   git pull
+   git fetch
+   git merge origin/dev
+   git push
+   ```
+
+4. Approve the [deployment workflow](https://github.com/department-for-transport-BODS/abods/actions/workflows/deploy.yml)
+
+#### Deploy to UAT
+
+1. Create a [test → main PR](https://github.com/department-for-transport-BODS/abods/compare/main...test?quick_pull=1&title=test+-%3E+main)
+2. Wait for checks to pass
+3. **Merge offline** using:
+
+   ```bash
+   # Save any local changes
+   git stash push -m "Unfinished changes before deploy"
+
+   # Update main branch
+   git checkout main
+   git pull
+   git fetch
+   git merge origin/test
+   git push
+   ```
+
+4. Approve the [deployment workflow](https://github.com/department-for-transport-BODS/abods/actions/workflows/deploy.yml)
 
 #### Deploy to PRODUCTION
 
 > [!IMPORTANT]
 >
 > - Complete a team go/no-go discussion before production deployment
-> - Production continues to use legacy release artefacts and version tags created by the existing dev-branch **build application** workflow. Promotion does not create these artefacts or tags.
 
-1. Complete **Deploy to DEV** above and wait for the production artefacts and version tag to be created successfully.
-2. Create a [new GitHub release](https://github.com/department-for-transport-BODS/abods/releases/new) from that tag.
-3. Select the [latest release](https://github.com/department-for-transport-BODS/abods/releases/latest) as the previous tag and click "Generate release notes".
-4. Publish the release and approve the [deployment workflow](https://github.com/department-for-transport-BODS/abods/actions/workflows/deploy.yml).
+1. Create a [new GitHub release](https://github.com/department-for-transport-BODS/abods/releases/new)
+2. Select the appropriate tag (usually the latest)
+3. Select the [latest release](https://github.com/department-for-transport-BODS/abods/releases/latest) as the previous tag and click "Generate release notes"
+4. Publish the release
+5. Approve the [deployment workflow](https://github.com/department-for-transport-BODS/abods/actions/workflows/deploy.yml)
 
 ![create_release.png](create_release.png)
 

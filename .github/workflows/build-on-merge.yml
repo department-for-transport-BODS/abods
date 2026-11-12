@@ -1,10 +1,10 @@
 name: build on merge
-run-name: build on merge to sandbox @ ${{ github.sha }}
+run-name: build on merge to main @ ${{ github.sha }}
 
 on:
   push:
     branches:
-      - "sandbox"
+      - "main"
 
 permissions: {}
 
@@ -16,8 +16,8 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ARTEFACT_BUCKET: bods-artefact-store
   ARTEFACT_KMS_KEY_ID: alias/bods-artefact-store
-  ARTEFACT_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
-  TARGET_ENVS: "sandbox"
+  ARTEFACT_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  TARGET_ENVS: "uat prod"
 
 jobs:
   validation:
@@ -35,7 +35,7 @@ jobs:
       - name: validate artefact repository configuration
         run: |
           if [[ -z "$ARTEFACT_ROLE_ARN" ]]; then
-            echo "::error::Missing repository secret: ARTEFACT_STORE_ROLE_ARN"
+            echo "::error::Missing repository secret: AWS_ROLE_TO_ASSUME"
             exit 1
           fi
 
@@ -59,7 +59,7 @@ jobs:
           fi
 
           if [[ "$version" == "$previous" ]]; then
-            echo "::error::VERSION has not been updated (still ${version}). Bump VERSION before merging to ${GITHUB_REF_NAME}"
+            echo "::error::VERSION has not been updated (still ${version}). Bump VERSION before merging to main"
             exit 1
           fi
 
@@ -85,20 +85,20 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
-          for prefix in \
-            "abods_backend_${VERSION}" "abods_frontend_${VERSION}" \
-            "abods_backend_sandbox_${VERSION}" "abods_frontend_sandbox_${VERSION}"; do
-            count=$(aws s3api list-objects-v2 --bucket "$ARTEFACT_BUCKET" --prefix "${prefix}/" --max-keys 1 --query 'KeyCount' --output text)
-            [[ "$count" == "0" ]] && continue
+          for env in $TARGET_ENVS; do
+            for prefix in "abods_${env}_${VERSION}" "abods_frontend_${env}_${VERSION}"; do
+              count=$(aws s3api list-objects-v2 --bucket "$ARTEFACT_BUCKET" --prefix "${prefix}/" --max-keys 1 --query 'KeyCount' --output text)
+              [[ "$count" == "0" ]] && continue
 
-            # A matching commit means this is a re-run of a partially failed build, so overwriting is safe
-            built_from=$(aws s3 cp "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" - 2>/dev/null | jq -r '.commit // empty' || true)
-            if [[ "$built_from" == "$GITHUB_SHA" ]]; then
-              echo "[INFO] ${prefix} was started by this commit, allowing re-run"
-            else
-              echo "::error::Version ${VERSION} has already been used (${prefix} exists). Increment VERSION to build a new release"
-              exit 1
-            fi
+              # A matching commit means this is a re-run of a partially failed build, so overwriting is safe
+              built_from=$(aws s3 cp "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" - 2>/dev/null | jq -r '.commit // empty' || true)
+              if [[ "$built_from" == "$GITHUB_SHA" ]]; then
+                echo "[INFO] ${prefix} was started by this commit, allowing re-run"
+              else
+                echo "::error::Version ${VERSION} has already been used (${prefix} exists). Increment VERSION to build a new release"
+                exit 1
+              fi
+            done
           done
 
           echo "[INFO] Version ${VERSION} is available for: ${TARGET_ENVS}"
@@ -153,29 +153,31 @@ jobs:
             --arg run "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
             '{version: $version, commit: $commit, run: $run}' > build-info.json
 
-          prefix="abods_backend_${VERSION}"
+          for env in $TARGET_ENVS; do
+            prefix="abods_${env}_${VERSION}"
 
-          aws s3 cp build-info.json "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" \
-            --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
+            aws s3 cp build-info.json "s3://${ARTEFACT_BUCKET}/${prefix}/build-info.json" \
+              --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
 
-          sam package \
-            --s3-bucket "$ARTEFACT_BUCKET" \
-            --s3-prefix "$prefix" \
-            --kms-key-id "$ARTEFACT_KMS_KEY_ID" \
-            --output-template-file packaged.yaml
+            sam package \
+              --s3-bucket "$ARTEFACT_BUCKET" \
+              --s3-prefix "$prefix" \
+              --kms-key-id "$ARTEFACT_KMS_KEY_ID" \
+              --output-template-file packaged.yaml
 
-          aws s3 cp packaged.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/packaged.yaml" \
-            --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
-          aws s3 cp samconfig.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/samconfig.yaml" \
-            --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
+            aws s3 cp packaged.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/packaged.yaml" \
+              --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
+            aws s3 cp samconfig.yaml "s3://${ARTEFACT_BUCKET}/${prefix}/samconfig.yaml" \
+              --sse aws:kms --sse-kms-key-id "$ARTEFACT_KMS_KEY_ID"
 
-          echo "[INFO] Backend ${VERSION} uploaded to s3://${ARTEFACT_BUCKET}/${prefix}/"
+            echo "[INFO] Backend ${VERSION} uploaded to s3://${ARTEFACT_BUCKET}/${prefix}/"
+          done
 
   frontend:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: validation
-    environment: ${{ matrix.env }}
+    environment: ${{ matrix.env }}-build
     defaults:
       run:
         working-directory: frontend
@@ -242,7 +244,7 @@ jobs:
         env:
           ENVIRONMENT: ${{ matrix.env }}
         run: |
-          prefix="abods_frontend_${VERSION}"
+          prefix="abods_frontend_${ENVIRONMENT}_${VERSION}"
 
           jq -n \
             --arg version "$VERSION" \
@@ -260,19 +262,3 @@ jobs:
             --only-show-errors
 
           echo "[INFO] Frontend ${VERSION} for ${ENVIRONMENT^^} uploaded to s3://${ARTEFACT_BUCKET}/${prefix}/"
-
-  deploy:
-    needs:
-      - validation
-      - backend
-      - frontend
-    permissions:
-      id-token: write
-      contents: read
-    uses: ./.github/workflows/deploy-artefacts.yml
-    with:
-      backend_artefact: abods_backend_${{ needs.validation.outputs.VERSION }}
-      frontend_artefact: abods_frontend_${{ needs.validation.outputs.VERSION }}
-      environment: sandbox
-    secrets:
-      ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
