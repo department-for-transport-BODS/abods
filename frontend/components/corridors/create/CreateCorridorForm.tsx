@@ -381,6 +381,7 @@ export const CreateCorridorForm = ({
                         setSelectedLocationBounds(null);
                       }}
                       onSelect={(selection) => {
+                        setMapBounds(null);
                         setSelectedLocationBounds(locationBounds(selection));
                         setHasSelectedLocation(true);
                       }}

@@ -296,10 +296,42 @@ describe("CorridorCreateMap", () => {
       />,
     );
 
-    expect(mapboxMock.methods.fitBounds).toHaveBeenCalledWith(locationBounds, {
-      padding: 60,
-      maxZoom: 14,
+    expect(mapboxMock.methods.fitBounds).toHaveBeenCalledWith(
+      locationBounds,
+      { padding: 60, maxZoom: 14 },
+      { reportedBounds: locationBounds },
+    );
+  });
+
+  it("reports the selected location, not the padded viewport, once the location fit ends", () => {
+    const locationBounds = {} as mapboxgl.LngLatBounds;
+    const onBoundsChange = vi.fn();
+
+    render(
+      <CorridorCreateMap
+        corridorStops={[]}
+        matchingStops={[]}
+        locationBounds={locationBounds}
+        onSelectStop={vi.fn()}
+        onBoundsChange={onBoundsChange}
+        mapboxToken="test-token"
+        mapboxStyle="mapbox://styles/test/street"
+      />,
+    );
+
+    const eventData = mapboxMock.methods.fitBounds.mock.calls[0][2];
+    act(() => {
+      mapboxMock.fire("moveend", eventData);
     });
+    expect(onBoundsChange).toHaveBeenLastCalledWith(locationBounds);
+
+    act(() => {
+      mapboxMock.fire("moveend", {});
+    });
+    expect(onBoundsChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ getEast: expect.any(Function) }),
+    );
+    expect(onBoundsChange).not.toHaveBeenLastCalledWith(locationBounds);
   });
 
   it("fits the map to matching stops during stop-name search", () => {
@@ -368,8 +400,8 @@ describe("CorridorCreateMap", () => {
     ).not.toBeInTheDocument();
 
     await act(async () => {
-      mapboxMock.fire("moveend");
-      mapboxMock.fire("moveend");
+      mapboxMock.fire("moveend", {});
+      mapboxMock.fire("moveend", {});
     });
 
     expect(
