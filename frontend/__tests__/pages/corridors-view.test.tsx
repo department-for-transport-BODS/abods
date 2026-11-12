@@ -327,6 +327,68 @@ describe("CorridorsViewPage", () => {
     });
   });
 
+  it("charts speed instead of journey time in speed mode", async () => {
+    mockQuery = { ...mockQuery, mode: "speed" };
+    renderPage();
+
+    expect(
+      await screen.findByLabelText("Speed (mph) chart"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Journey time chart"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("switches the chart to speed when the mode changes", async () => {
+    const view = renderPage();
+    expect(
+      await screen.findByLabelText("Journey time chart"),
+    ).toBeInTheDocument();
+
+    mockQuery = { ...mockQuery, mode: "speed" };
+    view.rerender(
+      <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+        <CorridorsViewPage />
+      </SWRConfig>,
+    );
+
+    expect(
+      await screen.findByLabelText("Speed (mph) chart"),
+    ).toBeInTheDocument();
+  });
+
+  it("calculates average speed from the selected segment's distance only", async () => {
+    mockQuery = { ...mockQuery, segment: "0" };
+    mockFetchCorridorById.mockResolvedValue({
+      ...corridor,
+      stops: [
+        ...corridor.stops,
+        { ...corridor.stops[1], stopId: "c", naptan: "ATCO:C", intId: 3 },
+      ],
+    });
+    mockFetchStats.mockResolvedValue({
+      ...stats,
+      serviceLinks: [
+        ...stats.serviceLinks,
+        {
+          fromStop: "ATCO:B",
+          toStop: "ATCO:C",
+          distance: 5000,
+          routeValidity: RouteType.Valid,
+          linkRoute: null,
+        },
+      ],
+    });
+
+    const { container } = renderPage();
+
+    await waitFor(() => {
+      expect(
+        container.querySelector("#corridor-average-speed"),
+      ).toHaveTextContent("5mph");
+    });
+  });
+
   it("renders the shared date range control and updates the query when changed", async () => {
     const user = userEvent.setup();
     renderPage();

@@ -123,9 +123,9 @@ jobs:
           # Application validation
           # Frontend validation
           if [[ `aws s3 ls s3://$rc_frontend_path|head` ]]; then
-            echo "[INFO] Release candidate version [${VERSION}] for component (FRONTEND-TWO) successfully validated"
+            echo "[INFO] Release candidate version [${VERSION}] for component (FRONTEND) successfully validated"
           else
-            echo "[ERROR] Release candidate version [${VERSION}] does not exist for component (FRONTEND-TWO). Exiting"
+            echo "[ERROR] Release candidate version [${VERSION}] does not exist for component (FRONTEND). Exiting"
             exit 1
           fi
 
@@ -214,7 +214,7 @@ jobs:
 
           mkdir dist/
           aws s3 cp s3://$RC_SRC/$rc_path/ dist/ --recursive
-          echo "[INFO] Application component (FRONTEND-TWO) with version ${VERSION} successfully downloaded for ${RC_ENV^^}"
+          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully downloaded for ${RC_ENV^^}"
 
       - name: get stack values
         id: get-values
@@ -236,7 +236,7 @@ jobs:
       - name: clear frontend for ${{ env.RC_ENV }}
         run: |
           aws s3 rm --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}
-          echo "[INFO] S3 Bucket for application component (FRONTEND-TWO) successfully cleared for ${RC_ENV^^}"
+          echo "[INFO] S3 Bucket for application component (FRONTEND) successfully cleared for ${RC_ENV^^}"
 
       - name: deploy frontend for ${{ env.RC_ENV }}
         env:
@@ -244,7 +244,7 @@ jobs:
         run: |
           aws s3 cp --recursive dist/ ${{ steps.get-values.outputs.frontend-bucket-name }}
           aws s3 cp --recursive ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk ${{ steps.get-values.outputs.frontend-bucket-name }}/freshdesk --metadata-directive REPLACE --content-type "text/html; charset=utf-8"
-          echo "[INFO] Application component (FRONTEND-TWO) with version ${VERSION} successfully deployed for ${RC_ENV^^}"
+          echo "[INFO] Application component (FRONTEND) with version ${VERSION} successfully deployed for ${RC_ENV^^}"
 
       - name: invalidate cloudfront cache for ${{ env.RC_ENV }}
         run: |

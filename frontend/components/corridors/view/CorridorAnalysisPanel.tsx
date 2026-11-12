@@ -25,14 +25,28 @@ const CorridorHistogramChart = dynamic(
   { ssr: false },
 );
 
-// Colours matching the Angular frontend
-const JOURNEY_TIME_WHISKER = "#4c2c92"; // govuk purple
-const JOURNEY_TIME_BOX = "#6f72af"; // light purple
-
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
+export type AnalysisMode = "time" | "speed";
+
+// Colours matching the Angular frontend
+const MODE_DISPLAY = {
+  time: {
+    yAxisType: "time",
+    title: "Journey time",
+    whiskerColor: "#4c2c92",
+    boxColor: "#6f72af",
+  },
+  speed: {
+    yAxisType: "value",
+    title: "Speed (mph)",
+    whiskerColor: "#00703c",
+    boxColor: "#74bb68",
+  },
+} as const;
 
 interface Props {
   stats: CorridorStats;
+  mode: AnalysisMode;
   tab: AnalysisTab;
   onChangeTab: (tab: AnalysisTab) => void;
   hideOutliers: CorridorHideOutliers;
@@ -91,6 +105,7 @@ const TransitTimeTable = ({
 
 export const CorridorAnalysisPanel = ({
   stats,
+  mode,
   tab,
   onChangeTab,
   hideOutliers,
@@ -102,6 +117,7 @@ export const CorridorAnalysisPanel = ({
     { id: "dayOfWeek", label: "Day of week" },
     { id: "distribution", label: "Distribution" },
   ];
+  const display = MODE_DISPLAY[mode];
 
   return (
     <div className="govuk-!-margin-bottom-6">
@@ -123,15 +139,17 @@ export const CorridorAnalysisPanel = ({
 
       {tab === "timeline" ? (
         <div className={styles.chartWrapper}>
+          {/* The charts read axis type and colours once at mount, so remount on mode change */}
           <CorridorBoxPlotChart
+            key={mode}
             data={stats.transitTimeStats}
             xAxisType="date"
             xAxisTitle="Date"
-            yAxisType="time"
-            yAxisTitle="Journey time"
+            yAxisType={display.yAxisType}
+            yAxisTitle={display.title}
             hideOutliers={hideOutliers.journeyTime}
-            whiskerColor={JOURNEY_TIME_WHISKER}
-            boxColor={JOURNEY_TIME_BOX}
+            whiskerColor={display.whiskerColor}
+            boxColor={display.boxColor}
           />
           <div
             className={clsx(
@@ -164,14 +182,15 @@ export const CorridorAnalysisPanel = ({
       {tab === "timeOfDay" ? (
         <div className={styles.chartWrapper}>
           <CorridorBoxPlotChart
+            key={mode}
             data={stats.transitTimeTimeOfDayStats}
             xAxisType="category"
             xAxisTitle="Time of day"
-            yAxisType="time"
-            yAxisTitle="Journey time"
+            yAxisType={display.yAxisType}
+            yAxisTitle={display.title}
             hideOutliers={hideOutliers.timeOfDay}
-            whiskerColor={JOURNEY_TIME_WHISKER}
-            boxColor={JOURNEY_TIME_BOX}
+            whiskerColor={display.whiskerColor}
+            boxColor={display.boxColor}
           />
           <div
             className={clsx(
@@ -204,14 +223,15 @@ export const CorridorAnalysisPanel = ({
       {tab === "dayOfWeek" ? (
         <div className={styles.chartWrapper}>
           <CorridorBoxPlotChart
+            key={mode}
             data={stats.transitTimeDayOfWeekStats}
             xAxisType="category"
             xAxisTitle="Day of week"
-            yAxisType="time"
-            yAxisTitle="Journey time"
+            yAxisType={display.yAxisType}
+            yAxisTitle={display.title}
             hideOutliers={hideOutliers.dayOfWeek}
-            whiskerColor={JOURNEY_TIME_WHISKER}
-            boxColor={JOURNEY_TIME_BOX}
+            whiskerColor={display.whiskerColor}
+            boxColor={display.boxColor}
           />
           <div
             className={clsx(
@@ -242,7 +262,12 @@ export const CorridorAnalysisPanel = ({
       ) : null}
 
       {tab === "distribution" ? (
-        <CorridorHistogramChart data={stats.transitTimeHistogram} />
+        <CorridorHistogramChart
+          key={mode}
+          data={stats.transitTimeHistogram}
+          xAxisTitle={display.title}
+          columnColor={display.boxColor}
+        />
       ) : null}
     </div>
   );

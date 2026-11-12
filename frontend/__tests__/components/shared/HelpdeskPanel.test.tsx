@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HelpdeskPanel from "@/components/shared/HelpdeskPanel";
+import { OnTimeHelpdeskButton } from "@/components/on-time/OnTimeHelpdesk/OnTimeHelpdeskButton";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useConfig } from "@/contexts/ConfigContext";
 import { FreshdeskArticle, HelpdeskContextType } from "@/types/helpdesk";
@@ -177,5 +178,24 @@ describe("HelpdeskPanel", () => {
     expect(
       document.querySelector(".govuk-accordion__section-summary"),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("OnTimeHelpdeskButton", () => {
+  it("opens the existing shared helpdesk panel", async () => {
+    const open = vi.fn();
+    mockUseHelpdesk.mockReturnValue(buildHelpdeskContext({ open }));
+
+    const user = userEvent.setup();
+    render(<OnTimeHelpdeskButton />);
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "How are these numbers calculated?",
+      }),
+    );
+
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

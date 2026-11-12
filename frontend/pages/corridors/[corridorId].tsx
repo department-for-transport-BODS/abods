@@ -13,8 +13,16 @@ import { useConfig } from "@/contexts/ConfigContext";
 import { useHelpdesk } from "@/contexts/HelpdeskContext";
 import { useCorridorHideOutliers } from "@/hooks/useCorridorHideOutliers";
 import { corridorsService } from "@/services/corridors/corridors.service";
-import { averageSpeedLabel } from "@/services/corridors/corridors-speed-utils";
-import { CorridorAnalysisPanel } from "@/components/corridors/view/CorridorAnalysisPanel";
+import {
+  averageSpeedLabel,
+  calculateTotalServiceLinkDistance,
+  serviceLinksForStops,
+  toSpeedStats,
+} from "@/services/corridors/corridors-speed-utils";
+import {
+  AnalysisMode,
+  CorridorAnalysisPanel,
+} from "@/components/corridors/view/CorridorAnalysisPanel";
 import { CorridorSegmentSelector } from "@/components/corridors/view/CorridorSegmentSelector";
 import { CorridorServicesTable } from "@/components/corridors/view/CorridorServicesTable";
 import { CorridorViewMap } from "@/components/corridors/view/CorridorViewMap";
@@ -30,7 +38,6 @@ const NOT_FOUND_HEADING = "Not found";
 const NOT_FOUND_MESSAGE =
   "Corridor not found, or you do not have permission to view.";
 
-type AnalysisMode = "time" | "speed";
 type AnalysisTab = "timeline" | "timeOfDay" | "dayOfWeek" | "distribution";
 
 const PRESET_DATE_RANGES: Record<
@@ -134,6 +141,16 @@ const CorridorsViewPage = () => {
         stops: selectedStops,
       }),
   );
+
+  // The stats query returns every corridor link even when a segment is selected
+  const selectedServiceLinks = serviceLinksForStops(
+    stats?.serviceLinks ?? [],
+    selectedStops,
+  );
+  const selectedDistance =
+    calculateTotalServiceLinkDistance(selectedServiceLinks);
+  const chartStats =
+    mode === "speed" && stats ? toSpeedStats(stats, selectedDistance) : stats;
 
   const isStatsLoading = corridorLoading || statsLoading;
 
@@ -348,7 +365,7 @@ const CorridorsViewPage = () => {
                   <LoadingDots />
                 ) : (
                   averageSpeedLabel(
-                    stats?.serviceLinks ?? [],
+                    selectedServiceLinks,
                     stats?.summaryStats.averageTransitTime,
                   )
                 )
@@ -422,9 +439,10 @@ const CorridorsViewPage = () => {
             />
           ) : null}
 
-          {stats ? (
+          {chartStats ? (
             <CorridorAnalysisPanel
-              stats={stats}
+              stats={chartStats}
+              mode={mode}
               tab={tab}
               onChangeTab={(value) => setQuery({ tab: value })}
               hideOutliers={hideOutliers}

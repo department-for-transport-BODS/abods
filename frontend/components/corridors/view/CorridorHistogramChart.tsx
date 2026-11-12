@@ -1,13 +1,17 @@
 import React, { useEffect, useRef } from "react";
 import { HistogramChartDataItem } from "../../../types/corridors";
 
-const COLUMN_FILL = "#6f72af"; // govuk light purple
-
 interface Props {
   data: HistogramChartDataItem[];
+  xAxisTitle: string;
+  columnColor: string;
 }
 
-export const CorridorHistogramChart = ({ data }: Props) => {
+export const CorridorHistogramChart = ({
+  data,
+  xAxisTitle,
+  columnColor,
+}: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
 
@@ -36,7 +40,7 @@ export const CorridorHistogramChart = ({ data }: Props) => {
       xAxis.renderer.line.strokeOpacity = 0;
       xAxis.renderer.cellStartLocation = 0.2;
       xAxis.renderer.cellEndLocation = 0.8;
-      xAxis.title.text = "Journey time";
+      xAxis.title.text = xAxisTitle;
       xAxis.title.fontSize = 14;
 
       // Y axis — value (integer)
@@ -52,8 +56,8 @@ export const CorridorHistogramChart = ({ data }: Props) => {
       const series = chart.series.push(new am4charts.ColumnSeries());
       series.dataFields.categoryX = "xAxisCategory";
       series.dataFields.valueY = "freq";
-      series.fill = am4core.color(COLUMN_FILL);
-      series.stroke = am4core.color(COLUMN_FILL);
+      series.fill = am4core.color(columnColor);
+      series.stroke = am4core.color(columnColor);
 
       series.tooltipHTML = `<div style="margin-bottom:5px;">{xAxisLabel}</div><div style="margin-bottom:5px;"><b>{freq} journeys</b></div>`;
       if (series.tooltip) {
@@ -95,7 +99,13 @@ export const CorridorHistogramChart = ({ data }: Props) => {
     chartRef.current.validateData();
   }, [data]);
 
-  return <div ref={containerRef} style={{ width: "100%", height: 440 }} />;
+  return (
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height: 440 }}
+      aria-label={`${xAxisTitle} distribution chart`}
+    />
+  );
 };
 
 function buildChartData(data: HistogramChartDataItem[]) {
