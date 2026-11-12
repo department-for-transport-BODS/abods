@@ -14,7 +14,6 @@ on:
   push:
     branches:
       - "test"
-      - "main"
     paths:
       - "VERSION"
   release:
