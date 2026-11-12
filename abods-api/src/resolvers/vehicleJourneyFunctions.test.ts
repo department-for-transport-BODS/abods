@@ -677,6 +677,32 @@ describe("findJourneys", () => {
 });
 
 describe("getServicePatternDistanceGeom", () => {
+  it("rejects unauthenticated requests before querying route data", async () => {
+    jest
+      .spyOn(helpers, "requireUserSession")
+      .mockRejectedValueOnce(new Error("Unauthorized"));
+    const executeQuery = jest
+      .spyOn(kyselyLib, "executeQueryTakeFirst")
+      .mockResolvedValue(null);
+    const resolver = journey.getServicePatternDistanceGeom;
+
+    if (typeof resolver !== "function") {
+      throw new Error("getServicePatternDistanceGeom resolver is unavailable");
+    }
+
+    await expect(
+      resolver(
+        {},
+        { vehicleJourneyId: "VJ1" },
+        context,
+        {} as GraphQLResolveInfo,
+      ),
+    ).rejects.toThrow("Unauthorized");
+
+    expect(helpers.requireUserSession).toHaveBeenCalledWith(context);
+    expect(executeQuery).not.toHaveBeenCalled();
+  });
+
   it("returns distance and geometry when found", async () => {
     const mockResult = {
       distance: 1234,
