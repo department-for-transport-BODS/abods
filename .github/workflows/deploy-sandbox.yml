@@ -1,0 +1,124 @@
+name: deploy sandbox
+run-name: Deploy build ${{ github.event.workflow_run.run_number }} from ${{ github.event.workflow_run.head_branch }} to sandbox
+
+on:
+  workflow_run:
+    workflows: ["build application"]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: abods-artefact-deploy-sandbox
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'workflow_dispatch' &&
+        github.event.workflow_run.head_repository.full_name == github.repository &&
+        !contains(fromJSON('["dev", "test", "main"]'), github.event.workflow_run.head_branch)
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: sandbox
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      DEPLOYMENT_BUCKET: ${{ vars.DEPLOYMENT_ARTEFACTS_S3_BUCKET }}
+    steps:
+      - name: setup sam
+        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
+        with:
+          use-installer: true
+
+      - name: configure aws credentials (sandbox)
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_ASSUME_ROLE_NAME }}
+          role-session-name: abods-sandbox-feature-deploy
+          role-skip-session-tagging: true
+
+      - name: download and validate sandbox build
+        id: build
+        working-directory: ${{ runner.temp }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BUILD_RUN_ID: ${{ github.event.workflow_run.id }}
+          BUILD_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOYMENT_BUCKET:?Sandbox deployment bucket is required}"
+
+          check_source_build() {
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs" \
+              --method GET -f branch="$BUILD_BRANCH" -F per_page=1 > build-runs.json
+            if ! jq -e --argjson id "$BUILD_RUN_ID" --argjson attempt "$BUILD_RUN_ATTEMPT" \
+              '.workflow_runs[0] | .id == $id and .run_attempt == $attempt and .status == "completed" and .conclusion == "success"' \
+              build-runs.json > /dev/null; then
+              echo "::error::The source build is no longer the latest completed successful build for this branch; deploy the newer build instead"
+              exit 1
+            fi
+          }
+
+          check_source_build
+          version="${BUILD_BRANCH//\//-}"
+          if [[ "$version" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+            prefix="abods/releases/$version"
+          else
+            prefix="abods/releases-dev/$version"
+          fi
+          aws s3 cp "s3://$DEPLOYMENT_BUCKET/$prefix/backend/packaged.yaml" packaged.yaml
+          aws s3 cp "s3://$DEPLOYMENT_BUCKET/$prefix/backend/samconfig.yaml" samconfig.yaml
+          aws s3 cp "s3://$DEPLOYMENT_BUCKET/$prefix/frontend/sandbox/" dist/ --recursive --only-show-errors
+          if [[ ! -s dist/index.html ]]; then
+            echo "::error::The build must contain a sandbox frontend index.html"
+            exit 1
+          fi
+          if ! jq -e '.envName == "sandbox"' dist/config.json > /dev/null; then
+            echo "::error::The build must contain frontend configuration for sandbox"
+            exit 1
+          fi
+          check_source_build
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: deploy backend to sandbox
+        id: backend
+        uses: department-for-transport-BODS/.github/actions/sam-deploy-artefact@v1
+        with:
+          template_file: ${{ runner.temp }}/packaged.yaml
+          config_file: ${{ runner.temp }}/samconfig.yaml
+          config_environment: sandbox
+          aws_region: ${{ env.AWS_REGION }}
+          deployment_bucket: ${{ env.DEPLOYMENT_BUCKET }}
+          deployment_prefix: abods/deployments/sandbox
+          project_name: ${{ vars.PROJECT_NAME }}
+          release_version: ${{ steps.build.outputs.version }}
+
+      - name: get sandbox frontend deployment targets
+        id: frontend-targets
+        working-directory: ${{ runner.temp }}
+        env:
+          STACK_NAME: ${{ steps.backend.outputs.stack_name }}
+        run: |
+          set -euo pipefail
+          aws cloudformation describe-stacks --stack-name "$STACK_NAME" --output json > stack.json
+          frontend_bucket=$(jq -er '.Stacks[0].Outputs[] | select(.OutputKey == "FrontendBucketName") | .OutputValue | select(startswith("s3://"))' stack.json)
+          distribution_id=$(jq -er '.Stacks[0].Outputs[] | select(.OutputKey == "CloudFrontDistributionId") | .OutputValue | select(length > 0)' stack.json)
+          echo "bucket=$frontend_bucket" >> "$GITHUB_OUTPUT"
+          echo "distribution_id=$distribution_id" >> "$GITHUB_OUTPUT"
+
+      - name: deploy sandbox frontend and invalidate cache
+        uses: department-for-transport-BODS/.github/actions/deploy-static-frontend@v1
+        with:
+          export_directory: ${{ runner.temp }}/dist
+          target_bucket: ${{ steps.frontend-targets.outputs.bucket }}
+          cloudfront_distribution_id: ${{ steps.frontend-targets.outputs.distribution_id }}
+          html_prefix: freshdesk

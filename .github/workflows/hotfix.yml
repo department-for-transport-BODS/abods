@@ -1,0 +1,84 @@
+name: Hotfix
+run-name: Hotfix ${{ inputs.tag }} to ${{ inputs.environment }}
+
+on:
+  # checkov:skip=CKV_GHA_7:Hotfix selects an existing tagged release for an approved target without building code.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (vX.Y.Z) with artefacts in bods-artefact-store
+        required: true
+        type: string
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - uat
+
+permissions: {}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      backend_artefact: ${{ steps.tag.outputs.backend }}
+      frontend_artefact: ${{ steps.tag.outputs.frontend }}
+      commit: ${{ steps.tag.outputs.commit }}
+    steps:
+      - name: validate hotfix inputs
+        env:
+          TAG: ${{ inputs.tag }}
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          set -euo pipefail
+          case "$TARGET_ENVIRONMENT" in
+            dev|test|uat) ;;
+            *) echo "::error::Only dev, test and uat can be hotfix targets"; exit 1 ;;
+          esac
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag must be in the format vX.Y.Z"
+            exit 1
+          fi
+
+      - name: checkout repository and tags
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: resolve release tag
+        id: tag
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if ! commit=$(git rev-parse --verify "refs/tags/${TAG}^{commit}"); then
+            echo "::error::Release tag $TAG does not exist or does not reference a commit"
+            exit 1
+          fi
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "backend=abods_backend_${TAG}" >> "$GITHUB_OUTPUT"
+          echo "frontend=abods_frontend_${TAG}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: resolve
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy-artefacts.yml
+    with:
+      backend_artefact: ${{ needs.resolve.outputs.backend_artefact }}
+      frontend_artefact: ${{ needs.resolve.outputs.frontend_artefact }}
+      expected_commit: ${{ needs.resolve.outputs.commit }}
+      is_promotion: true
+      environment: ${{ inputs.environment }}
+    secrets:
+      ARTEFACT_STORE_ROLE_ARN: ${{ secrets.ARTEFACT_STORE_ROLE_ARN }}
+      MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+      ANALYTICS_ID: ${{ secrets.ANALYTICS_ID }}
