@@ -21,6 +21,19 @@ The sandbox branch is the default branch and our primary development branch. Mer
 > [!IMPORTANT]
 > Database migrations will not be applied automatically in sandbox - you must connect to the database and run changes manually
 
+### Test a feature branch before review
+
+1. Push your feature branch.
+2. Open [build application](https://github.com/department-for-transport-BODS/abods/actions/workflows/build.yml), select **Run workflow**, choose your feature branch and start the build.
+3. After the build succeeds, [deploy sandbox](https://github.com/department-for-transport-BODS/abods/actions/workflows/deploy-sandbox.yml) automatically updates sandbox with your changes.
+4. Wait for deployment to succeed, then test your feature in sandbox.
+
+No separate deployment, Git tag or [VERSION](../VERSION) change is required. This only applies to manually started feature-branch builds; `dev`, `test` and `main` are excluded.
+
+> [!WARNING]
+>
+> Sandbox is shared, so coordinate with the team before replacing it. Feature deployments do not update the artefact manifest. Restore sandbox through a new successful **build on merge** deployment before promoting; redeploying the artefacts already recorded in the manifest will be skipped.
+
 ## Standard Deployment Process (Path to Live)
 
 ### Promote to DEV, TEST and UAT
@@ -79,9 +92,59 @@ After UAT approval, merge the approved sandbox code into the `dev` branch to bui
 
 ![create_release.png](create_release.png)
 
+## Hotfix deployment override (DEV, TEST and UAT)
+
+Use **Hotfix** only when an explicitly selected release must bypass normal promotion from the preceding environment. It supports `dev`, `test` and `uat`, the same targets as **Promote**. It is manual-only and is not triggered by builds, merges or repository dispatches. For production emergencies, follow [Production Hotfixes](#production-hotfixes) below.
+
+### Prerequisites
+
+- The release must have an existing Git tag in `vX.Y.Z` format pointing to the commit used to build its artefacts. Both lightweight and annotated tags are supported.
+- Matching `abods_backend_vX.Y.Z` and `abods_frontend_vX.Y.Z` artefacts must already exist in `bods-artefact-store`, including `build-info.json`, as produced by **build on merge**. Hotfix does not build code, create tags or convert legacy **build application** artefacts.
+- The target must have the configuration and AWS permissions described under **Promote to DEV, TEST and UAT**.
+
+> [!IMPORTANT]
+>
+> Hotfix deployments to `dev`, `test` and `uat` require approval through the target environment's existing approval gate before any deployment changes occur.
+
+### Prepare a Hotfix release
+
+1. Make the hotfix changes and increment [VERSION](../VERSION) to an unused release version.
+2. Merge the changes into `sandbox` and wait for **build on merge** to succeed.
+3. Create and push a Git tag matching that version, pointing to the exact sandbox commit built by that workflow. **build on merge** does not create the tag automatically.
+
+   Copy the commit SHA from the successful **build on merge** run, then run:
+
+   ```bash
+   git fetch origin --tags
+   git tag -a v1.2.3 <built-commit-sha> -m "Release v1.2.3"
+   git push origin refs/tags/v1.2.3
+   ```
+
+   Replace `v1.2.3` with the version in [VERSION](../VERSION) at that commit, and `<built-commit-sha>` with the copied SHA. Do not assume the latest sandbox commit is still the one built, and do not move or overwrite an existing tag. Pushing the tag does not deploy it.
+
+4. Follow **Run a Hotfix** below to deploy directly to `dev`, `test` or `uat`, without first deploying to preceding environments.
+
+A separate hotfix build workflow is not required for this path. A feature-branch build through **build application** alone is not sufficient because it produces legacy artefacts.
+
+> [!WARNING]
+>
+> The deployment includes the entire tagged sandbox build, including any other changes already merged into sandbox, not just the hotfix. Check that all included changes are suitable for the target environment. Production is not a target of this workflow.
+
+### Run a Hotfix
+
+1. Open the [Hotfix workflow](https://github.com/department-for-transport-BODS/abods/actions/workflows/hotfix.yml) and select **Run workflow** on the default branch.
+2. Enter the existing release **tag**, for example `v1.1.20`, and select the target **environment**.
+3. The workflow rejects unsupported targets and invalid or missing tags, then calls the existing **deploy artefacts** workflow with the selected release's backend and frontend prefixes. It does not read the preceding environment's manifest to choose a version.
+4. An authorised reviewer approves the target environment deployment. All artefact replication and deployment changes occur inside the protected deployment job, after approval.
+5. The deployment verifies that both artefacts match the tag's commit, retargets the backend and frontend configuration, deploys both components and invalidates CloudFront. After success, the existing deploy flow updates both entries in the target environment's `bods-artefact-manifest` together.
+
+If the target already records both requested artefacts, the existing deploy flow skips deployment. Missing artefacts or mismatched build metadata fail the workflow rather than selecting another release. A failed deployment does not update the manifest.
+
+No branch reset or force-push is needed for these non-production deployments. Build automation and the standard promotion workflow are unchanged. This workflow does not replace the production hotfix procedure below.
+
 ## Production Hotfixes
 
-In emergencies when the regular path to live contains code not ready for production:
+Use the existing production hotfix procedure in emergencies when the regular path to live contains code not ready for production. The **Hotfix** workflow above does not target production.
 
 > [!WARNING]
 >
@@ -106,8 +169,8 @@ In emergencies when the regular path to live contains code not ready for product
 1. Save the current state of the dev branch:
    ```bash
    git fetch
-   git checkout -b origin/dev DEV-BRANCH-BEFORE-HOTFIX-DEPLOYMENT
-   git push
+   git checkout -b DEV-BRANCH-BEFORE-HOTFIX-DEPLOYMENT origin/dev
+   git push -u origin DEV-BRANCH-BEFORE-HOTFIX-DEPLOYMENT
    ```
 2. Force-push the hotfix to dev:
    ```bash
@@ -120,7 +183,7 @@ This will trigger the [build workflow](https://github.com/department-for-transpo
 
 ### Deploy Hotfix to Production
 
-Follow the regular "Deploy to PRODUCTION" steps above.
+Follow the regular [Deploy to PRODUCTION](#deploy-to-production) steps above.
 
 ### Cleanup After Hotfix
 

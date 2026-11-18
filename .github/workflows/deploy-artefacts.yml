@@ -38,6 +38,11 @@ on:
         required: false
         default: false
         type: boolean
+      expected_commit:
+        description: Require artefacts to have been built from this commit
+        required: false
+        default: ""
+        type: string
     secrets:
       ARTEFACT_STORE_ROLE_ARN:
         required: true
@@ -210,6 +215,8 @@ jobs:
 
       - name: download release artefacts
         working-directory: ${{ runner.temp }}
+        env:
+          EXPECTED_COMMIT: ${{ inputs.expected_commit }}
         run: |
           set -euo pipefail
           aws s3 cp "s3://$ARTEFACT_BUCKET/$BACKEND_ARTEFACT/packaged.yaml" packaged.yaml
@@ -220,6 +227,10 @@ jobs:
           jq -e --arg version "$VERSION" --arg environment "$ARTEFACT_ENVIRONMENT" --arg commit "$(jq -r '.commit' backend-build-info.json)" \
             '.version == $version and .environment == $environment and (.commit | type == "string" and length > 0) and .commit == $commit' dist/build-info.json > /dev/null
           jq -e --arg environment "$ARTEFACT_ENVIRONMENT" '.envName == $environment' dist/config.json > /dev/null
+          if [[ -n "$EXPECTED_COMMIT" ]] && ! jq -e --arg commit "$EXPECTED_COMMIT" '.commit == $commit' backend-build-info.json > /dev/null; then
+            echo "::error::Release artefacts were not built from the requested tag's commit"
+            exit 1
+          fi
 
       - name: download backend objects for replication
         if: ${{ inputs.is_promotion }}
