@@ -462,12 +462,12 @@ describe("getFrequentServiceInfo", () => {
 
     let result: FrequentServiceInfoType | null = null;
     if (typeof getFrequentServiceInfo === "function") {
-      result = (await getFrequentServiceInfo(
+      result = await getFrequentServiceInfo(
         {},
         args,
         context,
         {} as GraphQLResolveInfo,
-      )) as FrequentServiceInfoType;
+      );
     }
 
     expect(result).not.toBeNull();
@@ -503,12 +503,12 @@ describe("getFrequentServiceInfo", () => {
 
     let result: FrequentServiceInfoType | null = null;
     if (typeof getFrequentServiceInfo === "function") {
-      result = (await getFrequentServiceInfo(
+      result = await getFrequentServiceInfo(
         {},
         args,
         context,
         {} as GraphQLResolveInfo,
-      )) as FrequentServiceInfoType;
+      );
     }
 
     expect(result).toBeNull();

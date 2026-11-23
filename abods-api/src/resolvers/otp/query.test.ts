@@ -134,9 +134,7 @@ describe("getAdminAreas", () => {
   });
 
   it("throws error if naptan_adminarea_with_shape returns null", async () => {
-    mockDb.noc_adminarea.findMany.mockResolvedValue(
-      mockAdminAreaRecords as never,
-    );
+    mockDb.noc_adminarea.findMany.mockResolvedValue(mockAdminAreaRecords);
     mockDb.naptan_adminarea_with_shape.findMany.mockResolvedValue([] as never);
 
     let result: Partial<AdminAreasType>[] | null = null;
@@ -195,9 +193,7 @@ describe("getServicePatterns", () => {
   it("returns service patterns with correct stops and links", async () => {
     jest.spyOn(common, "getTracksData").mockResolvedValue(mockTracksData);
 
-    mockDb.distinct_routes.findMany.mockResolvedValue(
-      mockDistinctRoutes as never,
-    );
+    mockDb.distinct_routes.findMany.mockResolvedValue(mockDistinctRoutes);
     mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue(
       mockStopQueryResults as never,
     );
@@ -257,9 +253,7 @@ describe("getServicePatterns", () => {
       { common_name: "Stop E", atco_code: "E", longitude: 3.3, latitude: 4.4 },
     ];
 
-    mockDb.distinct_routes.findMany.mockResolvedValue(
-      mockDistinctRoutes as never,
-    );
+    mockDb.distinct_routes.findMany.mockResolvedValue(mockDistinctRoutes);
     mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue(
       mockStopQueryResults as never,
     );
@@ -292,9 +286,7 @@ describe("getServicePatterns", () => {
     const mockStopQueryResults = [
       { common_name: "Stop A", atco_code: "A", longitude: 1.1, latitude: 2.2 },
     ];
-    mockDb.distinct_routes.findMany.mockResolvedValue(
-      mockDistinctRoutes as never,
-    );
+    mockDb.distinct_routes.findMany.mockResolvedValue(mockDistinctRoutes);
     mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue(
       mockStopQueryResults as never,
     );
@@ -322,9 +314,7 @@ describe("getServicePatterns", () => {
     jest.spyOn(common, "getTracksData").mockResolvedValue(mockTracksData);
     mockDistinctRoutes = [];
 
-    mockDb.distinct_routes.findMany.mockResolvedValue(
-      mockDistinctRoutes as never,
-    );
+    mockDb.distinct_routes.findMany.mockResolvedValue(mockDistinctRoutes);
     mockDb.naptan_stoppoint_latlong.findMany.mockResolvedValue(
       mockStopQueryResults as never,
     );

@@ -11,7 +11,7 @@ beforeEach(() => {
 
 describe("insertCorridorStops", () => {
   it("inserts corridor stops with correct data", async () => {
-    mockDb.corridor_stops.createMany.mockResolvedValue({ count: 2 } as never);
+    mockDb.corridor_stops.createMany.mockResolvedValue({ count: 2 });
 
     const corridorId = 42;
     const stopIds = ["101", "102"];
@@ -28,7 +28,7 @@ describe("insertCorridorStops", () => {
   });
 
   it("handles empty stopIds array", async () => {
-    mockDb.corridor_stops.createMany.mockResolvedValue({ count: 0 } as never);
+    mockDb.corridor_stops.createMany.mockResolvedValue({ count: 0 });
 
     const corridorId = 42;
     const stopIds: string[] = [];
@@ -42,7 +42,7 @@ describe("insertCorridorStops", () => {
   });
 
   it("converts stopIds to numbers and indexes correctly", async () => {
-    mockDb.corridor_stops.createMany.mockResolvedValue({ count: 3 } as never);
+    mockDb.corridor_stops.createMany.mockResolvedValue({ count: 3 });
 
     const corridorId = 99;
     const stopIds = ["201", "202", "203"];

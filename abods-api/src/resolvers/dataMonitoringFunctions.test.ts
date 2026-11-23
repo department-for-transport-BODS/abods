@@ -78,7 +78,7 @@ describe("getEmbeddedUrl", () => {
     // Mock Kysely updateTable chain for access count
     jest
       .spyOn(kyselyLib, "updateQueryTakeFirst")
-      .mockResolvedValue({ numUpdatedRows: 1 } as never);
+      .mockResolvedValue({ numUpdatedRows: 1 });
 
     // Mock AWS/Quicksight helpers
     (awsLib.checkRequiredQuicksightVars as jest.Mock).mockReturnValue(

@@ -1,5 +1,5 @@
 import { ApolloServer } from "@apollo/server";
-import { expressMiddleware } from "@apollo/server/express4";
+import { expressMiddleware } from "@as-integrations/express4";
 import serverlessExpress, {
   getCurrentInvoke,
 } from "@codegenie/serverless-express";
@@ -60,7 +60,7 @@ const env = process.env.PROJECT_ENV ?? "local";
 
 app.use(
   cors<cors.CorsRequest>({
-    origin: corsOrigin && corsOrigin.length === 1 ? corsOrigin[0] : corsOrigin,
+    origin: corsOrigin?.length === 1 ? corsOrigin[0] : corsOrigin,
     credentials: true,
   }),
   express.json(),
