@@ -1251,9 +1251,7 @@ describe("getServiceLinks", () => {
       kysely: dummyKysely,
     };
 
-    jest
-      .spyOn(kyselyLib, "executeQuery")
-      .mockResolvedValue(stopsResult as never);
+    jest.spyOn(kyselyLib, "executeQuery").mockResolvedValue(stopsResult);
   });
 
   it("returns valid service links when tracks exist", async () => {

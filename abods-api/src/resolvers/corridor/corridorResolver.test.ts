@@ -456,7 +456,7 @@ describe("getStats", () => {
 
     jest
       .spyOn(kyselyLib, "executeQuery")
-      .mockResolvedValue(mockTimetableResults as never);
+      .mockResolvedValue(mockTimetableResults);
 
     let result: { corridorTransits: TimetableType[][] } | null = null;
     if (typeof getStats === "function") {
@@ -557,7 +557,7 @@ describe("getStats", () => {
 
     jest
       .spyOn(kyselyLib, "executeQuery")
-      .mockResolvedValue(mockTimetableResults as never);
+      .mockResolvedValue(mockTimetableResults);
 
     let result: { corridorTransits: TimetableType[][] } | null = null;
     if (typeof getStats === "function") {
@@ -603,7 +603,7 @@ describe("getStats", () => {
 
     jest
       .spyOn(kyselyLib, "executeQuery")
-      .mockResolvedValue(mockTimetableResults as never);
+      .mockResolvedValue(mockTimetableResults);
 
     let result: { corridorTransits: TimetableType[][] } | null = null;
     if (typeof getStats === "function") {
@@ -650,7 +650,7 @@ describe("getStats", () => {
 
     jest
       .spyOn(kyselyLib, "executeQuery")
-      .mockResolvedValue(mockTimetableResults as never);
+      .mockResolvedValue(mockTimetableResults);
 
     let result: { corridorTransits: TimetableType[][] } | null = null;
     if (typeof getStats === "function") {

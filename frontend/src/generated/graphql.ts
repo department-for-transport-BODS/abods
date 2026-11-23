@@ -1,7 +1,3 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import { CorridorGranularity } from './schema';
 import { Direction } from './schema';
 import { FeatureFlag } from './schema';
@@ -13,6 +9,10 @@ import { RouteType } from './schema';
 import { StopsSegment } from './schema';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export * from "./schema";
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 export type AddFirstStopInputType = {
   adminAreaIds?: Array<string> | null | undefined;
   boundingBox?: BoundingBoxInputType | null | undefined;

@@ -202,12 +202,12 @@ describe("getDistancesDropdowns", () => {
 
     let result: Partial<DistancesDropdown> | null = null;
     if (typeof getDistancesDropdowns === "function") {
-      result = (await getDistancesDropdowns(
+      result = await getDistancesDropdowns(
         {},
         {},
         context,
         {} as GraphQLResolveInfo,
-      )) as DistancesDropdown;
+      );
     }
 
     expect(kyselyLib.executeQuery).toHaveBeenCalledTimes(1);
@@ -234,12 +234,12 @@ describe("getDistancesDropdowns", () => {
 
     let result: Partial<DistancesDropdown> | null = null;
     if (typeof getDistancesDropdowns === "function") {
-      result = (await getDistancesDropdowns(
+      result = await getDistancesDropdowns(
         {},
         {},
         context,
         {} as GraphQLResolveInfo,
-      )) as DistancesDropdown;
+      );
     }
 
     // Inspect the query builder

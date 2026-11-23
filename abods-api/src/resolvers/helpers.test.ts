@@ -32,7 +32,7 @@ describe("requireUserSession", () => {
       token: "valid-session",
       user_id: 123,
       expires: new Date(Date.now() + 10000),
-    } as never);
+    });
 
     // Mock bods_user.findUnique to return an active user with orgs
     mockDb.bods_user.findUnique.mockResolvedValue({
@@ -80,7 +80,7 @@ describe("requireUserSession", () => {
       token: "valid-session",
       user_id: 123,
       expires: new Date(Date.now() + 10000),
-    } as never);
+    });
     mockDb.bods_user.findUnique.mockResolvedValue(null);
     await expect(helpers.requireUserSession(context)).rejects.toThrow(
       "Unauthorized",
@@ -92,7 +92,7 @@ describe("requireUserSession", () => {
       token: "valid-session",
       user_id: 123,
       expires: new Date(Date.now() + 10000),
-    } as never);
+    });
     mockDb.bods_user.findUnique.mockResolvedValue({
       is_active: false,
       userOrganisations: [
@@ -112,7 +112,7 @@ describe("requireUserSession", () => {
       token: "valid-session",
       user_id: 123,
       expires: new Date(Date.now() + 10000),
-    } as never);
+    });
     mockDb.bods_user.findUnique.mockResolvedValue({
       is_active: true,
       userOrganisations: [],
